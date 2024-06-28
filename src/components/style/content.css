@@ -1,0 +1,60 @@
+.containerBox {
+    width: 60%;
+    background-color: #FAFAFA;
+}
+
+.storySection {
+    margin: 20px 20px 0 20px;
+}
+
+.storyHeader {
+    display: flex;
+    justify-content: start;
+}
+
+.storyBox {
+    display: flex;
+    overflow-x: scroll;
+    position: relative;
+}
+
+.storyBox::-webkit-scrollbar {
+    display: none;
+}
+
+.story {
+    min-width: 110px;
+    height: 160px;
+    margin-right: 10px;
+    position: relative;
+}
+
+.storyData {
+    max-width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.storyProfile {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    bottom: 10px;
+    left: 10px;
+    border: 3px solid #FAFAFA;
+
+}
+
+.storyPaginate {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    top: 40px;
+    right: 100px;
+    background-color: #0C9;
+    color: #FFF;
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: 2px 2px 3px #999;
+}
