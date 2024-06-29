@@ -93,8 +93,8 @@
 
 .postContainer {
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
     margin-top: 5px;
 }
 
@@ -107,7 +107,6 @@
 
 .postProfile {
     display: flex;
-
 }
 
 .postProfile img {
@@ -135,6 +134,10 @@
     text-align: left;
 }
 
+.postProfile small {
+    font-size: 12px;
+}
+
 .postAction {
     color: #9a9a9a;
     display: flex;
@@ -159,4 +162,83 @@
     text-align: left;
     padding-left: 8px;
     margin-top: 8px;
+}
+
+.createPostBox {
+    border-radius: 5px;
+}
+
+.createPostHeader {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 3px;
+}
+
+.postPrivacy {
+    border: none;
+    outline: none;
+    font-size: 12px;
+    color: #626262;
+}
+
+.write-post-container {
+    width: 100%;
+    background: var(--bg-color);
+    border-radius: 6px;
+    padding: 20px;
+    color: #626262;
+}
+
+.post-intput-container {
+    padding-left: 55px;
+    padding-top: 20px;
+}
+
+.post-intput-container textarea {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    border-bottom: 1px solid #ccc;
+    background: transparent;
+    resize: none;
+}
+
+.add-post-links {
+    display: flex;
+    margin-top: 10px;
+}
+
+.add-post-links a {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    color: #626262;
+    margin-right: 30px;
+    font-size: 13px;
+}
+
+.add-post-links .choosePhotoEmoji {
+    width: 20px;
+    margin-right: 10px;
+    color: rgb(255, 196, 0);
+}
+
+.sharedPostBtn {
+    width: 100%;
+    padding: 5px 0 5px 0;
+    border: none;
+    background: blue;
+    color: white;
+    text-align: center;
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    cursor: pointer;
+}
+
+.sharedPostBtn:hover {
+    box-shadow: 2px -11px 12px -10px rgba(0, 0, 255, 0.75);
+    -webkit-box-shadow: 2px -11px 12px -10px rgba(0, 0, 255, 0.75);
+    -moz-box-shadow: 2px -11px 12px -10px rgba(0, 0, 255, 0.75);
 }

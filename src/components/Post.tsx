@@ -1,10 +1,10 @@
 import { Avatar, Box, Button, Card, CardActions, CardContent, CardHeader, CardMedia, ImageList, ImageListItem, Typography } from '@mui/material'
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
-import "./style/content.css"
+import "./style/post.css"
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import ChatIcon from '@mui/icons-material/Chat';
 
-const Content = () => {
+const Post = () => {
     const itemData = [
         {
             img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
@@ -88,54 +88,9 @@ const Content = () => {
                     <button className='filterBtn' disabled>Following</button>
                 </Box>
                 <Box className='postContainer'>
-                    <Card sx={{ maxWidth: 360, marginBottom: 5 }}>
+                    <Card sx={{ maxWidth: 500, marginBottom: 2 }}>
                         <ImageList
-                            sx={{ width: 360, height: 250, margin: 0 }}
-                            variant="quilted"
-                            cols={4}
-                            rowHeight={121}
-                        >
-                            {itemData.map((item) => (
-                                <ImageListItem key={item.img} cols={item.cols || 1} rows={item.rows || 1}>
-                                    <img
-                                        {...srcset(item.img, 121, item.rows, item.cols)}
-                                        alt={item.title}
-                                        loading="lazy"
-                                    />
-                                </ImageListItem>
-                            ))}
-                        </ImageList>
-                        <CardContent sx={{ margin: 0, padding: 0, height: 100 }}>
-                            <div className='postHeader'>
-                                <div className="postProfile">
-                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" alt="post" />
-                                    <div className='profileText'>
-                                        <p>Ye Aung Khant</p>
-                                        <p className='postDate'>Jun 24</p>
-                                    </div>
-                                </div>
-                                <div className='postAction'>
-                                    <div className='postLike'>
-                                        <FavoriteRoundedIcon />
-                                        <p className='postActionText'>13k</p>
-                                    </div>
-                                    <div className='postComment'>
-                                        <ChatIcon />
-                                        <p className='postActionText'>987</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='postContent'>
-                                <Typography variant="body2" color="text.secondary">
-                                    Lizards are a widespread group of squamate reptiles, with over 6,000
-                                    species, ranging across all continents except Antarctica
-                                </Typography>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card sx={{ maxWidth: 360, marginBottom: 5 }}>
-                        <ImageList
-                            sx={{ width: 360, height: 250, margin: 0 }}
+                            sx={{ width: 500, height: 250, margin: 0 }}
                             variant="quilted"
                             cols={4}
                             rowHeight={121}
@@ -184,4 +139,4 @@ const Content = () => {
     )
 }
 
-export default Content
+export default Post

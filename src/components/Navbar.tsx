@@ -172,7 +172,7 @@ export default function Navbar() {
                     open={openMenu}
                 />}
             </Box>
-            {openPostCreate && <PostCreate />}
+            <PostCreate open={openPostCreate} setOpen={setOpenPostCreate} />
         </Box>
     );
 }

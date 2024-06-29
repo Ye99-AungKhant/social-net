@@ -2,7 +2,7 @@ import Navbar from './Navbar'
 import LeftSidebar from './LeftSidebar'
 import { Box } from '@mui/material'
 import RightSidebar from './RightSidebar'
-import Content from './Content'
+import Post from './Post'
 
 
 const Layout = () => {
@@ -11,7 +11,7 @@ const Layout = () => {
             <Navbar />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', height: 500 }}>
                 <LeftSidebar />
-                <Content />
+                <Post />
                 <RightSidebar />
             </Box>
         </Box>
