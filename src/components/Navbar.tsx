@@ -17,6 +17,8 @@ import MoreIcon from '@mui/icons-material/MoreVert';
 import { useState } from 'react';
 import Popup from './Popup';
 import Menu from './Menu';
+import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
+import PostCreate from './PostCreate';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -70,16 +72,26 @@ export default function Navbar() {
 
     const [open, setOpen] = useState<boolean>(false)
     const [openMenu, setOpenMenu] = useState<boolean>(false)
+    const [openPostCreate, setOpenPostCreate] = useState<boolean>(false)
     const handlePopup = () => {
+        if (openMenu)
+            setOpenMenu(false)
         if (open)
             return setOpen(false)
         return setOpen(true)
     }
 
     const handleOpenMenu = () => {
+        if (open)
+            setOpen(false)
         if (openMenu)
             return setOpenMenu(false)
         return setOpenMenu(true)
+    }
+
+    const handlePost = () => {
+        if (!openPostCreate)
+            return setOpenPostCreate(true)
     }
 
     return (
@@ -114,6 +126,11 @@ export default function Navbar() {
                     </Search>
                     <Box sx={{ flexGrow: 1 }} />
                     <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+                        <IconButton size="large" color="inherit"
+                            onClick={handlePost}
+                        >
+                            <AddCircleRoundedIcon />
+                        </IconButton>
                         <IconButton size="large" aria-label="show 4 new mails" color="inherit">
                             <Badge badgeContent={4} color="error">
                                 <MailIcon />
@@ -155,6 +172,7 @@ export default function Navbar() {
                     open={openMenu}
                 />}
             </Box>
+            {openPostCreate && <PostCreate />}
         </Box>
     );
 }

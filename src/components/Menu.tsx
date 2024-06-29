@@ -18,7 +18,7 @@ interface Props {
 const Menu = ({ open }: Props) => {
     return (
         <>
-            {open && <Box sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+            {open && <Box sx={{ width: '100%', maxWidth: 360, bgcolor: '#FAFAFA', position: 'relative', zIndex: 2 }}>
                 <List component="nav" aria-label="main mailbox folders">
                     <ListItemButton>
                         <ListItemIcon>

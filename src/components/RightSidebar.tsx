@@ -1,17 +1,9 @@
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-import Typography from '@mui/material/Typography';
-import { CardActionArea } from '@mui/material';
+import { Avatar, Badge, ListItemText, Stack, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Divider from '@mui/material/Divider';
-import InboxIcon from '@mui/icons-material/Inbox';
-import DraftsIcon from '@mui/icons-material/Drafts';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
@@ -23,39 +15,39 @@ const Friends = [
     { id: 4, label: 'Musics', icon: <FeedOutlinedIcon />, route: '' },
     { id: 5, label: 'Popular', icon: <FeedOutlinedIcon />, route: '' },
 ]
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+    '& .MuiBadge-badge': {
+        backgroundColor: '#44b700',
+        color: '#44b700',
+        boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    },
+}));
 const RightSidebar = () => {
     return (
-        <Box sx={{ width: '20%', bgcolor: 'background.paper' }}>
-            <Box>
-                <Card sx={{ maxWidth: 345 }}>
-                    <CardActionArea>
-                        {/* <CardMedia
-                            component="img"
-                            height="140"
-                            image="/static/images/cards/contemplative-reptile.jpg"
-                            alt="green iguana"
-                        /> */}
-                        <CardContent>
-                            <Typography gutterBottom variant="h5" component="div">
-                                Lizard
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Lizards are a widespread group of squamate reptiles, with over 6,000
-                                species, ranging across all continents except Antarctica
-                            </Typography>
-                        </CardContent>
-                    </CardActionArea>
-                </Card>
-            </Box>
+        <Box sx={{ width: '25%', bgcolor: 'background.paper' }}>
             <nav aria-label="main mailbox folders">
                 <List>
+                    <Typography sx={{ textAlign: 'left', color: '#626262', fontWeight: 'bold', marginLeft: 2 }}>FRIENDS</Typography>
                     {Friends.map((item) => (
-                        <ListItem disablePadding>
+                        <ListItem key={item.id} disablePadding>
                             <ListItemButton>
-                                <ListItemIcon>
-                                    {item.icon}
-                                </ListItemIcon>
-                                <ListItemText primary={item.label} />
+                                <Stack direction="row" spacing={2}>
+                                    <StyledBadge
+                                        overlap="circular"
+                                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                        variant="dot"
+                                    >
+                                        <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+                                    </StyledBadge>
+                                </Stack>
+                                <ListItemText
+                                    sx={{ marginLeft: 1 }}
+                                    primary="Single-line item"
+                                />
+                                <Box>
+                                    <Typography sx={{ fontSize: 11, color: '#9a9a9a' }}>10 min</Typography>
+                                </Box>
                             </ListItemButton>
                         </ListItem>
                     ))}

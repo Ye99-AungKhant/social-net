@@ -10,6 +10,7 @@ import DraftsIcon from '@mui/icons-material/Drafts';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
+import { Typography } from '@mui/material';
 
 const sidebarMenu = [
     { id: 1, label: 'Feed', icon: <FeedOutlinedIcon />, route: '' },
@@ -24,7 +25,19 @@ const LeftSidebar = () => {
             <nav aria-label="main mailbox folders">
                 <List>
                     {sidebarMenu.map((item) => (
-                        <ListItem disablePadding>
+                        <ListItem key={item.id} disablePadding>
+                            <ListItemButton>
+                                <ListItemIcon>
+                                    {item.icon}
+                                </ListItemIcon>
+                                <ListItemText primary={item.label} />
+                            </ListItemButton>
+                        </ListItem>
+                    ))}
+                    <Divider />
+                    <Typography sx={{ textAlign: 'left', color: '#626262', fontSize: 12, fontWeight: 'bold', marginLeft: 2 }}>PAGE YOU LIKE</Typography>
+                    {sidebarMenu.map((item) => (
+                        <ListItem key={item.id} disablePadding>
                             <ListItemButton>
                                 <ListItemIcon>
                                     {item.icon}

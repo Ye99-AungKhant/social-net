@@ -1,16 +1,39 @@
-import { Box, Card, Typography } from '@mui/material'
+import { Avatar, Box, Button, Card, CardActions, CardContent, CardHeader, CardMedia, ImageList, ImageListItem, Typography } from '@mui/material'
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import "./style/content.css"
-import React from 'react'
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
+import ChatIcon from '@mui/icons-material/Chat';
 
 const Content = () => {
-    const settings = {
-        dots: true,
-        infinite: true,
-        speed: 500,
-        slidesToShow: 3,
-        slidesToScroll: 3
-    };
+    const itemData = [
+        {
+            img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
+            title: 'Breakfast',
+            rows: 2,
+            cols: 2,
+        },
+        {
+            img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d',
+            title: 'Burger',
+        },
+        {
+            img: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45',
+            title: 'Camera',
+        },
+        {
+            img: 'https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c',
+            title: 'Coffee',
+            cols: 2,
+        },
+
+    ];
+    function srcset(image: string, size: number, rows = 1, cols = 1) {
+        return {
+            src: `${image}?w=${size * cols}&h=${size * rows}&fit=crop&auto=format`,
+            srcSet: `${image}?w=${size * cols}&h=${size * rows
+                }&fit=crop&auto=format&dpr=2 2x`,
+        };
+    }
     return (
         <Box className='containerBox'>
             <Box className='storySection'>
@@ -60,7 +83,102 @@ const Content = () => {
                 </Box>
             </Box>
             <Box className='postSection'>
-
+                <Box className='postFilter'>
+                    <button className='filterBtn'>All</button>
+                    <button className='filterBtn' disabled>Following</button>
+                </Box>
+                <Box className='postContainer'>
+                    <Card sx={{ maxWidth: 360, marginBottom: 5 }}>
+                        <ImageList
+                            sx={{ width: 360, height: 250, margin: 0 }}
+                            variant="quilted"
+                            cols={4}
+                            rowHeight={121}
+                        >
+                            {itemData.map((item) => (
+                                <ImageListItem key={item.img} cols={item.cols || 1} rows={item.rows || 1}>
+                                    <img
+                                        {...srcset(item.img, 121, item.rows, item.cols)}
+                                        alt={item.title}
+                                        loading="lazy"
+                                    />
+                                </ImageListItem>
+                            ))}
+                        </ImageList>
+                        <CardContent sx={{ margin: 0, padding: 0, height: 100 }}>
+                            <div className='postHeader'>
+                                <div className="postProfile">
+                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" alt="post" />
+                                    <div className='profileText'>
+                                        <p>Ye Aung Khant</p>
+                                        <p className='postDate'>Jun 24</p>
+                                    </div>
+                                </div>
+                                <div className='postAction'>
+                                    <div className='postLike'>
+                                        <FavoriteRoundedIcon />
+                                        <p className='postActionText'>13k</p>
+                                    </div>
+                                    <div className='postComment'>
+                                        <ChatIcon />
+                                        <p className='postActionText'>987</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className='postContent'>
+                                <Typography variant="body2" color="text.secondary">
+                                    Lizards are a widespread group of squamate reptiles, with over 6,000
+                                    species, ranging across all continents except Antarctica
+                                </Typography>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card sx={{ maxWidth: 360, marginBottom: 5 }}>
+                        <ImageList
+                            sx={{ width: 360, height: 250, margin: 0 }}
+                            variant="quilted"
+                            cols={4}
+                            rowHeight={121}
+                        >
+                            {itemData.map((item) => (
+                                <ImageListItem key={item.img} cols={item.cols || 1} rows={item.rows || 1}>
+                                    <img
+                                        {...srcset(item.img, 121, item.rows, item.cols)}
+                                        alt={item.title}
+                                        loading="lazy"
+                                    />
+                                </ImageListItem>
+                            ))}
+                        </ImageList>
+                        <CardContent sx={{ margin: 0, padding: 0, height: 100 }}>
+                            <div className='postHeader'>
+                                <div className="postProfile">
+                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" alt="post" />
+                                    <div className='profileText'>
+                                        <p>Ye Aung Khant</p>
+                                        <p className='postDate'>Jun 24</p>
+                                    </div>
+                                </div>
+                                <div className='postAction'>
+                                    <div className='postLike'>
+                                        <FavoriteRoundedIcon />
+                                        <p className='postActionText'>13k</p>
+                                    </div>
+                                    <div className='postComment'>
+                                        <ChatIcon />
+                                        <p className='postActionText'>987</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className='postContent'>
+                                <Typography variant="body2" color="text.secondary">
+                                    Lizards are a widespread group of squamate reptiles, with over 6,000
+                                    species, ranging across all continents except Antarctica
+                                </Typography>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </Box>
             </Box>
         </Box>
     )
