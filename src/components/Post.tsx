@@ -3,6 +3,9 @@ import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRound
 import "./style/post.css"
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import ChatIcon from '@mui/icons-material/Chat';
+import { useAppSelector } from '../store/hooks';
+import { useState } from 'react';
+import CommentDialog from './CommentDialog';
 
 const Post = () => {
     const itemData = [
@@ -27,12 +30,25 @@ const Post = () => {
         },
 
     ];
+    const posts = useAppSelector((state) => state.posts)
+    const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
+    const [isLike, setIsLike] = useState(false)
+
     function srcset(image: string, size: number, rows = 1, cols = 1) {
         return {
             src: `${image}?w=${size * cols}&h=${size * rows}&fit=crop&auto=format`,
             srcSet: `${image}?w=${size * cols}&h=${size * rows
                 }&fit=crop&auto=format&dpr=2 2x`,
         };
+    }
+
+    const handleLike = () => {
+        if (isLike)
+            return setIsLike(false)
+        setIsLike(true)
+    }
+    const handleCommentDialog = () => {
+        setOpenCommentDialog(!openCommetDialog)
     }
     return (
         <Box className='containerBox'>
@@ -116,10 +132,10 @@ const Post = () => {
                                 </div>
                                 <div className='postAction'>
                                     <div className='postLike'>
-                                        <FavoriteRoundedIcon />
+                                        <FavoriteRoundedIcon onClick={handleLike} sx={{ color: isLike ? 'red' : '#9a9a9a' }} className={isLike ? 'active' : ''} />
                                         <p className='postActionText'>13k</p>
                                     </div>
-                                    <div className='postComment'>
+                                    <div className='postComment' onClick={handleCommentDialog}>
                                         <ChatIcon />
                                         <p className='postActionText'>987</p>
                                     </div>
@@ -134,6 +150,10 @@ const Post = () => {
                         </CardContent>
                     </Card>
                 </Box>
+                <CommentDialog
+                    open={openCommetDialog}
+                    setOpen={setOpenCommentDialog}
+                />
             </Box>
         </Box>
     )

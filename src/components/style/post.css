@@ -145,12 +145,34 @@
 
 .postLike {
     display: flex;
+    cursor: pointer;
     margin-right: 30px;
+}
+
+.postLike .active {
+    animation: like 0.3s 1;
+    fill: red;
+    stroke: none;
+}
+
+@keyframes like {
+    0% {
+        transform: scale(1);
+    }
+
+    90% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1.1);
+    }
 }
 
 .postComment {
     display: flex;
     margin-right: 8px;
+    cursor: pointer;
 }
 
 .postActionText {
@@ -198,7 +220,7 @@
     width: 100%;
     border: 0;
     outline: 0;
-    border-bottom: 1px solid #ccc;
+    /* border-bottom: 1px solid #ccc; */
     background: transparent;
     resize: none;
 }
@@ -208,19 +230,22 @@
     margin-top: 10px;
 }
 
-.add-post-links a {
+.add-post-links a,
+.file-input-container {
     text-decoration: none;
     display: flex;
     align-items: center;
     color: #626262;
     margin-right: 30px;
     font-size: 13px;
+    cursor: pointer;
 }
 
 .add-post-links .choosePhotoEmoji {
     width: 20px;
     margin-right: 10px;
     color: rgb(255, 196, 0);
+    cursor: pointer;
 }
 
 .sharedPostBtn {
@@ -241,4 +266,43 @@
     box-shadow: 2px -11px 12px -10px rgba(0, 0, 255, 0.75);
     -webkit-box-shadow: 2px -11px 12px -10px rgba(0, 0, 255, 0.75);
     -moz-box-shadow: 2px -11px 12px -10px rgba(0, 0, 255, 0.75);
+}
+
+.imagePreviewContainer {
+    width: 100%;
+    max-height: 150px;
+    display: flex;
+    overflow-y: auto;
+    flex-wrap: wrap;
+}
+
+.imagePreviewBox {
+    width: 24%;
+    height: 100%;
+    position: relative;
+    margin: 0 1px 2px 0;
+}
+
+.imagePreview {
+    object-fit: cover;
+    width: 100%;
+    height: 150px;
+}
+
+.removePreviewImage {
+    font-size: 10px;
+    background: #626262cb;
+    color: #c2c0c0;
+    border-radius: 50%;
+}
+
+.removePreviewImage:hover {
+    background: #62626285;
+}
+
+.emojiPicker {
+    z-index: 4;
+    position: absolute;
+    top: 0;
+    bottom: 0;
 }
