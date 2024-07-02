@@ -1,11 +1,14 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Layout from './components/Layout';
+import SignInUp from './components/SignInUp';
 
 function App() {
   return (
-    <div className="App">
-      <Layout />
-    </div>
+    <Routes>
+      <Route path='/' element={<Layout />} />
+      <Route path='sign-in' element={<SignInUp />} />
+    </Routes>
   );
 }
 

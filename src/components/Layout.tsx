@@ -4,7 +4,6 @@ import { Box } from '@mui/material'
 import RightSidebar from './RightSidebar'
 import Post from './Post'
 
-
 const Layout = () => {
     return (
         <Box>

@@ -10,6 +10,8 @@ import { AccountCircle } from '@mui/icons-material';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import NightlightRoundRoundedIcon from '@mui/icons-material/NightlightRoundRounded';
 import PowerSettingsNewRoundedIcon from '@mui/icons-material/PowerSettingsNewRounded';
+import { Link } from 'react-router-dom';
+import SignInUp from './SignInUp';
 
 interface Props {
     open: boolean

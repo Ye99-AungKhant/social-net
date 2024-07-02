@@ -61,17 +61,15 @@ const CommentDialog = ({ open, setOpen }: Props) => {
                         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" />
                         <div className='profileText'>
                             <p>Ye Aung Khant</p>
+                            <div className='commentText' onClick={handleMenu}>Hello, I'm full-stack developer and always busy.I'm full-stack apple developer and always busy.I'm full-stack developer and always busy.</div>
                             <p className='postDate'>10 min</p>
                         </div>
-
                     </div>
-                    <div className='commentText'><p>Hello, I'm full-stack developer and always busy.I'm full-stack apple developer and always busy.I'm full-stack developer and always busy.</p></div>
-                    <MoreVertRoundedIcon sx={{ fontSize: 20 }} className='commentMenu' onClick={handleMenu} />
                     <MenuPopup open={openMenu} setOpen={setOpenMenu} />
                 </div>
 
                 <div className='commentInputBox'>
-                    <input type="text" className='commentInput' placeholder='Write comment...' />
+                    <input type="text" className='commentInput' placeholder='Write comment...' autoFocus />
                     <button className='commentSentBtn'><SendIcon /></button>
                 </div>
             </Box>

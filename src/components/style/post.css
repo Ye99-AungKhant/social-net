@@ -84,6 +84,11 @@
     margin: 10px 20px 0 20px;
 }
 
+.postFilter {
+    display: flex;
+    justify-content: center;
+}
+
 .filterBtn {
     border: none;
     cursor: pointer;
