@@ -10,14 +10,26 @@ import { AccountCircle } from '@mui/icons-material';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import NightlightRoundRoundedIcon from '@mui/icons-material/NightlightRoundRounded';
 import PowerSettingsNewRoundedIcon from '@mui/icons-material/PowerSettingsNewRounded';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SignInUp from './SignInUp';
+import { useAppDispatch } from '../store/hooks';
+import { logOut } from '../store/slices/userSlice';
 
 interface Props {
     open: boolean
 }
 
 const Menu = ({ open }: Props) => {
+    const dispatch = useAppDispatch()
+    const navigate = useNavigate();
+    const handleLogOut = async () => {
+        dispatch(logOut({
+            onSuccess: () => {
+                navigate("sign-in")
+            }
+        }))
+    }
+
     return (
         <>
             {open && <Box sx={{ width: '100%', maxWidth: 360, bgcolor: '#FAFAFA', position: 'relative', zIndex: 2 }}>
@@ -42,7 +54,7 @@ const Menu = ({ open }: Props) => {
                         <ListItemText primary='Display' />
                     </ListItemButton>
                     <Divider />
-                    <ListItemButton>
+                    <ListItemButton onClick={handleLogOut}>
                         <ListItemIcon>
                             <PowerSettingsNewRoundedIcon />
                         </ListItemIcon>

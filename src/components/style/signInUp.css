@@ -66,7 +66,7 @@
     border-color: #fff;
 }
 
-.container form {
+.container .form {
     background-color: #fff;
     display: flex;
     align-items: center;
@@ -76,15 +76,30 @@
     height: 100%;
 }
 
-.container input {
+.container .Input {
     background-color: #eee;
-    border: none;
-    margin: 8px 0;
+    border: 0px;
+    margin: 3px 0;
     padding: 10px 15px;
     font-size: 13px;
     border-radius: 8px;
     width: 100%;
     outline: none;
+}
+
+.errorInput {
+    border: 1px solid red;
+    background-color: #eee;
+    margin: 3px 0;
+    padding: 10px 15px;
+    font-size: 13px;
+    border-radius: 8px;
+    width: 100%;
+    outline: none;
+}
+
+.errorMessage {
+    color: red;
 }
 
 .form-container {
