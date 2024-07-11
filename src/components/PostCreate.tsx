@@ -13,9 +13,8 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import "./style/post.css"
 import { Divider, IconButton } from '@mui/material';
 import { useAppDispatch } from '../store/hooks';
-import { addPost } from '../store/slices/postSlice';
 import EmojiPicker from 'emoji-picker-react';
-import zIndex from '@mui/material/styles/zIndex';
+import { createPost } from '../store/slices/postSlice';
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -37,9 +36,16 @@ interface Props {
 
 const PostCreate = ({ open, setOpen }: Props) => {
     const [age, setAge] = React.useState('');
-    const [selectedImages, setSelectedImages] = useState<any>([]);
+    const [selectedImages, setSelectedImages] = useState<any>([])
     const [openEmojiPicker, setOpenEmojiPicker] = useState(false)
-    const [postContent, setPostContent] = useState<string>()
+    // const [postStatus, setPostStatus] = useState<string>('Public')
+    // const [postContent, setPostContent] = useState<string>()
+    const [newPost, setNewPost] = useState({
+        status: 'Public',
+        content: '',
+        image: []
+    })
+
 
     const dispatch = useAppDispatch()
 
@@ -61,6 +67,7 @@ const PostCreate = ({ open, setOpen }: Props) => {
         });
 
         setSelectedImages((previousImages: any) => previousImages.concat(imagesArray));
+        setNewPost({ ...newPost, image: selectedImages })
         event.target.value = "";
     };
 
@@ -74,9 +81,8 @@ const PostCreate = ({ open, setOpen }: Props) => {
     }
 
     const handleCreatePost = () => {
-        dispatch(addPost({
-            content: postContent ? postContent : '',
-            image: selectedImages
+        dispatch(createPost({
+            ...newPost
         }))
         setOpen(false)
     }
@@ -107,7 +113,9 @@ const PostCreate = ({ open, setOpen }: Props) => {
                         <div className='profileText'>
                             <p>Ye Aung Khant</p>
 
-                            <select name="privacy" id="privacy" className='postPrivacy'>
+                            <select name="status" id="privacy" className='postPrivacy' onChange={(e) => {
+                                setNewPost({ ...newPost, status: e.target.value })
+                            }}>
                                 <option value="Public">Public</option>
                                 <option value="Friend">Friend</option>
                                 <option value="Onlyme">Onlyme</option>
@@ -118,7 +126,7 @@ const PostCreate = ({ open, setOpen }: Props) => {
 
                     <div className="post-intput-container">
                         <textarea placeholder="Whant's on your mind, John?" onChange={(e) => {
-                            setPostContent(e.target.value)
+                            setNewPost({ ...newPost, content: e.target.value })
                         }}>
                         </textarea>
                         <div className="imagePreviewContainer">

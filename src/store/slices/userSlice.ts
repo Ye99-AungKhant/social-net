@@ -4,8 +4,16 @@ import { User, UserSlice } from "../../types/user";
 export const logOut = createAsyncThunk(
     'userLogout',
     async (payload: any, thunkApi) => {
+        const token = localStorage.getItem('token')
         const { onSuccess } = payload
-        const response = await fetch(`http://localhost:8000/api/logout`)
+        const response = await fetch(`http://localhost:8000/api/logout`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                'Authorization': `Bearer ${token}`,
+            },
+        })
         localStorage.removeItem('token')
         onSuccess && onSuccess()
     }
@@ -16,7 +24,7 @@ export const signUpUser = createAsyncThunk(
         console.log(payload);
 
         const { onSuccess } = payload
-        const response = await fetch(`http://localhost:8000/api/register`, {
+        const response = await fetch(`http://localhost:8000/api/signup`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",

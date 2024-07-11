@@ -5,18 +5,20 @@ import RightSidebar from './RightSidebar'
 import Post from './Post'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { useAppDispatch } from '../store/hooks'
+import { fetchData } from '../store/slices/appSlice'
 
 const Layout = () => {
     const navigate = useNavigate()
-
+    const dispatch = useAppDispatch();
     const token = localStorage.getItem('token')
 
     useEffect(() => {
         if (!token) {
-            navigate('sign-in')
+            return navigate('sign-in')
         }
+        dispatch(fetchData({}))
     }, [])
-
 
     return (
         <Box>

@@ -5,7 +5,7 @@ export const signInUser = createAsyncThunk(
     'signin',
     async (payload: UserSignIn, thunkApi) => {
         const { onSuccess } = payload
-        const response = await fetch(`http://localhost:8000/api/login`, {
+        const response = await fetch(`http://localhost:8000/api/signin`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",

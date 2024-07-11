@@ -3,9 +3,10 @@ import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRound
 import "./style/post.css"
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import ChatIcon from '@mui/icons-material/Chat';
-import { useAppSelector } from '../store/hooks';
-import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { useEffect, useState } from 'react';
 import CommentDialog from './CommentDialog';
+import { postLike } from '../store/slices/postSlice';
 
 const Post = () => {
     const itemData = [
@@ -31,6 +32,7 @@ const Post = () => {
 
     ];
     const posts = useAppSelector((state) => state.posts)
+    const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
     const [isLike, setIsLike] = useState(false)
 
@@ -42,14 +44,17 @@ const Post = () => {
         };
     }
 
-    const handleLike = () => {
-        if (isLike)
-            return setIsLike(false)
-        setIsLike(true)
+    const handleLike = (postId: number) => {
+        console.log("post liked", postId);
+        dispatch(postLike({ postId }))
+        // if (isLike)
+        //     return setIsLike(false)
+        // setIsLike(true)
     }
     const handleCommentDialog = () => {
         setOpenCommentDialog(!openCommetDialog)
     }
+
     return (
         <Box className='containerBox'>
             <Box className='storySection'>
@@ -103,53 +108,60 @@ const Post = () => {
                     <button className='filterBtn'>All</button>
                     <button className='filterBtn' disabled>Following</button>
                 </Box>
-                <Box className='postContainer'>
-                    <Card sx={{ maxWidth: 500, marginBottom: 2 }}>
-                        <ImageList
-                            sx={{ width: 500, height: 250, margin: 0 }}
-                            variant="quilted"
-                            cols={4}
-                            rowHeight={121}
-                        >
-                            {itemData.map((item) => (
-                                <ImageListItem key={item.img} cols={item.cols || 1} rows={item.rows || 1}>
-                                    <img
-                                        {...srcset(item.img, 121, item.rows, item.cols)}
-                                        alt={item.title}
-                                        loading="lazy"
-                                    />
-                                </ImageListItem>
-                            ))}
-                        </ImageList>
-                        <CardContent sx={{ margin: 0, padding: 0, height: 100 }}>
-                            <div className='postHeader'>
-                                <div className="postProfile">
-                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" alt="post" />
-                                    <div className='profileText'>
-                                        <p>Ye Aung Khant</p>
-                                        <p className='postDate'>Jun 24</p>
+
+                {posts.posts.map((post) => (
+                    <Box className='postContainer' key={post.id}>
+                        <Card sx={{ width: 500, marginBottom: 2 }}>
+                            {post.image != null &&
+                                <ImageList
+                                    sx={{ width: 500, height: 250, margin: 0 }}
+                                    variant="quilted"
+                                    cols={4}
+                                    rowHeight={121}
+                                >
+                                    {itemData.map((item) => (
+                                        <ImageListItem key={item.img} cols={item.cols || 1} rows={item.rows || 1}>
+                                            <img
+                                                {...srcset(item.img, 121, item.rows, item.cols)}
+                                                alt={item.title}
+                                                loading="lazy"
+                                            />
+                                        </ImageListItem>
+                                    ))}
+                                </ImageList>
+                            }
+                            <CardContent sx={{ margin: 0, padding: 0, minHeight: 100, width: '100%' }}>
+                                <div className='postHeader'>
+                                    <div className="postProfile">
+                                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" alt="post" />
+                                        <div className='profileText'>
+                                            <p>{post.user.name}</p>
+                                            <p className='postDate'>{post.date}</p>
+                                        </div>
+                                    </div>
+                                    <div className='postAction'>
+                                        <div className='postLike'>
+                                            <FavoriteRoundedIcon onClick={() => handleLike(post.id)} sx={{ color: isLike ? 'red' : '#9a9a9a' }} className={isLike ? 'active' : ''} />
+                                            <p className='postActionText'>{post.like_count}</p>
+                                        </div>
+                                        <div className='postComment' onClick={handleCommentDialog}>
+                                            <ChatIcon />
+                                            <p className='postActionText'>987</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className='postAction'>
-                                    <div className='postLike'>
-                                        <FavoriteRoundedIcon onClick={handleLike} sx={{ color: isLike ? 'red' : '#9a9a9a' }} className={isLike ? 'active' : ''} />
-                                        <p className='postActionText'>13k</p>
-                                    </div>
-                                    <div className='postComment' onClick={handleCommentDialog}>
-                                        <ChatIcon />
-                                        <p className='postActionText'>987</p>
-                                    </div>
+                                <div className='postContent'>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {post.content}
+                                    </Typography>
                                 </div>
-                            </div>
-                            <div className='postContent'>
-                                <Typography variant="body2" color="text.secondary">
-                                    Lizards are a widespread group of squamate reptiles, with over 6,000
-                                    species, ranging across all continents except Antarctica
-                                </Typography>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </Box>
+                            </CardContent>
+                        </Card>
+                    </Box>
+                ))}
+
+
+
                 <CommentDialog
                     open={openCommetDialog}
                     setOpen={setOpenCommentDialog}
