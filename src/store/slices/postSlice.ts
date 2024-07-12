@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from '../index'
 import { Post } from '../../types/app';
 import { PostCreate } from '../../types/post';
 

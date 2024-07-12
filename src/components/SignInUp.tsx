@@ -25,7 +25,7 @@ const SignInUp = () => {
         password: '',
     })
 
-    const { onError } = useAppSelector((state) => state.signUp)
+    const { onError } = useAppSelector((state) => state.auth)
     const logInError = useAppSelector((state) => state.signIn.onError)
 
     const handleSignUp = async () => {

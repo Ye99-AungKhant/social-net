@@ -5,8 +5,14 @@ export interface User extends BaseOptions {
     phone: string
     password: string
 }
+
+export interface AuthUser {
+    id: number
+    name: string
+}
 export interface UserSlice {
     user: User[],
+    authUser: AuthUser | null,
     onError: User | null
 }
 

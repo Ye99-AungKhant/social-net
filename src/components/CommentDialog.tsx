@@ -6,11 +6,14 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import MenuPopup from './MenuPopup';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { createComment } from '../store/slices/commentSlice';
 
 
 interface Props {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    postId: number
 }
 
 const style = {
@@ -25,15 +28,26 @@ const style = {
     pr: 4,
     pb: 4,
 };
-const CommentDialog = ({ open, setOpen }: Props) => {
-
+const CommentDialog = ({ open, setOpen, postId }: Props) => {
     const [openMenu, setOpenMenu] = useState(false)
+    const [comment, setComment] = useState({ content: '' })
+    const { authUser } = useAppSelector((state) => state.auth)
+    const dispatch = useAppDispatch()
     const closeModal = () => {
         setOpen(false)
     }
 
     const handleMenu = (e: any) => {
         setOpenMenu(true)
+    }
+
+    const handleCreateComment = () => {
+        if (comment !== null) {
+            const userId = authUser?.id
+            const { content } = comment
+            const commentpayload = { content, userId, postId }
+            dispatch(createComment(commentpayload))
+        }
     }
 
     return (
@@ -69,8 +83,10 @@ const CommentDialog = ({ open, setOpen }: Props) => {
                 </div>
 
                 <div className='commentInputBox'>
-                    <input type="text" className='commentInput' placeholder='Write comment...' autoFocus />
-                    <button className='commentSentBtn'><SendIcon /></button>
+                    <input type="text" className='commentInput' placeholder='Write comment...' autoFocus
+                        onChange={(e) => { setComment({ ...comment, content: e.target.value }) }}
+                    />
+                    <button className='commentSentBtn' onClick={handleCreateComment}><SendIcon /></button>
                 </div>
             </Box>
         </Modal>

@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { AppSlice, Post } from '../../types/app'
 import { setPost } from './postSlice'
+import { authUser } from './userSlice'
 
 export const fetchData = createAsyncThunk(
     'app/fetchData',
@@ -17,8 +18,9 @@ export const fetchData = createAsyncThunk(
             }
         })
         const dataFromServer = await response.json()
-        const { data } = dataFromServer
+        const { data, auth } = dataFromServer
         thunkApi.dispatch(setPost(data))
+        thunkApi.dispatch(authUser(auth))
         console.log(dataFromServer);
 
     }

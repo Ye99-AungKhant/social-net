@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { User, UserSlice } from "../../types/user";
+import { AuthUser, User, UserSlice } from "../../types/user";
 
 export const logOut = createAsyncThunk(
     'userLogout',
@@ -38,7 +38,8 @@ export const signUpUser = createAsyncThunk(
         }
         const { access_token, user_data } = dataFromServer.data
         localStorage.setItem('token', access_token)
-        console.log(user_data);
+        let auth = { id: user_data.id, name: user_data.name }
+        thunkApi.dispatch(authUser(auth))
         onSuccess && onSuccess()
 
     }
@@ -46,18 +47,22 @@ export const signUpUser = createAsyncThunk(
 
 const initialState: UserSlice = {
     user: [],
+    authUser: null,
     onError: null,
 }
 export const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
+        authUser: (state, action: PayloadAction<AuthUser>) => {
+            state.authUser = action.payload
+        },
         onError: (state, action: PayloadAction<User>) => {
             state.onError = action.payload
         }
     },
 })
 
-export const { onError } = userSlice.actions
+export const { onError, authUser } = userSlice.actions
 
 export default userSlice.reducer

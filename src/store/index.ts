@@ -6,7 +6,7 @@ import signInReducer from './slices/signInSlice'
 export const store = configureStore({
     reducer: {
         posts: postReducer,
-        signUp: userReducer,
+        auth: userReducer,
         signIn: signInReducer,
     },
 })

@@ -1,5 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { SignInSlice, UserSignIn, signInUserPayload } from "../../types/user";
+import { authUser } from "./userSlice";
 
 export const signInUser = createAsyncThunk(
     'signin',
@@ -19,7 +20,8 @@ export const signInUser = createAsyncThunk(
         }
         const { access_token, user_data } = dataFromServer.data
         localStorage.setItem('token', access_token)
-        console.log(user_data);
+        let auth = { id: user_data.id, name: user_data.name }
+        thunkApi.dispatch(authUser(auth))
         onSuccess && onSuccess()
     }
 )

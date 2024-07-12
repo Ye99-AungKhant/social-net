@@ -34,6 +34,8 @@ const Post = () => {
     const posts = useAppSelector((state) => state.posts)
     const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
+    const [postCommentId, setPostCommentId] = useState<number>(0)
+    const { authUser } = useAppSelector((state) => state.auth)
 
     function srcset(image: string, size: number, rows = 1, cols = 1) {
         return {
@@ -47,8 +49,9 @@ const Post = () => {
         console.log("post liked", postId);
         dispatch(postLike(postId))
     }
-    const handleCommentDialog = () => {
+    const handleCommentDialog = (postId: number) => {
         setOpenCommentDialog(!openCommetDialog)
+        setPostCommentId(postId)
     }
 
     return (
@@ -139,11 +142,10 @@ const Post = () => {
                                         <div className='postLike'>
 
                                             <FavoriteRoundedIcon onClick={() => handleLike(post.id)}
-
-                                                className={post.liked.find((like: any) => (like.user_id == 2)) ? 'active' : ''} />
+                                                className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
                                             <p className='postActionText'>{post.like_count}</p>
                                         </div>
-                                        <div className='postComment' onClick={handleCommentDialog}>
+                                        <div className='postComment' onClick={() => handleCommentDialog(post.id)}>
                                             <ChatIcon />
                                             <p className='postActionText'>987</p>
                                         </div>
@@ -158,12 +160,10 @@ const Post = () => {
                         </Card>
                     </Box>
                 ))}
-
-
-
                 <CommentDialog
                     open={openCommetDialog}
                     setOpen={setOpenCommentDialog}
+                    postId={postCommentId}
                 />
             </Box>
         </Box>
