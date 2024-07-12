@@ -18,15 +18,17 @@ a {
 
 .dropdown-menu {
     position: absolute;
-    top: 50px;
-    right: 0px;
+    /* top: 50px;
+    right: 0px; */
     background-color: #fff;
     border-radius: var(--border-radius);
-    padding: 5px 5px;
+    border: 1px solid black;
+    padding: 0px 0px;
     width: 100px;
+    z-index: 3;
 }
 
-.dropdown-menu::before {
+/* .dropdown-menu::before {
     content: '';
     position: absolute;
     top: -5px;
@@ -35,7 +37,7 @@ a {
     width: 20px;
     background: var(--secondary-bg);
     transform: rotate(45deg);
-}
+} */
 
 .dropdown-menu.active {
     opacity: 1;

@@ -7,7 +7,7 @@ import SendIcon from '@mui/icons-material/Send';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import MenuPopup from './MenuPopup';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { createComment } from '../store/slices/commentSlice';
+import { createComment, removeComment } from '../store/slices/commentSlice';
 
 
 interface Props {
@@ -32,13 +32,18 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
     const [openMenu, setOpenMenu] = useState(false)
     const [comment, setComment] = useState({ content: '' })
     const { authUser } = useAppSelector((state) => state.auth)
+    const { comments } = useAppSelector((state) => state.comments)
+    const [commentId, setCommentId] = useState<number>(0)
     const dispatch = useAppDispatch()
+
     const closeModal = () => {
         setOpen(false)
+        dispatch(removeComment())
     }
 
-    const handleMenu = (e: any) => {
-        setOpenMenu(true)
+    const handleMenu = (Id: number) => {
+        setCommentId(Id)
+        setOpenMenu(!openMenu)
     }
 
     const handleCreateComment = () => {
@@ -57,31 +62,39 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
-            <Box sx={style} className='commentBox'>
-                <Box className='createPostHeader'>
-                    <Typography sx={{ color: '#626262', fontWeight: 'bold', marginTop: 1 }}>
-                        Comments
-                    </Typography>
-                    <IconButton sx={{ position: 'absolute', right: 0 }}
-                        onClick={closeModal}
-                    >
-                        <CloseRoundedIcon />
-                    </IconButton>
+            <Box sx={style} className='commentContainer'>
+                <Box className='commentBox parentcontainer'>
+                    <Box className='createPostHeader'>
+                        <Typography sx={{ color: '#626262', fontWeight: 'bold', marginTop: 1 }}>
+                            Comments
+                        </Typography>
+                        <IconButton sx={{ position: 'absolute', right: 0 }}
+                            onClick={closeModal}
+                        >
+                            <CloseRoundedIcon />
+                        </IconButton>
+                    </Box>
 
-                </Box>
+                    {comments.map((comment) => (
+                        <div className='commentShowBox' key={comment.id}>
 
-                <div className='commentShowBox'>
-                    <div className="postProfile commentProfile">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" />
-                        <div className='profileText'>
-                            <p>Ye Aung Khant</p>
-                            <div className='commentText' onClick={handleMenu}>Hello, I'm full-stack developer and always busy.I'm full-stack apple developer and always busy.I'm full-stack developer and always busy.</div>
-                            <p className='postDate'>10 min</p>
+                            <div className="postProfile commentProfile">
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" />
+                                <div className='profileText'>
+                                    <div className='commentTextHeader'>
+                                        <p>{comment?.user?.name}</p>
+                                    </div>
+                                    <div className='commentText' onClick={() => handleMenu(comment.id)} style={{ position: 'relative' }}>
+                                        {comment.content}
+                                        {commentId === comment.id && <MenuPopup open={openMenu} setOpen={setOpenMenu} />}
+                                    </div>
+                                    <p className='postDate'>10 min</p>
+
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <MenuPopup open={openMenu} setOpen={setOpenMenu} />
-                </div>
-
+                    ))}
+                </Box>
                 <div className='commentInputBox'>
                     <input type="text" className='commentInput' placeholder='Write comment...' autoFocus
                         onChange={(e) => { setComment({ ...comment, content: e.target.value }) }}

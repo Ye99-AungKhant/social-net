@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { useEffect, useState } from 'react';
 import CommentDialog from './CommentDialog';
 import { postLike } from '../store/slices/postSlice';
+import { fetchComment } from '../store/slices/commentSlice';
 
 const Post = () => {
     const itemData = [
@@ -52,6 +53,7 @@ const Post = () => {
     const handleCommentDialog = (postId: number) => {
         setOpenCommentDialog(!openCommetDialog)
         setPostCommentId(postId)
+        dispatch(fetchComment(postId))
     }
 
     return (
