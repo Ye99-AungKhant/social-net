@@ -34,7 +34,6 @@ const Post = () => {
     const posts = useAppSelector((state) => state.posts)
     const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
-    const [isLike, setIsLike] = useState(false)
 
     function srcset(image: string, size: number, rows = 1, cols = 1) {
         return {
@@ -46,10 +45,7 @@ const Post = () => {
 
     const handleLike = (postId: number) => {
         console.log("post liked", postId);
-        dispatch(postLike({ postId }))
-        // if (isLike)
-        //     return setIsLike(false)
-        // setIsLike(true)
+        dispatch(postLike(postId))
     }
     const handleCommentDialog = () => {
         setOpenCommentDialog(!openCommetDialog)
@@ -141,7 +137,10 @@ const Post = () => {
                                     </div>
                                     <div className='postAction'>
                                         <div className='postLike'>
-                                            <FavoriteRoundedIcon onClick={() => handleLike(post.id)} sx={{ color: isLike ? 'red' : '#9a9a9a' }} className={isLike ? 'active' : ''} />
+
+                                            <FavoriteRoundedIcon onClick={() => handleLike(post.id)}
+
+                                                className={post.liked.find((like: any) => (like.user_id == 2)) ? 'active' : ''} />
                                             <p className='postActionText'>{post.like_count}</p>
                                         </div>
                                         <div className='postComment' onClick={handleCommentDialog}>

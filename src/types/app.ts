@@ -14,7 +14,8 @@ export interface Post {
     status: string
     image?: string
     date: string
-    like_count: number | ''
+    like_count: number
+    liked: any;
 }
 export interface AppSlice {
     posts: Post[],

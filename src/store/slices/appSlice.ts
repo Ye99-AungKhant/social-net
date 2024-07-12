@@ -19,6 +19,7 @@ export const fetchData = createAsyncThunk(
         const dataFromServer = await response.json()
         const { data } = dataFromServer
         thunkApi.dispatch(setPost(data))
+        console.log(dataFromServer);
 
     }
 )

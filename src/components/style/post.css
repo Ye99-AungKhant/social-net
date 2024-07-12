@@ -155,7 +155,7 @@
 }
 
 .postLike .active {
-    animation: like 0.3s 1;
+    animation: like 0.1s 1;
     fill: red;
     stroke: none;
 }

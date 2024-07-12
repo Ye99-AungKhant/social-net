@@ -26,7 +26,7 @@ export const createPost = createAsyncThunk(
 
 export const postLike = createAsyncThunk(
     'post/like',
-    async (payload: any, thunkApi) => {
+    async (payload: number, thunkApi) => {
         const response = await fetch(`http://localhost:8000/api/post/like`, {
             method: "POST",
             credentials: 'include',
@@ -36,10 +36,15 @@ export const postLike = createAsyncThunk(
                 "Access-Control-Allow-Origin": "*",
                 "Authorization": `Bearer ${localStorage.getItem('token')}`,
             },
-            body: JSON.stringify({ ...payload }),
+            body: JSON.stringify({ 'postId': payload }),
         });
         const dataFromServer = await response.json();
-        console.log(dataFromServer);
+        const { liked, data } = dataFromServer
+        if (liked) {
+            thunkApi.dispatch(setLike(data))
+        } else {
+            thunkApi.dispatch(setUnLike(data))
+        }
 
     }
 )
@@ -63,8 +68,29 @@ export const postCreateSlice = createSlice({
         setPost: (state, action: PayloadAction<Post[]>) => {
             state.posts = [...action.payload, ...state.posts]
         },
+        setLike: (state, action: PayloadAction<any>) => {
+            const postId = action.payload.post_id
+            state.posts.map((post) => {
+                if (post.id === postId) {
+                    post.like_count += 1;
+                    post.liked.push(action.payload)
+                }
+                return post;
+            })
+        },
+        setUnLike: (state, action: PayloadAction<any>) => {
+            const postId = action.payload.post_id
+            state.posts.map((post) => {
+                if (post.id === postId) {
+                    post.like_count -= 1;
+                    post.liked.pop()
+                }
+                return post;
+            })
+
+        }
     },
 })
 
-export const { setPost } = postCreateSlice.actions
+export const { setPost, setLike, setUnLike } = postCreateSlice.actions
 export default postCreateSlice.reducer
