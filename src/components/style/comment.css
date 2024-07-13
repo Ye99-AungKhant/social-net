@@ -7,12 +7,14 @@
 
 .commentBox {
     height: 95%;
+    width: 100%;
     overflow-y: scroll;
+    scroll-behavior: smooth;
 }
 
 .commentShowBox {
-    height: 50px;
-    width: 95%;
+    min-height: 50px;
+    width: 100%;
     cursor: pointer;
     padding: 5px 5px 0 5px;
     margin: 0 0 15px 0;
@@ -30,6 +32,7 @@
     background: #dad8d8ea;
     color: #1f1e1e;
     padding: 5px;
+    position: 'relative';
 }
 
 .commentTextHeader {

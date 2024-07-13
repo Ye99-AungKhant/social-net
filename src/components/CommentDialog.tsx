@@ -1,5 +1,5 @@
 import { Box, Button, FormControl, IconButton, Modal, Typography } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import "./style/post.css"
 import "./style/comment.css"
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -7,7 +7,8 @@ import SendIcon from '@mui/icons-material/Send';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import MenuPopup from './MenuPopup';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { createComment, removeComment } from '../store/slices/commentSlice';
+import { createComment, removeAllComment, removeEditComment, updateComment } from '../store/slices/commentSlice';
+import { EditComment } from '../types/comment';
 
 
 interface Props {
@@ -31,19 +32,37 @@ const style = {
 const CommentDialog = ({ open, setOpen, postId }: Props) => {
     const [openMenu, setOpenMenu] = useState(false)
     const [comment, setComment] = useState({ content: '' })
+    const { editComment } = useAppSelector((state) => state.comments)
     const { authUser } = useAppSelector((state) => state.auth)
     const { comments } = useAppSelector((state) => state.comments)
     const [commentId, setCommentId] = useState<number>(0)
     const dispatch = useAppDispatch()
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const closeModal = () => {
         setOpen(false)
-        dispatch(removeComment())
+        dispatch(removeAllComment())
     }
 
-    const handleMenu = (Id: number) => {
-        setCommentId(Id)
-        setOpenMenu(!openMenu)
+    const handleMenu = (Id: number, userId: number) => {
+        if (userId === authUser?.id) {
+            setCommentId(Id)
+            setOpenMenu(!openMenu)
+        }
+        return
+    }
+
+    const isCreateOrNewComment = () => {
+        if (editComment) {
+            if (editComment.content != comment.content) {
+                dispatch(updateComment({ id: editComment.id, content: comment.content }))
+                if (inputRef.current) {
+                    inputRef.current.value = '' // Clear input field
+                }
+            }
+        } else {
+            handleCreateComment()
+        }
     }
 
     const handleCreateComment = () => {
@@ -52,6 +71,9 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
             const { content } = comment
             const commentpayload = { content, userId, postId }
             dispatch(createComment(commentpayload))
+            if (inputRef.current) {
+                inputRef.current.value = '' // Clear input field
+            }
         }
     }
 
@@ -84,11 +106,20 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
                                     <div className='commentTextHeader'>
                                         <p>{comment?.user?.name}</p>
                                     </div>
-                                    <div className='commentText' onClick={() => handleMenu(comment.id)} style={{ position: 'relative' }}>
+                                    <div className='commentText'
+                                        onClick={() => handleMenu(comment.id, comment.user_id)}
+                                    >
                                         {comment.content}
-                                        {commentId === comment.id && <MenuPopup open={openMenu} setOpen={setOpenMenu} />}
+                                        {commentId === comment.id &&
+                                            < MenuPopup
+                                                editId={comment.id}
+                                                deleteId={comment.id}
+                                                open={openMenu}
+                                                setOpen={setOpenMenu}
+                                            />
+                                        }
                                     </div>
-                                    <p className='postDate'>10 min</p>
+                                    <p className='postDate'>{comment.date}</p>
 
                                 </div>
                             </div>
@@ -97,9 +128,11 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
                 </Box>
                 <div className='commentInputBox'>
                     <input type="text" className='commentInput' placeholder='Write comment...' autoFocus
+                        defaultValue={editComment != null ? editComment.content : comment.content}
+                        ref={inputRef}
                         onChange={(e) => { setComment({ ...comment, content: e.target.value }) }}
                     />
-                    <button className='commentSentBtn' onClick={handleCreateComment}><SendIcon /></button>
+                    <button className='commentSentBtn' onClick={isCreateOrNewComment}><SendIcon /></button>
                 </div>
             </Box>
         </Modal>

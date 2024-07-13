@@ -22,7 +22,7 @@ a {
     right: 0px; */
     background-color: #fff;
     border-radius: var(--border-radius);
-    border: 1px solid black;
+    border: 1px solid #dad8d8ea;
     padding: 0px 0px;
     width: 100px;
     z-index: 3;
@@ -54,7 +54,7 @@ a {
 }
 
 .dropdown-menu ul li {
-    padding: 5px 0;
+    padding: 2px 0;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -70,7 +70,7 @@ a {
 
 .dropdownItem {
     display: flex;
-    margin: 5px auto;
+    margin: 2px auto;
 }
 
 .dropdownItem div {
