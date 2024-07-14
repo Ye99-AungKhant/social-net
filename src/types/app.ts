@@ -16,6 +16,7 @@ export interface Post {
     image?: string
     date: string
     like_count: number
+    comment_count: number
     liked: any;
 }
 export interface AppSlice {

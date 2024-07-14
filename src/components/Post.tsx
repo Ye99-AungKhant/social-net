@@ -149,7 +149,7 @@ const Post = () => {
                                         </div>
                                         <div className='postComment' onClick={() => handleCommentDialog(post.id)}>
                                             <ChatIcon />
-                                            <p className='postActionText'>987</p>
+                                            <p className='postActionText'>{post.comment_count}</p>
                                         </div>
                                     </div>
                                 </div>

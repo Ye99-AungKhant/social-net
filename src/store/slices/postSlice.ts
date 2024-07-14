@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, isAction } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { Post } from '../../types/app';
 import { PostCreate } from '../../types/post';
@@ -87,9 +87,15 @@ export const postCreateSlice = createSlice({
                 return post;
             })
 
-        }
+        },
+        setCommentCountIncrease: (state, action: PayloadAction<number>) => {
+            state.posts.map((post) => (post.id === action.payload ? post.comment_count += 1 : post))
+        },
+        setCommentCountDecrease: (state, action: PayloadAction<number>) => {
+            state.posts.map((post) => (post.id === action.payload ? post.comment_count -= 1 : post))
+        },
     },
 })
 
-export const { setPost, setLike, setUnLike } = postCreateSlice.actions
+export const { setPost, setLike, setUnLike, setCommentCountIncrease, setCommentCountDecrease } = postCreateSlice.actions
 export default postCreateSlice.reducer

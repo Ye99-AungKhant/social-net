@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Comments, CommentSlice, CreateComment, EditComment } from '../../types/comment';
+import { setCommentCountDecrease, setCommentCountIncrease } from './postSlice';
 
 export const fetchComment = createAsyncThunk(
     'fetchComment',
@@ -36,9 +37,12 @@ export const createComment = createAsyncThunk(
             body: JSON.stringify({ ...payload }),
         });
         const dataFromServer = await response.json();
-        const { data } = dataFromServer
-        console.log(data);
-        thunkApi.dispatch(setComment(data))
+        const { success, data } = dataFromServer
+        if (success) {
+            thunkApi.dispatch(setComment(data))
+            thunkApi.dispatch(setCommentCountIncrease(data[0].post_id))
+        }
+
     }
 )
 
@@ -56,9 +60,11 @@ export const deleteComment = createAsyncThunk(
             },
         });
         const dataFromServer = await response.json();
-        const { data } = dataFromServer
-        console.log(data);
-        thunkApi.dispatch(removeComment(payload))
+        const { success, data } = dataFromServer
+        if (success) {
+            thunkApi.dispatch(removeComment(payload))
+            thunkApi.dispatch(setCommentCountDecrease(data))
+        }
     }
 )
 
