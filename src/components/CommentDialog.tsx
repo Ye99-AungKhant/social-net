@@ -52,6 +52,13 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
         return
     }
 
+    useEffect(() => {
+        if (editComment) {
+            setComment({ content: editComment.content })
+        }
+
+    }, [editComment])
+
     const isCreateOrNewComment = () => {
         if (editComment) {
             if (editComment.content != comment.content) {
@@ -59,6 +66,7 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
                 if (inputRef.current) {
                     inputRef.current.value = '' // Clear input field
                 }
+                setComment({ content: '' })
             }
         } else {
             handleCreateComment()
@@ -74,6 +82,7 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
             if (inputRef.current) {
                 inputRef.current.value = '' // Clear input field
             }
+            setComment({ content: '' })
         }
     }
 
@@ -128,7 +137,7 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
                 </Box>
                 <div className='commentInputBox'>
                     <input type="text" className='commentInput' placeholder='Write comment...' autoFocus
-                        defaultValue={editComment != null ? editComment.content : comment.content}
+                        value={comment.content}
                         ref={inputRef}
                         onChange={(e) => { setComment({ ...comment, content: e.target.value }) }}
                     />
