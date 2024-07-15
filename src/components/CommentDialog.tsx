@@ -31,6 +31,7 @@ const style = {
 };
 const CommentDialog = ({ open, setOpen, postId }: Props) => {
     const [openMenu, setOpenMenu] = useState(false)
+    const [showMore, setShowMore] = useState<any>({})
     const [comment, setComment] = useState({ content: '' })
     const { editComment } = useAppSelector((state) => state.comments)
     const { authUser } = useAppSelector((state) => state.auth)
@@ -86,6 +87,13 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
         }
     }
 
+    const handleCommentToggle = (id: number) => {
+        setShowMore((prevState: any) => ({
+            ...prevState,
+            [id]: !prevState[id]
+        }))
+    };
+
     return (
         <Modal
             open={open}
@@ -114,11 +122,17 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
                                 <div className='profileText'>
                                     <div className='commentTextHeader'>
                                         <p>{comment?.user?.name}</p>
+                                        <p style={{ marginLeft: '5px' }} className='commentMenu' onClick={() => handleMenu(comment.id, comment.user_id)}>▼</p>
                                     </div>
-                                    <div className='commentText'
-                                        onClick={() => handleMenu(comment.id, comment.user_id)}
-                                    >
-                                        {comment.content}
+                                    <div className='commentText'>
+                                        {showMore[comment.id] ? comment.content : `${comment.content.substring(0, 120)}`}
+
+                                        {comment.content.length > 120 ?
+                                            <button className='showMoreBtn' onClick={() => handleCommentToggle(comment.id)}>
+                                                {showMore[comment.id] ? "See less" : "... See more"}
+                                            </button> : ''
+                                        }
+
                                         {commentId === comment.id &&
                                             < MenuPopup
                                                 editId={comment.id}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -15,6 +15,11 @@ import { Divider, IconButton } from '@mui/material';
 import { useAppDispatch } from '../store/hooks';
 import EmojiPicker from 'emoji-picker-react';
 import { createPost } from '../store/slices/postSlice';
+import { imageDb } from '../config';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { v4 as uuid } from 'uuid';
+import { PostCreate as PostData } from '../types/post';
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -35,27 +40,21 @@ interface Props {
 }
 
 const PostCreate = ({ open, setOpen }: Props) => {
-    const [age, setAge] = React.useState('');
     const [selectedImages, setSelectedImages] = useState<any>([])
+    const [selectedImagesUpload, setSelectedImagesUpload] = useState<any>([])
     const [openEmojiPicker, setOpenEmojiPicker] = useState(false)
-    // const [postStatus, setPostStatus] = useState<string>('Public')
-    // const [postContent, setPostContent] = useState<string>()
-    const [newPost, setNewPost] = useState({
+    const dispatch = useAppDispatch()
+    const [newPost, setNewPost] = useState<PostData>({
         status: 'Public',
         content: '',
-        image: []
+        image: [],
     })
 
-
-    const dispatch = useAppDispatch()
-
-    const handleChange = (event: SelectChangeEvent) => {
-        setAge(event.target.value);
-    };
 
     const closeModal = () => {
         setOpen(false)
         setSelectedImages([])
+        setSelectedImagesUpload([])
     }
 
     const onSelectFile = (event: any) => {
@@ -67,7 +66,7 @@ const PostCreate = ({ open, setOpen }: Props) => {
         });
 
         setSelectedImages((previousImages: any) => previousImages.concat(imagesArray));
-        setNewPost({ ...newPost, image: selectedImages })
+        setSelectedImagesUpload(selectedFilesArray)
         event.target.value = "";
     };
 
@@ -80,12 +79,39 @@ const PostCreate = ({ open, setOpen }: Props) => {
         setOpenEmojiPicker(true)
     }
 
-    const handleCreatePost = () => {
-        dispatch(createPost({
-            ...newPost
-        }))
-        setOpen(false)
+    const handleCreatePost = async () => {
+        try {
+            const uploadPromises = await selectedImagesUpload.map(async (image: any) => {
+                const imgRef = ref(imageDb, `files/sn_${uuid()}`)
+                const uploaded = await uploadBytes(imgRef, image)
+                return getDownloadURL(uploaded.ref);
+            })
+            let downloadUrl: any = []
+            let postPayloadData: any
+
+            downloadUrl = await (Promise.all(uploadPromises))
+            setNewPost((prevState) => {
+                postPayloadData = { ...prevState, image: downloadUrl };
+                return postPayloadData;
+            });
+
+            dispatch(createPost(postPayloadData))
+            closeModal()
+        } catch (error) {
+            console.error("Error uploading images:", error);
+        }
     }
+
+    const postContentCreate = () => {
+        // dispatch(createPost(newPost))
+        console.log('postdata', newPost);
+    }
+
+
+
+    // useEffect(() => {
+    //     console.log('postdata useEffect', newPost);
+    // }, [downloadUrl])
 
     return (
         <Modal
@@ -133,9 +159,10 @@ const PostCreate = ({ open, setOpen }: Props) => {
                             {selectedImages &&
                                 selectedImages.map((image: any, index: any) => {
                                     return (
-                                        <div className='imagePreviewBox'>
+                                        <div className='imagePreviewBox' key={index}>
                                             <IconButton sx={{ position: 'absolute', right: 0 }}
                                                 onClick={() => deletePreviewImageHandler(image)}
+
                                             >
                                                 <CloseRoundedIcon className='removePreviewImage' />
                                             </IconButton>

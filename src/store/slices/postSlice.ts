@@ -20,6 +20,8 @@ export const createPost = createAsyncThunk(
         const dataFromServer = await response.json();
         const { data } = dataFromServer
         thunkApi.dispatch(setPost(data))
+        console.log('post with image', payload);
+
     }
 )
 

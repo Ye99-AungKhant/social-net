@@ -89,6 +89,10 @@
     justify-content: center;
 }
 
+.menuBtn {
+    cursor: pointer;
+}
+
 .filterBtn {
     border: none;
     cursor: pointer;
@@ -123,6 +127,15 @@
 
 .profileText {
     margin-left: 5px;
+}
+
+.showMoreBtn {
+    border: none;
+    background: none;
+    font-size: 15px;
+    cursor: pointer;
+    color: #626262;
+    margin-left: 3px;
 }
 
 .postProfile p {

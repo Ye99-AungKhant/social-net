@@ -56,16 +56,4 @@ function MenuPopup({ open, setOpen, editId, deleteId }: Props) {
         </div>
     );
 }
-
-// function DropdownItem(props: any) {
-//     return (
-//         <li className='dropdownItem' onClick={}>
-//             <div>{props.img}</div>
-//             <a> {props.text} </a>
-//         </li>
-//     );
-// }
-{/* <DropdownItem img={<EditIcon />} text={"Edit"} />
-                    <DropdownItem img={<DeleteForeverIcon />} text={"Delete"} onClick={commentDelete} /> */}
-
 export default MenuPopup

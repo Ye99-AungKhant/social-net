@@ -1,10 +1,10 @@
 import { BaseOptions } from "./app";
 
-interface Image {
+export interface PostImage {
     url: string
 }
 export interface PostCreate extends BaseOptions {
     status: string,
     content: string,
-    image?: Image[],
+    image?: PostImage[],
 }

@@ -15,7 +15,6 @@
 .commentShowBox {
     min-height: 50px;
     width: 100%;
-    cursor: pointer;
     padding: 5px 5px 0 5px;
     margin: 0 0 15px 0;
     border-radius: 10px;
@@ -29,7 +28,7 @@
 .commentText {
     border-radius: 10px;
     width: 100%;
-    background: #dad8d8ea;
+    background: #ecebebea;
     color: #1f1e1e;
     padding: 5px;
     position: 'relative';
@@ -40,15 +39,7 @@
 }
 
 .commentMenu {
-    position: absolute;
-    top: 0;
-    right: 0;
     cursor: pointer;
-}
-
-.commentMenu:hover {
-    background: #9a9a9a;
-    border-radius: 3px;
 }
 
 .commentInputBox {

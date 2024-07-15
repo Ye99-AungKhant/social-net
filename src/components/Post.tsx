@@ -1,6 +1,7 @@
 import { Avatar, Box, Button, Card, CardActions, CardContent, CardHeader, CardMedia, ImageList, ImageListItem, Typography } from '@mui/material'
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import "./style/post.css"
+import './style/PhotoGallery.css'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -8,35 +9,20 @@ import { useEffect, useState } from 'react';
 import CommentDialog from './CommentDialog';
 import { postLike } from '../store/slices/postSlice';
 import { fetchComment } from '../store/slices/commentSlice';
+import MenuPopup from './MenuPopup';
+import PostPhotoDialog from './PostPhotoDialog';
 
 const Post = () => {
-    const itemData = [
-        {
-            img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
-            title: 'Breakfast',
-            rows: 2,
-            cols: 2,
-        },
-        {
-            img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d',
-            title: 'Burger',
-        },
-        {
-            img: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45',
-            title: 'Camera',
-        },
-        {
-            img: 'https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c',
-            title: 'Coffee',
-            cols: 2,
-        },
-
-    ];
     const posts = useAppSelector((state) => state.posts)
     const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
+    const [openPostPhotoDialog, setOpenPostPhotoDialog] = useState<boolean>(false)
     const [postCommentId, setPostCommentId] = useState<number>(0)
+    const [postMenuId, setPostMenuId] = useState<number>(0)
+    const [openMenu, setOpenMenu] = useState(false)
+    const [showMore, setShowMore] = useState<any>({})
     const { authUser } = useAppSelector((state) => state.auth)
+    const maxPhotos = 4;
 
     function srcset(image: string, size: number, rows = 1, cols = 1) {
         return {
@@ -54,6 +40,22 @@ const Post = () => {
         setOpenCommentDialog(!openCommetDialog)
         setPostCommentId(postId)
         dispatch(fetchComment(postId))
+    }
+
+    const handlePostPhotoDialog = (postId: number) => {
+        setOpenPostPhotoDialog(!openPostPhotoDialog)
+    }
+
+    const handlePostToggle = (postId: number) => {
+        setShowMore((prevState: any) => ({
+            ...prevState,
+            [postId]: !prevState[postId]
+        }))
+    };
+
+    const handlePostMenu = (postId: number) => {
+        setOpenMenu(!openMenu)
+        setPostMenuId(postId)
     }
 
     return (
@@ -113,24 +115,29 @@ const Post = () => {
                 {posts.posts.map((post) => (
                     <Box className='postContainer' key={post.id}>
                         <Card sx={{ width: 500, marginBottom: 2 }}>
-                            {post.image != null &&
-                                <ImageList
-                                    sx={{ width: 500, height: 250, margin: 0 }}
-                                    variant="quilted"
-                                    cols={4}
-                                    rowHeight={121}
-                                >
-                                    {itemData.map((item) => (
-                                        <ImageListItem key={item.img} cols={item.cols || 1} rows={item.rows || 1}>
-                                            <img
-                                                {...srcset(item.img, 121, item.rows, item.cols)}
-                                                alt={item.title}
-                                                loading="lazy"
-                                            />
-                                        </ImageListItem>
-                                    ))}
-                                </ImageList>
+
+                            {post.image && post.image?.length > 0 &&
+                                <div className="gallery">
+                                    {post.image.slice(0, maxPhotos).map((photo, index) => (
+                                        <div className="photo-container" key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+                                            <img src={photo.url} alt='postphoto' className="photo" />
+                                            {post.image && index === maxPhotos - 1 && post.image.length > maxPhotos && (
+                                                <div className="overlay">
+                                                    +{post.image.length - maxPhotos}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                    }
+                                    <PostPhotoDialog
+                                        open={openPostPhotoDialog}
+                                        setOpen={setOpenPostPhotoDialog}
+                                        photo={post.image}
+                                    />
+                                </div>
+
                             }
+
                             <CardContent sx={{ margin: 0, padding: 0, minHeight: 100, width: '100%' }}>
                                 <div className='postHeader'>
                                     <div className="postProfile">
@@ -138,7 +145,16 @@ const Post = () => {
                                         <div className='profileText'>
                                             <p>{post.user.name}</p>
                                             <p className='postDate'>{post.date}</p>
+                                            {postMenuId == post.id &&
+                                                < MenuPopup
+                                                    editId={post.id}
+                                                    deleteId={post.id}
+                                                    open={openMenu}
+                                                    setOpen={setOpenMenu}
+                                                />
+                                            }
                                         </div>
+                                        <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
                                     </div>
                                     <div className='postAction'>
                                         <div className='postLike'>
@@ -154,8 +170,13 @@ const Post = () => {
                                     </div>
                                 </div>
                                 <div className='postContent'>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {post.content}
+                                    <Typography variant="body2" color="text.black">
+                                        {showMore[post.id] ? post.content : `${post.content.substring(0, 120)}`}
+                                        {post.content.length > 120 ?
+                                            <button className='showMoreBtn' onClick={() => handlePostToggle(post.id)}>
+                                                {showMore[post.id] ? "  See less" : "... See more"}
+                                            </button> : ''
+                                        }
                                     </Typography>
                                 </div>
                             </CardContent>
@@ -167,6 +188,7 @@ const Post = () => {
                     setOpen={setOpenCommentDialog}
                     postId={postCommentId}
                 />
+
             </Box>
         </Box>
     )
