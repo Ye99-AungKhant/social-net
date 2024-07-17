@@ -3,6 +3,28 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { Post } from '../../types/app';
 import { PostCreate } from '../../types/post';
 
+export const postFetch = createAsyncThunk(
+    'postFetch',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/post?page=${payload}`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+        const dataFromServer = await response.json()
+        const { success, data } = dataFromServer
+        thunkApi.dispatch(setPost(data))
+        console.log(dataFromServer);
+        return data
+
+    }
+)
+
 export const createPost = createAsyncThunk(
     'createpost',
     async (payload: PostCreate, thunkApi) => {
@@ -67,7 +89,7 @@ export const postCreateSlice = createSlice({
     initialState,
     reducers: {
         setPost: (state, action: PayloadAction<Post[]>) => {
-            state.posts = [...action.payload, ...state.posts]
+            state.posts = [...state.posts, ...action.payload]
         },
         setLike: (state, action: PayloadAction<any>) => {
             const postId = action.payload.post_id

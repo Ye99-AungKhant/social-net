@@ -5,10 +5,18 @@ export interface User extends BaseOptions {
     phone: string
     password: string
 }
+interface Profile {
+    id?: number
+    post_id?: number | null
+    user_id: number | null
+    url: string
+    type?: string
+}
 
 export interface AuthUser {
     id: number
     name: string
+    profile?: Profile
 }
 export interface UserSlice {
     user: User[],

@@ -3,10 +3,19 @@ export interface BaseOptions {
     onSuccess?: (data?: any) => void;
     onError?: (error?: any) => void;
 }
+
+interface Profile {
+    id: number
+    post_id: number | null
+    user_id: number | null
+    url: string
+    type: string
+}
+
 export interface UserDetail {
     id: number
     name: string
-    profile?: string
+    profile?: Profile
 }
 export interface postImage {
     id: number

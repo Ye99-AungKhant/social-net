@@ -7,7 +7,7 @@ import { authUser } from './userSlice'
 export const fetchData = createAsyncThunk(
     'app/fetchData',
     async (payload: any, thunkApi) => {
-        const response = await fetch('http://localhost:8000/api/app', {
+        const response = await fetch(`http://localhost:8000/api/app`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -18,8 +18,7 @@ export const fetchData = createAsyncThunk(
             }
         })
         const dataFromServer = await response.json()
-        const { data, auth } = dataFromServer
-        thunkApi.dispatch(setPost(data))
+        const { auth } = dataFromServer
         thunkApi.dispatch(authUser(auth))
         console.log(dataFromServer);
 

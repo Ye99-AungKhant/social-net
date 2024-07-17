@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAppDispatch } from '../store/hooks'
 import { fetchData } from '../store/slices/appSlice'
+import { postFetch } from '../store/slices/postSlice'
 
 const Layout = () => {
     const navigate = useNavigate()
@@ -18,6 +19,7 @@ const Layout = () => {
             return navigate('sign-in')
         }
         dispatch(fetchData({}))
+
     }, [])
 
     return (
