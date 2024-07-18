@@ -2,6 +2,7 @@ import { Box, Button, FormControl, IconButton, Modal, Typography } from '@mui/ma
 import React, { useEffect, useRef, useState } from 'react'
 import "./style/post.css"
 import "./style/comment.css"
+import defaultUser from './user.png'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
@@ -118,7 +119,7 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
                         <div className='commentShowBox' key={comment.id}>
 
                             <div className="postProfile commentProfile">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" />
+                                <img src={comment.user.profile ? comment.user.profile : defaultUser} />
                                 <div className='profileText'>
                                     <div className='commentTextHeader'>
                                         <p>{comment?.user?.name}</p>

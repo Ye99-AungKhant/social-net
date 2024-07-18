@@ -3,9 +3,11 @@ import postReducer from './slices/postSlice'
 import userReducer from './slices/userSlice'
 import signInReducer from './slices/signInSlice'
 import commentReducer from './slices/commentSlice'
+import storyReducer from './slices/storySlice'
 
 export const store = configureStore({
     reducer: {
+        stories: storyReducer,
         posts: postReducer,
         comments: commentReducer,
         auth: userReducer,

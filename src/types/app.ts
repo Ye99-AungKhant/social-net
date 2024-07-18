@@ -15,7 +15,7 @@ interface Profile {
 export interface UserDetail {
     id: number
     name: string
-    profile?: Profile
+    profile?: string
 }
 export interface postImage {
     id: number

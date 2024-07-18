@@ -16,12 +16,20 @@ import { postFetch } from '../store/slices/postSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import { userSlice } from './../store/slices/userSlice';
+import { storyFetch } from '../store/slices/storySlice';
+import PostCreate from './PostCreate';
+import StoryTextTextDialog from './StoryTextDialog';
+import { postLoading, profileLoading, storyLoading, storyUploadLoading } from './SkeletonComponent';
+
 
 const Post = () => {
     const posts = useAppSelector((state) => state.posts)
+    const { stories } = useAppSelector((state) => state.stories)
     const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
     const [openPostPhotoDialog, setOpenPostPhotoDialog] = useState<any>({})
+    const [openStoryPhotoDialog, setOpenStoryPhotoDialog] = useState<any>({})
+    const [openStoryTextDialog, setOpenStoryTextDialog] = useState<any>({})
     const [postCommentId, setPostCommentId] = useState<number>(0)
     const [postMenuId, setPostMenuId] = useState<number>(0)
     const [openMenu, setOpenMenu] = useState(false)
@@ -29,6 +37,10 @@ const Post = () => {
     const { authUser } = useAppSelector((state) => state.auth)
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
+    const [storyHasMore, setStoryHasMore] = useState(true);
+    const [storyPage, setStoryPage] = useState(1);
+    const [openStoryCreate, setOpenStoryCreate] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(true)
     const maxPhotos = 4;
 
     const handleLike = (postId: number) => {
@@ -47,6 +59,20 @@ const Post = () => {
         }))
     }
 
+    const handleStoryPhotoDialog = (storyId: number) => {
+        setOpenStoryPhotoDialog((prevState: any) => ({
+            ...prevState,
+            [storyId]: !prevState[storyId]
+        }))
+    }
+
+    const handleStoryTextDialog = (storyId: number) => {
+        setOpenStoryTextDialog((prevState: any) => ({
+            ...prevState,
+            [storyId]: !prevState[storyId]
+        }))
+    }
+
     const handlePostToggle = (postId: number) => {
         setShowMore((prevState: any) => ({
             ...prevState,
@@ -60,15 +86,15 @@ const Post = () => {
     }
 
     useEffect(() => {
-        fetchData();
+        fetchStoryData();
+        fetchPostData();
     }, []);
 
-    const fetchData = async () => {
+    const fetchPostData = async () => {
         console.log('post loaded');
-
         try {
             dispatch(postFetch(page)).then((res) => res.payload).then((data) => {
-                if (data.length == 0) {
+                if (data != null && data.length == 0) {
                     setHasMore(false);
                 }
             })
@@ -78,28 +104,103 @@ const Post = () => {
         }
     };
 
+    const fetchStoryData = async () => {
+        console.log('story loaded');
+        try {
+            dispatch(storyFetch(storyPage)).then((res) => res.payload).then((data) => {
+                if (data.length == 0) {
+                    setStoryHasMore(false);
+                }
+            })
+            setStoryPage((prevPage) => prevPage + 1);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const handleCreateStory = () => {
+        if (!openStoryCreate)
+            return setOpenStoryCreate(true)
+    }
+
+    const handleLoaded: React.ReactEventHandler<HTMLImageElement> = () => {
+        setLoading(false)
+    }
+
     return (
         <Box id='containerBoxDiv' className='containerBox'>
 
             <Box className='storySection'>
-                <Box className='storyBox'>
-                    <div className='story'>
-                        <div className='backdrop'>
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQl2ZfH1x24-7Nagdv4N9kOX6bDzqJ_nFu2Tg&s" alt="story" className='storyData' />
+                <InfiniteScroll
+                    dataLength={stories != null ? stories.length : 0}
+                    next={fetchStoryData}
+                    hasMore={storyHasMore}
+                    loader=''
+                    scrollableTarget="storyBoxDiv"
+                >
+                    <Box id='storyBoxDiv' className='storyBox'>
+                        <div className='story'>
+                            <div className='backdrop'>
+                                {loading && storyUploadLoading}
+                                <img
+                                    src={authUser?.profile ? authUser?.profile : ''}
+                                    alt=""
+                                    className='storyData'
+                                    onLoad={handleLoaded}
+                                />
+                            </div>
+                            <div onClick={handleCreateStory}>
+                                <AddCircleRoundedIcon className='uploadStory' sx={{ fontSize: 40 }} />
+                            </div>
+                            <p>Create Story</p>
                         </div>
-                        <AddCircleRoundedIcon className='uploadStory' sx={{ fontSize: 40 }} />
-                        <p>Post Story</p>
-                    </div>
-                    <div className='story'>
-                        <p className='storyName'>Khant</p>
-                        <div className='backdrop'>
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQl2ZfH1x24-7Nagdv4N9kOX6bDzqJ_nFu2Tg&s" alt="story" className='storyData' />
-                        </div>
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" alt="story" className='storyProfile' />
-                        <p className='storyName'>Khant</p>
-                    </div>
 
-                </Box>
+                        {stories.map((story) => (
+
+                            <div key={story.id} className='story'>
+                                <p className='storyName'>{story.user.name}</p>
+                                {story.content ?
+                                    <div className="backdrop storyText" onClick={() => handleStoryTextDialog(story.id)}>
+                                        <div className="storyTextBackground"></div>
+                                        <div className="storyTextContent">
+                                            <p>{story.content.substring(0, 60).concat('...')}</p>
+                                        </div>
+                                    </div>
+                                    : <div className='backdrop' onClick={() => handleStoryPhotoDialog(story.id)}>
+                                        {loading && storyLoading}
+                                        <img
+                                            src={story.url !== null ? story.url : ''}
+                                            alt="story"
+                                            className='storyData'
+                                            onLoad={handleLoaded}
+                                        />
+                                    </div>
+
+                                }
+
+                                {loading && profileLoading}
+                                <img
+                                    src={story.user.profile ? story.user.profile : defaultUser}
+                                    alt="story"
+                                    className='storyProfile'
+                                    onLoad={handleLoaded}
+                                />
+                                <p className='storyName'>{story.user.name}</p>
+                                {openStoryPhotoDialog[story.id] && <PostPhotoDialog
+                                    open={true}
+                                    setOpen={setOpenStoryPhotoDialog}
+                                    photo={[story]}
+                                />}
+                                {openStoryTextDialog[story.id] && <StoryTextTextDialog
+                                    open={true}
+                                    setOpen={setOpenStoryTextDialog}
+                                    story={story.content}
+                                />}
+                            </div>
+                        ))}
+
+                    </Box>
+                </InfiniteScroll>
             </Box>
 
             <Box className='postSection'>
@@ -110,9 +211,9 @@ const Post = () => {
 
                 <InfiniteScroll
                     dataLength={posts.posts.length}
-                    next={fetchData}
+                    next={fetchPostData}
                     hasMore={hasMore}
-                    loader={<h4>Loading...</h4>}
+                    loader=''
                     endMessage={<p style={{ textAlign: 'center' }}><b>Yay! You have seen it all</b></p>}
                     scrollableTarget="containerBoxDiv"
                 >
@@ -126,7 +227,15 @@ const Post = () => {
                                             <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
                                                 && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
                                                 key={index} onClick={() => handlePostPhotoDialog(post.id)}>
-                                                <img src={photo.url} alt='postphoto' className="photo" />
+
+                                                {loading && postLoading}
+                                                <img
+                                                    src={photo.url}
+                                                    alt='postphoto'
+                                                    className="photo"
+                                                    onLoad={handleLoaded}
+                                                />
+
                                                 {post.image && index === maxPhotos - 1 && post.image.length > maxPhotos && (
                                                     <div className="overlay">
                                                         +{post.image.length - maxPhotos}
@@ -148,7 +257,12 @@ const Post = () => {
                                     <div className='postHeader'>
                                         <div className="postProfile">
 
-                                            <img src={post.user.profile ? post.user.profile.url : defaultUser} alt="profile" />
+                                            {loading && profileLoading}
+                                            <img
+                                                src={post.user.profile ? post.user.profile : defaultUser}
+                                                alt="profile"
+                                                onLoad={handleLoaded}
+                                            />
                                             <div className='profileText'>
                                                 <p>{post.user.name}</p>
                                                 <p className='postDate'>{post.date}</p>
@@ -198,6 +312,8 @@ const Post = () => {
                 />
 
             </Box>
+
+            <PostCreate open={openStoryCreate} setOpen={setOpenStoryCreate} type='Story' />
         </Box >
 
     )

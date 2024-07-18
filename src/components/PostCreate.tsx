@@ -6,20 +6,17 @@ import Modal from '@mui/material/Modal';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import Emoji from '@mui/icons-material/SentimentVerySatisfiedRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
 import "./style/post.css"
+import defaultUser from './user.png'
 import { Divider, IconButton } from '@mui/material';
-import { useAppDispatch } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import EmojiPicker from 'emoji-picker-react';
 import { createPost } from '../store/slices/postSlice';
 import { imageDb } from '../config';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { v4 as uuid } from 'uuid';
 import { PostCreate as PostData } from '../types/post';
+import { createStory } from '../store/slices/storySlice';
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -36,38 +33,52 @@ const style = {
 
 interface Props {
     open: boolean
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>
+    type: string
 }
 
-const PostCreate = ({ open, setOpen }: Props) => {
+const PostCreate = ({ open, setOpen, type }: Props) => {
     const [selectedImages, setSelectedImages] = useState<any>([])
     const [selectedImagesUpload, setSelectedImagesUpload] = useState<any>([])
     const [openEmojiPicker, setOpenEmojiPicker] = useState(false)
+    const { authUser } = useAppSelector((state) => state.auth)
     const dispatch = useAppDispatch()
+    const [storySelectType, setStorySelectType] = useState(false)
     const [newPost, setNewPost] = useState<PostData>({
         status: 'Public',
         content: '',
         image: [],
     })
 
-
     const closeModal = () => {
         setOpen(false)
         setSelectedImages([])
         setSelectedImagesUpload([])
+        setNewPost({
+            status: 'Public',
+            content: '',
+            image: [],
+        })
     }
 
     const onSelectFile = (event: any) => {
-        const selectedFiles = event.target.files;
-        const selectedFilesArray = Array.from(selectedFiles);
-
-        const imagesArray = selectedFilesArray.map((file: any) => {
-            return URL.createObjectURL(file);
-        });
-
-        setSelectedImages((previousImages: any) => previousImages.concat(imagesArray));
-        setSelectedImagesUpload(selectedFilesArray)
-        event.target.value = "";
+        if (type == 'Post') {
+            const selectedFiles = event.target.files;
+            const selectedFilesArray = Array.from(selectedFiles);
+            const imagesArray = selectedFilesArray.map((file: any) => {
+                return URL.createObjectURL(file);
+            });
+            setSelectedImages((previousImages: any) => previousImages.concat(imagesArray));
+            setSelectedImagesUpload(selectedFilesArray)
+            event.target.value = "";
+        } else {
+            const selectedFiles = event.target.files[0];
+            const selectedFilesArray = Array.from(selectedFiles);
+            const imagesArray = URL.createObjectURL(selectedFiles);
+            setSelectedImages([imagesArray]);
+            setSelectedImagesUpload([selectedFiles])
+            event.target.value = "";
+        }
     };
 
     const deletePreviewImageHandler = (image: any) => {
@@ -81,37 +92,62 @@ const PostCreate = ({ open, setOpen }: Props) => {
 
     const handleCreatePost = async () => {
         try {
-            const uploadPromises = await selectedImagesUpload.map(async (image: any) => {
-                const imgRef = ref(imageDb, `files/sn_${uuid()}`)
-                const uploaded = await uploadBytes(imgRef, image)
-                return getDownloadURL(uploaded.ref);
-            })
-            let downloadUrl: any = []
-            let postPayloadData: any
 
-            downloadUrl = await (Promise.all(uploadPromises))
-            setNewPost((prevState) => {
-                postPayloadData = { ...prevState, image: downloadUrl };
-                return postPayloadData;
-            });
+            if (selectedImagesUpload.length !== 0 && type == 'Post') {
+                const uploadPromises = await selectedImagesUpload.map(async (image: any) => {
+                    const imgRef = ref(imageDb, `files/sn_${uuid()}`)
+                    const uploaded = await uploadBytes(imgRef, image)
+                    return getDownloadURL(uploaded.ref);
+                })
+                let postPayloadData: any
+                let downloadUrl: any = []
+                downloadUrl = await (Promise.all(uploadPromises))
+                setNewPost((prevState) => {
+                    postPayloadData = { ...prevState, image: downloadUrl };
+                    return postPayloadData;
+                });
 
-            dispatch(createPost(postPayloadData))
-            closeModal()
+
+                dispatch(createPost(postPayloadData))
+                console.log('post', postPayloadData);
+                closeModal()
+            } else if (selectedImagesUpload.length === 0 && type == 'Post') {
+                dispatch(createPost({ ...newPost }))
+                closeModal()
+            }
+            if (selectedImagesUpload.length !== 0 && type == 'Story') {
+                console.log('story post', selectedImagesUpload);
+                const uploadPromises = await selectedImagesUpload.map(async (image: any) => {
+                    const imgRef = ref(imageDb, `files/sn_${uuid()}`)
+                    const uploaded = await uploadBytes(imgRef, image)
+                    return getDownloadURL(uploaded.ref);
+                })
+
+                let postPayloadData: any
+                let downloadUrl: any = []
+                downloadUrl = await (Promise.all(uploadPromises))
+                setNewPost((prevState) => {
+                    postPayloadData = { ...prevState, image: downloadUrl };
+                    return postPayloadData;
+                });
+
+                dispatch(createStory(postPayloadData))
+                console.log('story upload', postPayloadData);
+                closeModal()
+            } else if (selectedImagesUpload.length === 0 && type == 'Story') {
+                dispatch(createStory({ ...newPost }))
+                closeModal()
+            }
+
+
         } catch (error) {
             console.error("Error uploading images:", error);
         }
     }
 
-    const postContentCreate = () => {
-        // dispatch(createPost(newPost))
-        console.log('postdata', newPost);
+    const storyTypeToggle = () => {
+        setStorySelectType(!storySelectType)
     }
-
-
-
-    // useEffect(() => {
-    //     console.log('postdata useEffect', newPost);
-    // }, [downloadUrl])
 
     return (
         <Modal
@@ -124,7 +160,7 @@ const PostCreate = ({ open, setOpen }: Props) => {
                 {/* {openEmojiPicker && <EmojiPicker />} */}
                 <Box className='createPostHeader'>
                     <Typography sx={{ color: '#626262', fontWeight: 'bold', marginTop: 1 }}>
-                        Create Post
+                        Create {type}
                     </Typography>
                     <IconButton sx={{ position: 'absolute', right: 0 }}
                         onClick={closeModal}
@@ -135,9 +171,9 @@ const PostCreate = ({ open, setOpen }: Props) => {
                 </Box>
                 <div className="write-post-container">
                     <div className="postProfile">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwZ_pFEuyzQacYLhz6ymV8Nxq-3hyIa-1Y1A&s" />
+                        <img src={authUser?.profile ? authUser.profile : defaultUser} />
                         <div className='profileText'>
-                            <p>Ye Aung Khant</p>
+                            <p>{authUser?.name}</p>
 
                             <select name="status" id="privacy" className='postPrivacy' onChange={(e) => {
                                 setNewPost({ ...newPost, status: e.target.value })
@@ -146,16 +182,27 @@ const PostCreate = ({ open, setOpen }: Props) => {
                                 <option value="Friend">Friend</option>
                                 <option value="Onlyme">Onlyme</option>
                             </select>
-
                         </div>
+                        {type === 'Story' &&
+                            <div className="storyType">
+                                <button type='button' className={!storySelectType ? 'storyToggleBtn storyTypeBtn' : 'storyTypeBtn'} onClick={storyTypeToggle}>Text</button>
+                                <button type='button' className={storySelectType ? 'storyToggleBtn storyTypeBtn' : 'storyTypeBtn'} onClick={storyTypeToggle}>Photo</button>
+                            </div>
+                        }
+
                     </div>
 
                     <div className="post-intput-container">
-                        <textarea placeholder="Whant's on your mind, John?" onChange={(e) => {
-                            setNewPost({ ...newPost, content: e.target.value })
-                        }}>
-                        </textarea>
+
+                        {!storySelectType ?
+                            <textarea placeholder="Whant's on your mind, John?" onChange={(e) => {
+                                setNewPost({ ...newPost, content: e.target.value })
+                            }}>
+                            </textarea>
+                            : <div></div>
+                        }
                         <div className="imagePreviewContainer">
+
                             {selectedImages &&
                                 selectedImages.map((image: any, index: any) => {
                                     return (
@@ -171,19 +218,35 @@ const PostCreate = ({ open, setOpen }: Props) => {
                                     );
                                 })
                             }
+
                         </div>
                         <Divider />
                         <div className="add-post-links">
-                            <label className='file-input-container' onChange={onSelectFile} htmlFor="formId">
-                                <CameraAltIcon className='choosePhotoEmoji' />
-                                <input
-                                    type='file'
-                                    id="formId"
-                                    multiple accept="image/png , image/jpeg, image/webp"
-                                    hidden
-                                />
-                                Photo/Video
-                            </label>
+                            {type === 'Story' ? selectedImages.length == 0 && storySelectType &&
+                                <label className='file-input-container' onChange={onSelectFile} htmlFor="formId">
+                                    <CameraAltIcon className='choosePhotoEmoji' />
+                                    <input
+                                        type='file'
+                                        id="formId"
+                                        multiple accept="image/png , image/jpeg, image/webp"
+                                        hidden
+                                    />
+                                    Photo/Video
+                                </label>
+                                : ''
+                            }
+                            {type === 'Post' &&
+                                <label className='file-input-container' onChange={onSelectFile} htmlFor="formId">
+                                    <CameraAltIcon className='choosePhotoEmoji' />
+                                    <input
+                                        type='file'
+                                        id="formId"
+                                        multiple accept="image/png , image/jpeg, image/webp"
+                                        hidden
+                                    />
+                                    Photo/Video
+                                </label>
+                            }
 
                             <label className='file-input-container' onClick={showEmojiPicker}>
                                 <Emoji className='choosePhotoEmoji' />
@@ -194,7 +257,7 @@ const PostCreate = ({ open, setOpen }: Props) => {
                     <input
                         type='button'
                         className='sharedPostBtn'
-                        value='Share Post'
+                        value={`Share ${type}`}
                         onClick={handleCreatePost}
                     />
                 </div>

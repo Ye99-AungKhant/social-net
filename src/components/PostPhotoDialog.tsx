@@ -1,23 +1,17 @@
-import { Box, Button, FormControl, IconButton, Modal, Typography } from '@mui/material'
+import { Box, Modal } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import "./style/post.css"
 import "./style/comment.css"
 import "./style/PhotoCarousel.css"
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { ArrowBackIosRounded, ArrowForwardIosRounded } from '@mui/icons-material'
-import SendIcon from '@mui/icons-material/Send';
-import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
-import MenuPopup from './MenuPopup';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { createComment, removeAllComment, removeEditComment, updateComment } from '../store/slices/commentSlice';
-import { EditComment } from '../types/comment';
-import { postImage } from '../types/app';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 
 interface Props {
     open: boolean
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    photo: postImage[]
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>
+    photo: any[]
 }
 
 const style = {
@@ -28,7 +22,7 @@ const style = {
     transform: 'translate(-50%, -50%)',
 };
 const PostPhotoDialog = ({ open, setOpen, photo }: Props) => {
-
+    const [loading, setLoading] = useState<boolean>(true)
     const closeModal = () => {
         setOpen(false)
     }
@@ -43,6 +37,9 @@ const PostPhotoDialog = ({ open, setOpen, photo }: Props) => {
         setSlide(slide === 0 ? photo.length - 1 : slide - 1);
     };
 
+    const handleLoaded: React.ReactEventHandler<HTMLImageElement> = () => {
+        setLoading(false)
+    }
 
     return (
         <Modal
@@ -50,8 +47,10 @@ const PostPhotoDialog = ({ open, setOpen, photo }: Props) => {
             onClose={closeModal}
         >
             <Box sx={style}>
+
                 <div className="carousel">
-                    <ArrowBackIosRounded onClick={prevSlide} className="arrow arrow-left" />
+                    {loading && <CircularProgress sx={{ position: 'absolute', top: '50%', left: '50%', }} />}
+                    {photo.length > 1 && <ArrowBackIosRounded onClick={prevSlide} className="arrow arrow-left" />}
                     {photo.map((item, idx) => {
                         return (
                             <img
@@ -59,13 +58,14 @@ const PostPhotoDialog = ({ open, setOpen, photo }: Props) => {
                                 alt='photo'
                                 key={idx}
                                 className={slide === idx ? "slide" : "slide slide-hidden"}
+                                onLoad={handleLoaded}
                             />
                         );
                     })}
-                    <ArrowForwardIosRounded
+                    {photo.length > 1 && <ArrowForwardIosRounded
                         onClick={nextSlide}
                         className="arrow arrow-right"
-                    />
+                    />}
                     <span className="indicators">
                         {photo.map((_, idx) => {
                             return (

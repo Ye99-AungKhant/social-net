@@ -38,7 +38,7 @@ export const signUpUser = createAsyncThunk(
         }
         const { access_token, user_data } = dataFromServer.data
         localStorage.setItem('token', access_token)
-        let auth = { id: user_data.id, name: user_data.name }
+        let auth = { id: user_data.id, name: user_data.name, profile: user_data.profile }
         thunkApi.dispatch(authUser(auth))
         onSuccess && onSuccess()
 

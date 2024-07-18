@@ -16,7 +16,7 @@ interface Profile {
 export interface AuthUser {
     id: number
     name: string
-    profile?: Profile
+    profile: string | null
 }
 export interface UserSlice {
     user: User[],
