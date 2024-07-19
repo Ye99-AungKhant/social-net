@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, isAction } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { Post } from '../../types/app';
 import { PostCreate } from '../../types/post';
+import { config } from './../../config/index';
 
 export const postFetch = createAsyncThunk(
     'postFetch',
@@ -19,6 +20,28 @@ export const postFetch = createAsyncThunk(
         const dataFromServer = await response.json()
         const { success, data } = dataFromServer
         thunkApi.dispatch(setPost(data))
+        console.log(dataFromServer);
+        return data
+
+    }
+)
+
+export const friendPostFetch = createAsyncThunk(
+    'friendPostFetch',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`${config.ApiBaseUrl}/friendPost?page=${payload}`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+        const dataFromServer = await response.json()
+        const { success, data } = dataFromServer
+        thunkApi.dispatch(setFriendPost(data))
         console.log(dataFromServer);
         return data
 
@@ -74,12 +97,14 @@ export const postLike = createAsyncThunk(
 
 interface PostSlice {
     posts: Post[]
+    friendPosts: Post[]
     isLoading?: boolean;
     error?: string | null;
 }
 
 const initialState: PostSlice = {
     posts: [],
+    friendPosts: [],
     isLoading: false,
     error: null
 }
@@ -90,6 +115,9 @@ export const postCreateSlice = createSlice({
     reducers: {
         setPost: (state, action: PayloadAction<Post[]>) => {
             state.posts = [...state.posts, ...action.payload]
+        },
+        setFriendPost: (state, action: PayloadAction<Post[]>) => {
+            state.friendPosts = [...state.friendPosts, ...action.payload]
         },
         setLike: (state, action: PayloadAction<any>) => {
             const postId = action.payload.post_id
@@ -121,5 +149,5 @@ export const postCreateSlice = createSlice({
     },
 })
 
-export const { setPost, setLike, setUnLike, setCommentCountIncrease, setCommentCountDecrease } = postCreateSlice.actions
+export const { setPost, setFriendPost, setLike, setUnLike, setCommentCountIncrease, setCommentCountDecrease } = postCreateSlice.actions
 export default postCreateSlice.reducer

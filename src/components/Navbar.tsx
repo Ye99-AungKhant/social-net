@@ -19,6 +19,10 @@ import Popup from './Popup';
 import Menu from './Menu';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import PostCreate from './PostCreate';
+import '../components/style/style.css'
+import { Avatar } from '@mui/material';
+import { useAppSelector } from '../store/hooks';
+import defaultUser from './user.png'
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -73,6 +77,7 @@ export default function Navbar() {
     const [open, setOpen] = useState<boolean>(false)
     const [openMenu, setOpenMenu] = useState<boolean>(false)
     const [openPostCreate, setOpenPostCreate] = useState<boolean>(false)
+    const { authUser } = useAppSelector((state) => state.auth)
     const handlePopup = () => {
         if (openMenu)
             setOpenMenu(false)
@@ -155,7 +160,7 @@ export default function Navbar() {
                             onClick={handleOpenMenu}
                             color="inherit"
                         >
-                            <AccountCircle />
+                            <Avatar alt="Remy Sharp" src={authUser?.profile ? authUser?.profile : 'defaultUser'} />
                         </IconButton>
                     </Box>
 

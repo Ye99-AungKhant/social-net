@@ -5,19 +5,19 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import InboxIcon from '@mui/icons-material/Inbox';
-import DraftsIcon from '@mui/icons-material/Drafts';
-import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
-import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
-import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
+import SpaceDashboardRoundedIcon from '@mui/icons-material/SpaceDashboardRounded';
+import CropOriginalRoundedIcon from '@mui/icons-material/CropOriginalRounded';
+import SlideshowRoundedIcon from '@mui/icons-material/SlideshowRounded';
 import { Typography } from '@mui/material';
+import { blue } from '@mui/material/colors';
+import { Link } from 'react-router-dom';
 
 const sidebarMenu = [
-    { id: 1, label: 'Feed', icon: <FeedOutlinedIcon />, route: '' },
-    { id: 2, label: 'Photos', icon: <PhotoOutlinedIcon />, route: '' },
-    { id: 3, label: 'Watch Videos', icon: <PlayCircleOutlinedIcon />, route: '' },
-    { id: 4, label: 'Musics', icon: <FeedOutlinedIcon />, route: '' },
-    { id: 5, label: 'Popular', icon: <FeedOutlinedIcon />, route: '' },
+    { id: 1, label: 'Feed', icon: <SpaceDashboardRoundedIcon />, route: '/', Iconcolor: '#2196f3' },
+    { id: 2, label: 'Friends', icon: <PeopleAltRoundedIcon />, route: '', Iconcolor: '#2e7d32' },
+    { id: 4, label: 'Photos', icon: <CropOriginalRoundedIcon />, route: '', Iconcolor: '#ef6c00' },
+    { id: 3, label: 'Watch Videos', icon: <SlideshowRoundedIcon />, route: '', Iconcolor: '#9016cd' },
 ]
 const LeftSidebar = () => {
     return (
@@ -25,27 +25,19 @@ const LeftSidebar = () => {
             <nav aria-label="main mailbox folders">
                 <List>
                     {sidebarMenu.map((item) => (
-                        <ListItem key={item.id} disablePadding>
-                            <ListItemButton>
-                                <ListItemIcon>
-                                    {item.icon}
-                                </ListItemIcon>
-                                <ListItemText primary={item.label} />
-                            </ListItemButton>
-                        </ListItem>
+                        <Link to={item.route}>
+                            <ListItem key={item.id} disablePadding>
+                                <ListItemButton className='iconBg'>
+                                    <ListItemIcon sx={{ color: item.Iconcolor }}>
+                                        {item.icon}
+                                    </ListItemIcon>
+                                    <ListItemText primary={item.label} />
+                                </ListItemButton>
+                            </ListItem>
+                        </Link>
                     ))}
                     <Divider />
-                    <Typography sx={{ textAlign: 'left', color: '#626262', fontSize: 12, fontWeight: 'bold', marginLeft: 2 }}>PAGE YOU LIKE</Typography>
-                    {sidebarMenu.map((item) => (
-                        <ListItem key={item.id} disablePadding>
-                            <ListItemButton>
-                                <ListItemIcon>
-                                    {item.icon}
-                                </ListItemIcon>
-                                <ListItemText primary={item.label} />
-                            </ListItemButton>
-                        </ListItem>
-                    ))}
+
                 </List>
             </nav>
         </Box>

@@ -8,7 +8,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { useEffect, useState } from 'react';
 import CommentDialog from './CommentDialog';
-import { postLike } from '../store/slices/postSlice';
+import { friendPostFetch, postLike } from '../store/slices/postSlice';
 import { fetchComment } from '../store/slices/commentSlice';
 import MenuPopup from './MenuPopup';
 import PostPhotoDialog from './PostPhotoDialog';
@@ -41,6 +41,7 @@ const Post = () => {
     const [storyPage, setStoryPage] = useState(1);
     const [openStoryCreate, setOpenStoryCreate] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(true)
+    const [filterPost, setFilterPost] = useState<string>('friendPosts')
     const maxPhotos = 4;
 
     const handleLike = (postId: number) => {
@@ -87,18 +88,30 @@ const Post = () => {
 
     useEffect(() => {
         fetchStoryData();
+    }, [])
+    useEffect(() => {
         fetchPostData();
-    }, []);
+    }, [filterPost]);
 
     const fetchPostData = async () => {
         console.log('post loaded');
         try {
-            dispatch(postFetch(page)).then((res) => res.payload).then((data) => {
-                if (data != null && data.length == 0) {
-                    setHasMore(false);
-                }
-            })
-            setPage((prevPage) => prevPage + 1);
+            if (filterPost == 'posts') {
+                dispatch(postFetch(page)).then((res) => res.payload).then((data) => {
+                    if (data != null && data.length == 0) {
+                        setHasMore(false);
+                    }
+                })
+                setPage((prevPage) => prevPage + 1);
+            } else {
+                dispatch(friendPostFetch(page)).then((res) => res.payload).then((data) => {
+                    if (data != null && data.length == 0) {
+                        setHasMore(false);
+                    }
+                })
+                setPage((prevPage) => prevPage + 1);
+            }
+
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -125,6 +138,15 @@ const Post = () => {
 
     const handleLoaded: React.ReactEventHandler<HTMLImageElement> = () => {
         setLoading(false)
+    }
+
+    const handleFilterPost = (status: string) => {
+        if (status === 'All') {
+            if (filterPost == 'posts') return
+            return setFilterPost('posts')
+        }
+
+        return setFilterPost('friendPosts')
     }
 
     return (
@@ -205,8 +227,8 @@ const Post = () => {
 
             <Box className='postSection'>
                 <Box className='postFilter'>
-                    <button className='filterBtn'>All</button>
-                    <button className='filterBtn' disabled>Following</button>
+                    <button type='button' className={`filterBtn ${filterPost == 'posts' ? 'filterBtnActive' : ''}`} onClick={() => handleFilterPost('All')}>All</button>
+                    <button type='button' className={`filterBtn ${filterPost !== 'posts' ? 'filterBtnActive' : ''}`} onClick={() => handleFilterPost('Following')}>Following</button>
                 </Box>
 
                 <InfiniteScroll
@@ -217,7 +239,95 @@ const Post = () => {
                     endMessage={<p style={{ textAlign: 'center' }}><b>Yay! You have seen it all</b></p>}
                     scrollableTarget="containerBoxDiv"
                 >
-                    {posts.posts.map((post) => (
+                    {filterPost == 'posts' && posts.posts.map((post) => (
+                        <Box className='postContainer' key={post.id}>
+                            <Card sx={{ width: 500 }}>
+
+                                {post.image && post.image?.length > 0 &&
+                                    <div className="gallery">
+                                        {post.image.slice(0, maxPhotos).map((photo, index) => (
+                                            <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
+                                                && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
+                                                key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+
+                                                {loading && postLoading}
+                                                <img
+                                                    src={photo.url}
+                                                    alt='postphoto'
+                                                    className="photo"
+                                                    onLoad={handleLoaded}
+                                                />
+
+                                                {post.image && index === maxPhotos - 1 && post.image.length > maxPhotos && (
+                                                    <div className="overlay">
+                                                        +{post.image.length - maxPhotos}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                        }
+                                        {openPostPhotoDialog[post.id] && <PostPhotoDialog
+                                            open={true}
+                                            setOpen={setOpenPostPhotoDialog}
+                                            photo={post.image}
+                                        />}
+                                    </div>
+
+                                }
+
+                                <CardContent sx={{ margin: 0, padding: 0, minHeight: 100, width: '100%' }}>
+                                    <div className='postHeader'>
+                                        <div className="postProfile">
+
+                                            {loading && profileLoading}
+                                            <img
+                                                src={post.user.profile ? post.user.profile : defaultUser}
+                                                alt="profile"
+                                                onLoad={handleLoaded}
+                                            />
+                                            <div className='profileText'>
+                                                <p>{post.user.name}</p>
+                                                <p className='postDate'>{post.date}</p>
+                                                {postMenuId == post.id &&
+                                                    < MenuPopup
+                                                        editId={post.id}
+                                                        deleteId={post.id}
+                                                        open={openMenu}
+                                                        setOpen={setOpenMenu}
+                                                    />
+                                                }
+                                            </div>
+                                            <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
+                                        </div>
+                                        <div className='postAction'>
+                                            <div className='postLike'>
+
+                                                <FavoriteRoundedIcon onClick={() => handleLike(post.id)}
+                                                    className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
+                                                <p className='postActionText'>{post.like_count}</p>
+                                            </div>
+                                            <div className='postComment' onClick={() => handleCommentDialog(post.id)}>
+                                                <ChatIcon />
+                                                <p className='postActionText'>{post.comment_count}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className='postContent'>
+                                        <Typography variant="body2" color="text.black">
+                                            {showMore[post.id] ? post.content : `${post.content.substring(0, 120)}`}
+                                            {post.content.length > 120 ?
+                                                <button className='showMoreBtn' onClick={() => handlePostToggle(post.id)}>
+                                                    {showMore[post.id] ? "  See less" : "... See more"}
+                                                </button> : ''
+                                            }
+                                        </Typography>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Box>
+                    ))}
+
+                    {filterPost == 'friendPosts' && posts.friendPosts.map((post) => (
                         <Box className='postContainer' key={post.id}>
                             <Card sx={{ width: 500, marginBottom: 2 }}>
 
