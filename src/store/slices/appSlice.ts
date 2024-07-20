@@ -24,23 +24,3 @@ export const fetchData = createAsyncThunk(
 
     }
 )
-
-// const initialState: AppSlice = {
-//     posts: [],
-//     notifications: '',
-//     chats: '',
-//     friends: ''
-// }
-
-// export const appSlice = createSlice({
-//     name: 'posts',
-//     initialState,
-//     reducers: {
-//         setPost: (state, action: PayloadAction<Post>) => {
-//             state.posts = [...state.posts, action.payload]
-//         },
-//     },
-// })
-
-// export const { setPost } = appSlice.actions
-// export default appSlice.reducer

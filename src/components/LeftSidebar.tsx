@@ -25,7 +25,7 @@ const LeftSidebar = () => {
             <nav aria-label="main mailbox folders">
                 <List>
                     {sidebarMenu.map((item) => (
-                        <Link to={item.route}>
+                        <Link key={item.id} to={item.route}>
                             <ListItem key={item.id} disablePadding>
                                 <ListItemButton className='iconBg'>
                                     <ListItemIcon sx={{ color: item.Iconcolor }}>

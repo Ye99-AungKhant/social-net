@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { Post } from '../../types/app';
 import { PostCreate } from '../../types/post';
 import { config } from './../../config/index';
+import { profileDetail } from './profileDataSlice';
 
 export const postFetch = createAsyncThunk(
     'postFetch',

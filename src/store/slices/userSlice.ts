@@ -45,6 +45,8 @@ export const signUpUser = createAsyncThunk(
     }
 );
 
+
+
 const initialState: UserSlice = {
     user: [],
     authUser: null,
@@ -59,7 +61,7 @@ export const userSlice = createSlice({
         },
         onError: (state, action: PayloadAction<User>) => {
             state.onError = action.payload
-        }
+        },
     },
 })
 

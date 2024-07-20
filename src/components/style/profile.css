@@ -10,8 +10,10 @@ body {
 }
 
 .profile-container {
-    padding: 20px 15%;
+    /* padding: 20px 15%; */
+    width: 70%;
     color: #626262;
+    position: relative;
 }
 
 .cover-img {
@@ -103,10 +105,39 @@ body {
 
 .info-col {
     flex-basis: 33%;
+    height: 100%;
+    position: relative;
+    overflow-y: scroll;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+
 }
 
 .post-col {
     flex-basis: 65%;
+    height: 500px;
+    position: relative;
+    overflow-y: scroll;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+}
+
+.post-col::-webkit-scrollbar-track,
+.info-col::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #F5F5F5;
+}
+
+.post-col::-webkit-scrollbar,
+.info-col::-webkit-scrollbar {
+    width: 3px;
+    background-color: #F5F5F5;
+
+}
+
+.post-col::-webkit-scrollbar-thumb,
+.info-col::-webkit-scrollbar-thumb {
+    background-color: #000000;
 }
 
 .profile-intro {
@@ -180,19 +211,19 @@ body {
 }
 
 .friends-box {
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    grid-gap: 10px;
-    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 5px;
 }
 
-.friends-box div img {
-    width: 100%;
+.friends-box .item img {
+    margin-left: 3px;
+    width: 100px;
     cursor: pointer;
     padding-bottom: 20px;
 }
 
-.friends-box div {
+.friends-box .item {
     position: relative;
 }
 

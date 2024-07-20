@@ -17,9 +17,10 @@ import { logOut } from '../store/slices/userSlice';
 
 interface Props {
     open: boolean
+    Id: number | undefined
 }
 
-const Menu = ({ open }: Props) => {
+const Menu = ({ open, Id }: Props) => {
     const dispatch = useAppDispatch()
     const navigate = useNavigate();
     const handleLogOut = async () => {
@@ -35,10 +36,12 @@ const Menu = ({ open }: Props) => {
             {open && <Box sx={{ width: '100%', maxWidth: 360, bgcolor: '#FAFAFA', position: 'relative', zIndex: 2 }}>
                 <List component="nav" aria-label="main mailbox folders">
                     <ListItemButton>
-                        <ListItemIcon>
-                            <AccountCircle />
-                        </ListItemIcon>
-                        <ListItemText primary='Profile' />
+                        <Link to={`/profile/${Id}`}>
+                            <ListItemIcon>
+                                <AccountCircle />
+                            </ListItemIcon>
+                            <ListItemText primary='Profile' />
+                        </Link>
                     </ListItemButton>
                     <ListItemButton>
                         <ListItemIcon>

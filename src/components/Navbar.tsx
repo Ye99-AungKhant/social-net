@@ -175,6 +175,7 @@ export default function Navbar() {
             <Box sx={{ position: 'absolute', right: 10 }}>
                 {openMenu && <Menu
                     open={openMenu}
+                    Id={authUser?.id}
                 />}
             </Box>
             <PostCreate open={openPostCreate} setOpen={setOpenPostCreate} type='Post' />

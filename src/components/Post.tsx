@@ -20,6 +20,7 @@ import { storyFetch } from '../store/slices/storySlice';
 import PostCreate from './PostCreate';
 import StoryTextTextDialog from './StoryTextDialog';
 import { postLoading, profileLoading, storyLoading, storyUploadLoading } from './SkeletonComponent';
+import { Link } from 'react-router-dom';
 
 
 const Post = () => {
@@ -280,13 +281,15 @@ const Post = () => {
                                         <div className="postProfile">
 
                                             {loading && profileLoading}
-                                            <img
-                                                src={post.user.profile ? post.user.profile : defaultUser}
-                                                alt="profile"
-                                                onLoad={handleLoaded}
-                                            />
+                                            <Link to={`profile/${post.user.id}`}>
+                                                <img
+                                                    src={post.user.profile ? post.user.profile : defaultUser}
+                                                    alt="profile"
+                                                    onLoad={handleLoaded}
+                                                />
+                                            </Link>
                                             <div className='profileText'>
-                                                <p>{post.user.name}</p>
+                                                <Link to={`profile/${post.user.id}`}><p>{post.user.name}</p></Link>
                                                 <p className='postDate'>{post.date}</p>
                                                 {postMenuId == post.id &&
                                                     < MenuPopup
@@ -297,6 +300,7 @@ const Post = () => {
                                                     />
                                                 }
                                             </div>
+
                                             <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
                                         </div>
                                         <div className='postAction'>
@@ -329,7 +333,7 @@ const Post = () => {
 
                     {filterPost == 'friendPosts' && posts.friendPosts.map((post) => (
                         <Box className='postContainer' key={post.id}>
-                            <Card sx={{ width: 500, marginBottom: 2 }}>
+                            <Card sx={{ width: 500 }}>
 
                                 {post.image && post.image?.length > 0 &&
                                     <div className="gallery">
@@ -368,13 +372,15 @@ const Post = () => {
                                         <div className="postProfile">
 
                                             {loading && profileLoading}
-                                            <img
-                                                src={post.user.profile ? post.user.profile : defaultUser}
-                                                alt="profile"
-                                                onLoad={handleLoaded}
-                                            />
+                                            <Link to={`profile/${post.user.id}`}>
+                                                <img
+                                                    src={post.user.profile ? post.user.profile : defaultUser}
+                                                    alt="profile"
+                                                    onLoad={handleLoaded}
+                                                />
+                                            </Link>
                                             <div className='profileText'>
-                                                <p>{post.user.name}</p>
+                                                <Link to={`profile/${post.user.id}`}><p>{post.user.name}</p></Link>
                                                 <p className='postDate'>{post.date}</p>
                                                 {postMenuId == post.id &&
                                                     < MenuPopup
