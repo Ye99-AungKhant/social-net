@@ -3,11 +3,13 @@ import LeftSidebar from './LeftSidebar'
 import { Box } from '@mui/material'
 import RightSidebar from './RightSidebar'
 import Post from './Post'
-import { useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAppDispatch } from '../store/hooks'
 import { fetchData } from '../store/slices/appSlice'
 import { postFetch } from '../store/slices/postSlice'
+import FriendRequest from './FriendRequest'
+
 
 const Layout = () => {
     const navigate = useNavigate()
@@ -27,7 +29,7 @@ const Layout = () => {
             <Navbar />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', height: 500 }}>
                 <LeftSidebar />
-                <Post />
+                <Outlet />
                 <RightSidebar />
             </Box>
         </Box>

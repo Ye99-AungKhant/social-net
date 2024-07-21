@@ -18,7 +18,7 @@ import Navbar from './Navbar';
 import { fetchData } from '../store/slices/appSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Link, useParams } from 'react-router-dom';
-import { profileDataFetch, profilePostFetch, removePost, unfriend } from './../store/slices/profileDataSlice';
+import { addfriend, profileDataFetch, profilePostFetch, removePost, unfriend } from './../store/slices/profileDataSlice';
 import LeftSidebar from './LeftSidebar';
 import ConfirmDialog from './ConfirmDialog';
 
@@ -77,8 +77,13 @@ const UserProfile = () => {
         setOpenComfirmDialog(true)
     }
 
+    const handleAddFriend = () => {
+        dispatch(addfriend(profileId))
+    }
+
     const handleConfirmUnfriend = () => {
         dispatch(unfriend(profileId))
+        setOpenComfirmDialog(false)
     }
 
     useEffect(() => {
@@ -128,19 +133,21 @@ const UserProfile = () => {
                         </Box>
                         {authUser?.id != profileId &&
                             <Box className="pd-right">
-                                {friendLists.map((friendlist) => (
-                                    friendlist.id == authUser?.id ?
-                                        <button type="button" onClick={handleComfirmDialog}>
-                                            <PersonRoundedIcon sx={{ marginRight: 1 }} />Friend
-                                        </button>
-                                        : <button type="button">
-                                            <PersonAddIcon sx={{ marginRight: 1 }} /> Add Friend
-                                        </button>
+                                {friendLists.length == 0 ?
+                                    <button type="button" onClick={handleAddFriend}>
+                                        <PersonAddIcon sx={{ marginRight: 1 }} /> Add Friends
+                                    </button>
+                                    : friendLists.map((friendlist) => (
+                                        friendlist.id == authUser?.id ?
+                                            <button key={friendlist.id} type="button" onClick={handleComfirmDialog}>
+                                                <PersonRoundedIcon sx={{ marginRight: 1 }} />Friend
+                                            </button>
+                                            : <button key={friendlist.id} type="button">
+                                                <PersonAddIcon sx={{ marginRight: 1 }} /> Add Friend
+                                            </button>
 
-                                ))}
-                                {/* <button type="button">
-                                    <PersonAddIcon /> Friends
-                                </button> */}
+                                    ))}
+
                                 <button type="button">
                                     <SendRoundedIcon />
                                     Message

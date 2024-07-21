@@ -3,13 +3,18 @@ import './App.css';
 import Layout from './components/Layout';
 import SignInUp from './components/SignInUp';
 import UserProfile from './components/UserProfile';
+import Post from './components/Post';
+import FriendRequest from './components/FriendRequest';
 
 
 function App() {
 
   return (
     <Routes>
-      <Route path='/' element={<Layout />} />
+      <Route path='/' element={<Layout />} >
+        <Route index element={<Post />} />
+        <Route path="/friend" element={<FriendRequest />} />
+      </Route>
       <Route path='sign-in' element={<SignInUp />} />
       <Route path='profile/:profileId' element={<UserProfile />} />
     </Routes>

@@ -66,6 +66,25 @@ export const unfriend = createAsyncThunk(
     }
 )
 
+export const addfriend = createAsyncThunk(
+    'addfriend',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/friend/request/${payload}`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+        const dataFromServer = await response.json()
+        const { success, data } = dataFromServer
+        // success && thunkApi.dispatch(friendLists(data))
+    }
+)
+
 
 const initialState: ProfileDataSlice = {
     posts: [],
@@ -83,7 +102,7 @@ export const profileDataSlice = createSlice({
             state.profileDetail = action.payload
         },
         friendLists: (state, action: PayloadAction<ProfileDataDetail[]>) => {
-            state.friendLists = [...action.payload]
+            state.friendLists = [...action.payload, ...state.friendLists]
         },
         removePost: (state) => {
             state.posts = []
