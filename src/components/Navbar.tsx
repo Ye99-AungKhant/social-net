@@ -23,6 +23,7 @@ import '../components/style/style.css'
 import { Avatar } from '@mui/material';
 import { useAppSelector } from '../store/hooks';
 import defaultUser from './user.png'
+import Chat from './Chat';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -77,6 +78,7 @@ export default function Navbar() {
     const [open, setOpen] = useState<boolean>(false)
     const [openMenu, setOpenMenu] = useState<boolean>(false)
     const [openPostCreate, setOpenPostCreate] = useState<boolean>(false)
+    const [openChatModal, setOpenChatModal] = useState(false)
     const { authUser } = useAppSelector((state) => state.auth)
     const handlePopup = () => {
         if (openMenu)
@@ -97,6 +99,10 @@ export default function Navbar() {
     const handlePost = () => {
         if (!openPostCreate)
             return setOpenPostCreate(true)
+    }
+
+    const handleChatModal = () => {
+        setOpenChatModal(!openChatModal)
     }
 
     return (
@@ -136,7 +142,9 @@ export default function Navbar() {
                         >
                             <AddCircleRoundedIcon />
                         </IconButton>
-                        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
+                        <IconButton size="large" aria-label="show 4 new mails" color="inherit"
+                            onClick={handleChatModal}
+                        >
                             <Badge badgeContent={4} color="error">
                                 <MailIcon />
                             </Badge>
@@ -179,6 +187,7 @@ export default function Navbar() {
                 />}
             </Box>
             <PostCreate open={openPostCreate} setOpen={setOpenPostCreate} type='Post' />
+            <Chat open={openChatModal} setOpen={setOpenChatModal} />
         </Box>
     );
 }
