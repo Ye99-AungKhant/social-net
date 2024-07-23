@@ -9,9 +9,10 @@ import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 import SpaceDashboardRoundedIcon from '@mui/icons-material/SpaceDashboardRounded';
 import CropOriginalRoundedIcon from '@mui/icons-material/CropOriginalRounded';
 import SlideshowRoundedIcon from '@mui/icons-material/SlideshowRounded';
-import { Typography } from '@mui/material';
+import { Typography, Badge } from '@mui/material';
 import { blue } from '@mui/material/colors';
 import { Link } from 'react-router-dom';
+import { useAppSelector } from '../store/hooks';
 
 const sidebarMenu = [
     { id: 1, label: 'Feed', icon: <SpaceDashboardRoundedIcon />, route: '/', Iconcolor: '#2196f3' },
@@ -20,6 +21,8 @@ const sidebarMenu = [
     { id: 3, label: 'Watch Videos', icon: <SlideshowRoundedIcon />, route: '', Iconcolor: '#9016cd' },
 ]
 const LeftSidebar = () => {
+    const { friendRequestNoti } = useAppSelector((state) => state.app)
+
     return (
         <Box sx={{ width: '20%', bgcolor: 'background.paper' }}>
             <nav aria-label="main mailbox folders">
@@ -29,7 +32,12 @@ const LeftSidebar = () => {
                             <ListItem key={item.id} disablePadding>
                                 <ListItemButton className='iconBg'>
                                     <ListItemIcon sx={{ color: item.Iconcolor }}>
-                                        {item.icon}
+                                        {item.id == 2 ? <Badge badgeContent={friendRequestNoti} color="error">
+                                            {item.icon}
+                                        </Badge>
+                                            : <>{item.icon}</>
+                                        }
+
                                     </ListItemIcon>
                                     <ListItemText primary={item.label} />
                                 </ListItemButton>

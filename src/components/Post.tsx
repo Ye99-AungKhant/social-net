@@ -46,7 +46,8 @@ const Post = () => {
     const maxPhotos = 4;
 
     const handleLike = (postId: number) => {
-        dispatch(postLike(postId))
+        let postData = { filterPost, postId }
+        dispatch(postLike(postData))
     }
     const handleCommentDialog = (postId: number) => {
         setOpenCommentDialog(!openCommetDialog)

@@ -9,5 +9,6 @@ export interface ProfileDataDetail {
 export interface ProfileDataSlice {
     posts: Post[]
     profileDetail: ProfileDataDetail | null
-    friendLists: ProfileDataDetail[]
+    friendLists: ProfileDataDetail[],
+    waitingfriendLists: any[]
 }

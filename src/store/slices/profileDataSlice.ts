@@ -39,9 +39,10 @@ export const profileDataFetch = createAsyncThunk(
             }
         })
         const dataFromServer = await response.json()
-        const { success, profileData, friendList } = dataFromServer
+        const { success, profileData, friendList, waitingfriendList } = dataFromServer
         thunkApi.dispatch(profileDetail(profileData))
         thunkApi.dispatch(friendLists(friendList))
+        thunkApi.dispatch(waitingfriendLists(waitingfriendList))
     }
 )
 
@@ -62,6 +63,7 @@ export const unfriend = createAsyncThunk(
         const { success } = dataFromServer
         if (success) {
             thunkApi.dispatch(removeFriend(payload))
+            thunkApi.dispatch(removeWaitingFriend())
         }
     }
 )
@@ -81,7 +83,7 @@ export const addfriend = createAsyncThunk(
         })
         const dataFromServer = await response.json()
         const { success, data } = dataFromServer
-        // success && thunkApi.dispatch(friendLists(data))
+        thunkApi.dispatch(waitingfriendLists(data))
     }
 )
 
@@ -89,7 +91,8 @@ export const addfriend = createAsyncThunk(
 const initialState: ProfileDataSlice = {
     posts: [],
     profileDetail: null,
-    friendLists: []
+    friendLists: [],
+    waitingfriendLists: []
 }
 export const profileDataSlice = createSlice({
     name: 'profileDataDetail',
@@ -102,17 +105,23 @@ export const profileDataSlice = createSlice({
             state.profileDetail = action.payload
         },
         friendLists: (state, action: PayloadAction<ProfileDataDetail[]>) => {
-            state.friendLists = [...action.payload, ...state.friendLists]
+            state.friendLists = action.payload
+        },
+        waitingfriendLists: (state, action: PayloadAction<any[]>) => {
+            state.waitingfriendLists = action.payload
         },
         removePost: (state) => {
             state.posts = []
         },
         removeFriend: (state, action: PayloadAction<number>) => {
             state.friendLists = state.friendLists.filter((friendlist) => (friendlist.id !== action.payload))
+        },
+        removeWaitingFriend: (state) => {
+            state.waitingfriendLists = []
         }
     },
 })
 
-export const { setProfilePost, profileDetail, friendLists, removePost, removeFriend } = profileDataSlice.actions
+export const { setProfilePost, profileDetail, friendLists, waitingfriendLists, removePost, removeFriend, removeWaitingFriend } = profileDataSlice.actions
 
 export default profileDataSlice.reducer

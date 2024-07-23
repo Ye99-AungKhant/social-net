@@ -1,4 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { waitingfriendLists } from "./profileDataSlice";
 
 export const friendRequestFetch = createAsyncThunk(
     "friendRequestFetch",
@@ -15,6 +16,24 @@ export const friendRequestFetch = createAsyncThunk(
         const dataFromServer = await response.json()
         const { success, data } = dataFromServer
         return data
+    }
+)
+
+export const waitingFriend = createAsyncThunk(
+    "waitingFriend",
+    async (payload: any, thunkApi) => {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`http://localhost:8000/api/friend/waiting`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        const dataFromServer = await response.json()
+        const { success, waitingfriendList } = dataFromServer
+        return waitingfriendList
     }
 )
 
@@ -56,3 +75,17 @@ export const friendRequestDecline = createAsyncThunk(
     }
 )
 
+export const waitingFriendCancel = createAsyncThunk(
+    "waitingFriendCancel",
+    async (payload: number, thunkApi) => {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`http://localhost:8000/api/unfriend/${payload}`, {
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+    }
+)

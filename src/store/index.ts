@@ -5,9 +5,11 @@ import signInReducer from './slices/signInSlice'
 import commentReducer from './slices/commentSlice'
 import storyReducer from './slices/storySlice'
 import profileDataReducer from './slices/profileDataSlice'
+import appReducer from './slices/appSlice'
 
 export const store = configureStore({
     reducer: {
+        app: appReducer,
         stories: storyReducer,
         posts: postReducer,
         comments: commentReducer,

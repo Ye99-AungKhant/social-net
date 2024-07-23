@@ -37,8 +37,7 @@ export interface Post {
     liked: any;
 }
 export interface AppSlice {
-    posts: Post[],
-    notifications?: string | null,
-    chats?: string | null,
-    friends?: string | null,
+    notifications: string | null,
+    chats: string | null,
+    friendRequestNoti: string | null,
 }

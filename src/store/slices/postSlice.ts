@@ -73,7 +73,9 @@ export const createPost = createAsyncThunk(
 
 export const postLike = createAsyncThunk(
     'post/like',
-    async (payload: number, thunkApi) => {
+    async (payload: any, thunkApi) => {
+        console.log('post with filter', payload);
+
         const response = await fetch(`http://localhost:8000/api/post/like`, {
             method: "POST",
             credentials: 'include',
@@ -83,16 +85,23 @@ export const postLike = createAsyncThunk(
                 "Access-Control-Allow-Origin": "*",
                 "Authorization": `Bearer ${localStorage.getItem('token')}`,
             },
-            body: JSON.stringify({ 'postId': payload }),
+            body: JSON.stringify({ 'postId': payload.postId }),
         });
         const dataFromServer = await response.json();
         const { liked, data } = dataFromServer
-        if (liked) {
-            thunkApi.dispatch(setLike(data))
+        if (payload.filterPost == 'posts') {
+            if (liked) {
+                thunkApi.dispatch(setLike(data))
+            } else {
+                thunkApi.dispatch(setUnLike(data))
+            }
         } else {
-            thunkApi.dispatch(setUnLike(data))
+            if (liked) {
+                thunkApi.dispatch(setFriendPostLike(data))
+            } else {
+                thunkApi.dispatch(setFriendPostUnLike(data))
+            }
         }
-
     }
 )
 
@@ -141,14 +150,44 @@ export const postCreateSlice = createSlice({
             })
 
         },
+        setFriendPostLike: (state, action: PayloadAction<any>) => {
+            const postId = action.payload.post_id
+            state.friendPosts.map((post) => {
+                if (post.id === postId) {
+                    post.like_count += 1;
+                    post.liked.push(action.payload)
+                }
+                return post;
+            })
+        },
+        setFriendPostUnLike: (state, action: PayloadAction<any>) => {
+            const postId = action.payload.post_id
+            state.friendPosts.map((post) => {
+                if (post.id === postId) {
+                    post.like_count -= 1;
+                    post.liked.pop()
+                }
+                return post;
+            })
+        },
         setCommentCountIncrease: (state, action: PayloadAction<number>) => {
             state.posts.map((post) => (post.id === action.payload ? post.comment_count += 1 : post))
         },
         setCommentCountDecrease: (state, action: PayloadAction<number>) => {
             state.posts.map((post) => (post.id === action.payload ? post.comment_count -= 1 : post))
         },
+        setFriendPostCommentCountIncrease: (state, action: PayloadAction<number>) => {
+            state.friendPosts.map((post) => (post.id === action.payload ? post.comment_count += 1 : post))
+        },
+        setFriendPostCommentCountDecrease: (state, action: PayloadAction<number>) => {
+            console.log(action.payload);
+
+            state.friendPosts.map((post) => (post.id === action.payload ? post.comment_count -= 1 : post))
+        },
     },
 })
 
-export const { setPost, setFriendPost, setLike, setUnLike, setCommentCountIncrease, setCommentCountDecrease } = postCreateSlice.actions
+export const { setPost, setFriendPost, setLike, setUnLike, setFriendPostLike,
+    setFriendPostUnLike, setCommentCountIncrease, setCommentCountDecrease,
+    setFriendPostCommentCountIncrease, setFriendPostCommentCountDecrease } = postCreateSlice.actions
 export default postCreateSlice.reducer

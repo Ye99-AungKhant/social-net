@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
 import { AppSlice, Post } from '../../types/app'
 import { setPost } from './postSlice'
 import { authUser } from './userSlice'
+import { PayloadAction } from '@reduxjs/toolkit';
 
 export const fetchData = createAsyncThunk(
     'app/fetchData',
@@ -18,9 +18,28 @@ export const fetchData = createAsyncThunk(
             }
         })
         const dataFromServer = await response.json()
-        const { auth } = dataFromServer
+        const { auth, friendRequestNoti } = dataFromServer
         thunkApi.dispatch(authUser(auth))
+        thunkApi.dispatch(setfriendRequestNoti(friendRequestNoti))
         console.log(dataFromServer);
-
     }
 )
+
+const initialState: AppSlice = {
+    notifications: null,
+    chats: null,
+    friendRequestNoti: null,
+}
+
+export const appDataSlice = createSlice({
+    name: 'appData',
+    initialState,
+    reducers: {
+        setfriendRequestNoti: (state, action: PayloadAction<any>) => {
+            state.friendRequestNoti = action.payload
+        }
+    }
+})
+
+export const { setfriendRequestNoti } = appDataSlice.actions
+export default appDataSlice.reducer
