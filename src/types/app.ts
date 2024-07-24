@@ -39,5 +39,6 @@ export interface Post {
 export interface AppSlice {
     notifications: string | null,
     chats: string | null,
+    friendList: UserDetail[] | null,
     friendRequestNoti: string | null,
 }

@@ -6,6 +6,7 @@ import commentReducer from './slices/commentSlice'
 import storyReducer from './slices/storySlice'
 import profileDataReducer from './slices/profileDataSlice'
 import appReducer from './slices/appSlice'
+import chatReducer from './slices/chatSlice'
 
 export const store = configureStore({
     reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
         auth: userReducer,
         signIn: signInReducer,
         profileData: profileDataReducer,
+        chat: chatReducer
     },
 })
 

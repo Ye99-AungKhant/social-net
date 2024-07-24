@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { AppSlice, Post } from '../../types/app'
+import { AppSlice, Post, UserDetail } from '../../types/app'
 import { setPost } from './postSlice'
 import { authUser } from './userSlice'
 import { PayloadAction } from '@reduxjs/toolkit';
@@ -18,9 +18,10 @@ export const fetchData = createAsyncThunk(
             }
         })
         const dataFromServer = await response.json()
-        const { auth, friendRequestNoti } = dataFromServer
+        const { auth, friendRequestNoti, friendList } = dataFromServer
         thunkApi.dispatch(authUser(auth))
         thunkApi.dispatch(setfriendRequestNoti(friendRequestNoti))
+        thunkApi.dispatch(setFriendList(friendList))
         console.log(dataFromServer);
     }
 )
@@ -28,6 +29,7 @@ export const fetchData = createAsyncThunk(
 const initialState: AppSlice = {
     notifications: null,
     chats: null,
+    friendList: null,
     friendRequestNoti: null,
 }
 
@@ -37,9 +39,12 @@ export const appDataSlice = createSlice({
     reducers: {
         setfriendRequestNoti: (state, action: PayloadAction<any>) => {
             state.friendRequestNoti = action.payload
+        },
+        setFriendList: (state, action: PayloadAction<UserDetail[]>) => {
+            state.friendList = [...action.payload]
         }
     }
 })
 
-export const { setfriendRequestNoti } = appDataSlice.actions
+export const { setfriendRequestNoti, setFriendList } = appDataSlice.actions
 export default appDataSlice.reducer
