@@ -23,6 +23,7 @@ import './style/chat.css'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { chatfetch, sendChatMessage } from '../store/slices/chatSlice';
 import { Chat as chatlist, ChatSlice } from '../types/chat';
+import Badge from '@mui/material/Badge';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -38,6 +39,7 @@ interface Props {
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 const Chat = ({ open, setOpen }: Props) => {
+    const [ws, setWs] = useState<WebSocket | null>(null);
     const [message, setMessage] = useState<chatlist[]>([])
     const messagesEndRef = useRef<null | HTMLElement>(null);
     const chatRef = useRef<null | HTMLInputElement>(null)
@@ -45,6 +47,7 @@ const Chat = ({ open, setOpen }: Props) => {
     const { friendList } = useAppSelector((state) => state.app)
     const { chats } = useAppSelector((state) => state.chat)
     const { authUser } = useAppSelector((state) => state.auth)
+    const [unreadMessage, setUnReadMessage] = useState<any>({})
     const dispatch = useAppDispatch()
 
     const handleClose = () => {
@@ -52,14 +55,24 @@ const Chat = ({ open, setOpen }: Props) => {
     };
     const handleSend = (seleteUserId: any) => {
         if (chatRef.current?.value) {
-            let id = message && message.length + 1
-            let sender_id = authUser ? authUser.id : 0
+            let id = Date.now()
+            // let sender_id = authUser ? authUser.id : 0
             let receiver_id = seleteUserId
             let msg = chatRef.current.value
-            const newMessage: chatlist = { id, sender_id, receiver_id, message: msg };
+            const newMessage: any = { id, receiver_id, message: msg };
             setMessage([...message, newMessage])
             dispatch(sendChatMessage(newMessage))
             chatRef.current.value = ''
+
+            if (ws) {
+                ws.send(JSON.stringify({
+                    type: 'message',
+                    message: msg,
+                    senderId: authUser?.id,
+                    receiverId: seleteUserId,
+                }));
+            }
+
         }
     };
 
@@ -69,6 +82,21 @@ const Chat = ({ open, setOpen }: Props) => {
 
     const handleSelectUser = (user: any) => {
 
+        if (unreadMessage[user.id] != 0) {
+            console.log('unreadmessage count handle', unreadMessage[user.id])
+            setUnReadMessage((prevCounts: any) => ({
+                ...prevCounts,
+                [user.id]: 0,
+            }))
+
+            if (ws) {
+                ws.send(JSON.stringify({
+                    type: 'setMessageCount',
+                    userId: user.id,
+                }));
+            }
+        }
+
         dispatch(chatfetch(user.id)).then((res) => res.payload).then((data: any) => setMessage(data))
         setSelectUser(user)
     }
@@ -77,7 +105,41 @@ const Chat = ({ open, setOpen }: Props) => {
         setSelectUser('')
     }
     useEffect(() => {
+        const websocket = new WebSocket('ws://localhost:8080');
+        websocket.onopen = () => {
+            websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
+        };
+        websocket.onmessage = (event) => {
+            const parsedMessage = JSON.parse(event.data);
+            console.log('realtime data', parsedMessage);
+
+            if (parsedMessage.type === 'message' && selectUser) {
+                console.log('seletedUser', selectUser);
+
+                if (parsedMessage.receiverId == selectUser.id || parsedMessage.senderId == selectUser.id) {
+                    setMessage((prevMessages: any) => [
+                        ...prevMessages,
+                        {
+                            id: Date.now(),
+                            sender_id: parsedMessage.senderId,
+                            receiver_id: authUser?.id,
+                            message: parsedMessage.message,
+                        },
+                    ]);
+                }
+            } else if (parsedMessage.type === 'messageCount') {
+                setUnReadMessage((prevCounts: any) => ({
+                    ...prevCounts,
+                    [parsedMessage.userId]: parsedMessage.count,
+                }));
+                console.log('unreadmessage count', parsedMessage.count);
+
+            }
+        };
         scrollToBottom();
+        setWs(websocket);
+        return () => websocket.close();
+
     }, [message]);
 
     return (
@@ -96,6 +158,15 @@ const Chat = ({ open, setOpen }: Props) => {
                             <button className="search-button">
                                 <SearchIcon className="search-icon" />
                             </button>
+                            <IconButton
+                                edge="start"
+                                color="inherit"
+                                onClick={handleClose}
+                                aria-label="close"
+                                sx={{ position: 'absolute', right: 0 }}
+                            >
+                                <CloseIcon />
+                            </IconButton>
                         </Box>
                         <Box className="chat-user-list">
                             {friendList?.map((list) => (
@@ -106,7 +177,9 @@ const Chat = ({ open, setOpen }: Props) => {
                                             secondary='2m'
                                         />
                                         <ListItemAvatar>
-                                            <Avatar alt="Travis Howard" src={list.profile} />
+                                            <Badge badgeContent={unreadMessage[list.id]} color="error">
+                                                <Avatar alt="Travis Howard" src={list.profile} />
+                                            </Badge>
                                         </ListItemAvatar>
                                         <ListItemText primary={list.name} secondary="Good morning..." />
                                     </ListItemButton>
@@ -137,8 +210,9 @@ const Chat = ({ open, setOpen }: Props) => {
                                     </ListItemButton>
                                 </Box>
                                 <Box className='messages'>
-                                    {message && message.reverse().map((chat) => (
+                                    {message && message.map((chat) => (
                                         <Box key={chat.id} className={chat.receiver_id == authUser?.id ? 'messageReceiver' : 'messageSender'}>
+
                                             <Box className={chat.receiver_id == authUser?.id ? 'receiver' : 'sender'}>
                                                 {chat.message}
                                             </Box>
