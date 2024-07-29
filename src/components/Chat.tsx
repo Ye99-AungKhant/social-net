@@ -21,7 +21,7 @@ import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRound
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import './style/chat.css'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { chatfetch, sendChatMessage } from '../store/slices/chatSlice';
+import { chatfetch, chatNotiRemove, sendChatMessage } from '../store/slices/chatSlice';
 import { Chat as chatlist, ChatMedia, ChatSlice } from '../types/chat';
 import Badge from '@mui/material/Badge';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -57,6 +57,7 @@ const Chat = ({ open, setOpen }: Props) => {
     const [unreadMessage, setUnReadMessage] = useState<any>({})
     const [selectedImages, setSelectedImages] = useState<any>([])
     const [selectedImagesUpload, setSelectedImagesUpload] = useState<any>([])
+    const { chatNoti } = useAppSelector((state) => state.app)
     const dispatch = useAppDispatch()
 
     const handleClose = () => {
@@ -130,6 +131,8 @@ const Chat = ({ open, setOpen }: Props) => {
                     userId: user.id,
                 }));
             }
+            const senderId = user.id
+            dispatch(chatNotiRemove(senderId))
         }
 
         dispatch(chatfetch(user.id)).then((res) => res.payload).then((data: any) => setMessage(data))
@@ -157,6 +160,22 @@ const Chat = ({ open, setOpen }: Props) => {
     }
 
     useEffect(() => {
+        chatNoti?.map((noti) => friendList?.map((friend) => {
+
+            let notiList: any = friend.id == noti.sender_id
+            let i = 1
+            if (notiList)
+                i++
+            setUnReadMessage((prevCounts: any) => ({
+                ...prevCounts,
+                [noti.sender_id]: i
+            }));
+            console.log('unreadMessage list', notiList);
+        }))
+    }, [chatNoti])
+
+
+    useEffect(() => {
         const websocket = new WebSocket('ws://localhost:8080');
         websocket.onopen = () => {
             websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
@@ -180,20 +199,25 @@ const Chat = ({ open, setOpen }: Props) => {
                         },
                     ]);
                 }
-            } else {
+            } else if (parsedMessage.type === 'messageCount') {
                 setUnReadMessage((prevCounts: any) => ({
                     ...prevCounts,
                     [parsedMessage.userId]: parsedMessage.count,
                 }));
                 console.log('unreadmessage count', parsedMessage.count);
 
+            } else if (parsedMessage.type === 'read') {
+                setMessage((prevMessages) => prevMessages.map((msg) =>
+                    msg.sender_id === parsedMessage.receiverId ? { ...msg, read: true } : msg
+                ));
             }
         };
+
         scrollToBottom();
         setWs(websocket);
         return () => websocket.close();
-
     }, [message]);
+
 
     return (
         <Fragment>

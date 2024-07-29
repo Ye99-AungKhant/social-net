@@ -80,6 +80,8 @@ export default function Navbar() {
     const [openPostCreate, setOpenPostCreate] = useState<boolean>(false)
     const [openChatModal, setOpenChatModal] = useState(false)
     const { authUser } = useAppSelector((state) => state.auth)
+    const { chatNoti } = useAppSelector((state) => state.app)
+
     const handlePopup = () => {
         if (openMenu)
             setOpenMenu(false)
@@ -145,7 +147,7 @@ export default function Navbar() {
                         <IconButton size="large" aria-label="show 4 new mails" color="inherit"
                             onClick={handleChatModal}
                         >
-                            <Badge badgeContent={4} color="error">
+                            <Badge badgeContent={chatNoti?.length} color="error">
                                 <MailIcon />
                             </Badge>
                         </IconButton>

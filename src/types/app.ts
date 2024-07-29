@@ -1,3 +1,4 @@
+import { Chat } from "./chat";
 
 export interface BaseOptions {
     onSuccess?: (data?: any) => void;
@@ -38,7 +39,7 @@ export interface Post {
 }
 export interface AppSlice {
     notifications: string | null,
-    chats: string | null,
+    chatNoti: Chat[] | null,
     friendList: UserDetail[] | null,
     friendRequestNoti: string | null,
 }

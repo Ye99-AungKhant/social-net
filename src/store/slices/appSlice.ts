@@ -18,8 +18,9 @@ export const fetchData = createAsyncThunk(
             }
         })
         const dataFromServer = await response.json()
-        const { auth, friendRequestNoti, friendList } = dataFromServer
+        const { auth, friendRequestNoti, friendList, chatNoti } = dataFromServer
         thunkApi.dispatch(authUser(auth))
+        thunkApi.dispatch(setChatNoti(chatNoti))
         thunkApi.dispatch(setfriendRequestNoti(friendRequestNoti))
         thunkApi.dispatch(setFriendList(friendList))
         console.log(dataFromServer);
@@ -28,7 +29,7 @@ export const fetchData = createAsyncThunk(
 
 const initialState: AppSlice = {
     notifications: null,
-    chats: null,
+    chatNoti: null,
     friendList: null,
     friendRequestNoti: null,
 }
@@ -37,6 +38,13 @@ export const appDataSlice = createSlice({
     name: 'appData',
     initialState,
     reducers: {
+        setChatNoti: (state, action: PayloadAction<any>) => {
+            state.chatNoti = action.payload
+        },
+        removeChatNoti: (state, action: PayloadAction<any>) => {
+            if (state.chatNoti)
+                state.chatNoti = state.chatNoti.filter((noti) => (noti.sender_id !== action.payload))
+        },
         setfriendRequestNoti: (state, action: PayloadAction<any>) => {
             state.friendRequestNoti = action.payload
         },
@@ -46,5 +54,5 @@ export const appDataSlice = createSlice({
     }
 })
 
-export const { setfriendRequestNoti, setFriendList } = appDataSlice.actions
+export const { setChatNoti, removeChatNoti, setfriendRequestNoti, setFriendList } = appDataSlice.actions
 export default appDataSlice.reducer

@@ -57,6 +57,17 @@ wss.on('connection', (ws) => {
                 messageCounts[parsedMessage.userId] = 0
                 console.log("set unread message count");
                 break;
+
+            case 'read':
+                const senderWs = users[parsedMessage.senderId];
+                if (senderWs) {
+                    senderWs.send(JSON.stringify({
+                        type: 'read',
+                        receiverId: parsedMessage.receiverId,
+                    }));
+                }
+                break;
+
             default:
                 break;
         }

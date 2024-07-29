@@ -1,5 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ChatSlice, Chat } from "../../types/chat";
+import { removeChatNoti } from "./appSlice";
 
 export const chatfetch = createAsyncThunk(
     'chatfetch',
@@ -38,6 +39,27 @@ export const sendChatMessage = createAsyncThunk(
         const dataFromServer = await response.json()
         const { data } = dataFromServer
         thunkApi.dispatch(setNewChat(data))
+    }
+)
+
+export const chatNotiRemove = createAsyncThunk(
+    'chatNotiRemove',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/chat/read`, {
+            method: "PATCH",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ 'senderId': payload })
+        })
+        const dataFromServer = await response.json()
+        const { data } = dataFromServer
+        thunkApi.dispatch(removeChatNoti(payload))
+
     }
 )
 

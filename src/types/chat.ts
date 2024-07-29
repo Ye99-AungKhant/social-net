@@ -8,7 +8,8 @@ export interface Chat {
     receiver_id: number,
     message: string | null,
     media: ChatMedia[],
-    date?: string
+    date?: string,
+    read?: boolean,
 }
 
 export interface ChatSlice {
