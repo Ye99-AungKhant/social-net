@@ -22,8 +22,15 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import './style/chat.css'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { chatfetch, sendChatMessage } from '../store/slices/chatSlice';
-import { Chat as chatlist, ChatSlice } from '../types/chat';
+import { Chat as chatlist, ChatMedia, ChatSlice } from '../types/chat';
 import Badge from '@mui/material/Badge';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import { imageDb } from '../config';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import ImageList from '@mui/material/ImageList';
+import ImageListItem from '@mui/material/ImageListItem';
+import { v4 as uuid } from 'uuid';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -48,12 +55,14 @@ const Chat = ({ open, setOpen }: Props) => {
     const { chats } = useAppSelector((state) => state.chat)
     const { authUser } = useAppSelector((state) => state.auth)
     const [unreadMessage, setUnReadMessage] = useState<any>({})
+    const [selectedImages, setSelectedImages] = useState<any>([])
+    const [selectedImagesUpload, setSelectedImagesUpload] = useState<any>([])
     const dispatch = useAppDispatch()
 
     const handleClose = () => {
         setOpen(false);
     };
-    const handleSend = (seleteUserId: any) => {
+    const handleSend = async (seleteUserId: any) => {
         if (chatRef.current?.value) {
             let id = Date.now()
             // let sender_id = authUser ? authUser.id : 0
@@ -72,7 +81,33 @@ const Chat = ({ open, setOpen }: Props) => {
                     receiverId: seleteUserId,
                 }));
             }
-
+        } else if (selectedImagesUpload.length > 0) {
+            const uploadPromises = await selectedImagesUpload.map(async (image: any) => {
+                const imgRef = ref(imageDb, `chat/sn_${uuid()}`)
+                const uploaded = await uploadBytes(imgRef, image)
+                return getDownloadURL(uploaded.ref);
+            })
+            let downloadUrl: any = []
+            downloadUrl = await (Promise.all(uploadPromises))
+            downloadUrl = downloadUrl.map((url: string) => ({ url }));
+            setSelectedImages([])
+            setSelectedImagesUpload([])
+            console.log(downloadUrl);
+            let id = Date.now()
+            let msg = chatRef.current?.value ? chatRef.current?.value : null
+            let receiver_id = seleteUserId
+            const newMessage: any = { id, receiver_id, message: msg, media: downloadUrl };
+            setMessage([...message, newMessage])
+            dispatch(sendChatMessage(newMessage))
+            if (ws) {
+                ws.send(JSON.stringify({
+                    type: 'message',
+                    message: msg,
+                    media: downloadUrl,
+                    senderId: authUser?.id,
+                    receiverId: seleteUserId,
+                }));
+            }
         }
     };
 
@@ -104,6 +139,23 @@ const Chat = ({ open, setOpen }: Props) => {
     const handleChatWindowClose = () => {
         setSelectUser('')
     }
+
+    const onSelectFile = (event: any) => {
+        const selectedFiles = event.target.files;
+        const selectedFilesArray = Array.from(selectedFiles).slice(0, 10);
+        const imagesArray = selectedFilesArray.map((file: any) => {
+            return URL.createObjectURL(file);
+        });
+        setSelectedImages((previousImages: any) => previousImages.concat(imagesArray));
+        setSelectedImagesUpload(selectedFilesArray)
+        event.target.value = "";
+    };
+
+    const deletePreviewImageHandler = (image: any) => {
+        setSelectedImages(selectedImages.filter((e: any) => e !== image));
+        URL.revokeObjectURL(image);
+    }
+
     useEffect(() => {
         const websocket = new WebSocket('ws://localhost:8080');
         websocket.onopen = () => {
@@ -124,10 +176,11 @@ const Chat = ({ open, setOpen }: Props) => {
                             sender_id: parsedMessage.senderId,
                             receiver_id: authUser?.id,
                             message: parsedMessage.message,
+                            media: parsedMessage.media
                         },
                     ]);
                 }
-            } else if (parsedMessage.type === 'messageCount') {
+            } else {
                 setUnReadMessage((prevCounts: any) => ({
                     ...prevCounts,
                     [parsedMessage.userId]: parsedMessage.count,
@@ -213,17 +266,58 @@ const Chat = ({ open, setOpen }: Props) => {
                                     {message && message.map((chat) => (
                                         <Box key={chat.id} className={chat.receiver_id == authUser?.id ? 'messageReceiver' : 'messageSender'}>
 
-                                            <Box className={chat.receiver_id == authUser?.id ? 'receiver' : 'sender'}>
-                                                {chat.message}
-                                            </Box>
+                                            {chat.media &&
+                                                <Box key={chat.id} className='chatImageBox'>
+                                                    {chat.media.map((item) => (
+                                                        <ImageListItem key={item.id} className='chatImage'>
+                                                            <img
+                                                                src={`${item.url}`}
+                                                                alt='chat_photo'
+                                                                loading="lazy"
+                                                            />
+                                                        </ImageListItem>
+                                                    ))}
+                                                </Box>
+                                            }
+                                            {chat.message !== null &&
+                                                <Box className={chat.receiver_id == authUser?.id ? 'receiver' : 'sender'}>
+                                                    {chat.message}
+                                                </Box>
+                                            }
                                         </Box>
                                     ))}
                                     <Box ref={messagesEndRef} />
                                 </Box>
                             </Box>
-
+                            <Box className="imagePreviewContainer">
+                                {selectedImages &&
+                                    selectedImages.map((image: any, index: any) => {
+                                        return (
+                                            <Box className='imagePreviewBox' key={index}>
+                                                <IconButton sx={{ position: 'absolute', right: 0 }}
+                                                    onClick={() => deletePreviewImageHandler(image)}
+                                                >
+                                                    <CloseRoundedIcon className='removePreviewImage' />
+                                                </IconButton>
+                                                <img src={image} height="200" alt="upload" className='imagePreview' />
+                                            </Box>
+                                        );
+                                    })
+                                }
+                            </Box>
                             <Box className="chat-form">
                                 <div className="input-container">
+                                    {selectedImages && selectedImages.length < 10 &&
+                                        <label className='file-input-container' htmlFor="formId" onChange={onSelectFile}>
+                                            <CameraAltIcon className='choosePhotoEmoji' />
+                                            <input
+                                                type='file'
+                                                id="formId"
+                                                multiple accept="image/png , image/jpeg, image/webp"
+                                                hidden
+                                            />
+                                        </label>
+                                    }
                                     <input
                                         type="text"
                                         placeholder="Write message..."

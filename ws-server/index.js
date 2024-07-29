@@ -32,6 +32,7 @@ wss.on('connection', (ws) => {
                     receiverWs.send(JSON.stringify({
                         type: 'message',
                         message: parsedMessage.message,
+                        media: parsedMessage.media,
                         senderId: parsedMessage.senderId,
                         receiverId: parsedMessage.receiverId,
                     }));
