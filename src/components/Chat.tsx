@@ -31,6 +31,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import { v4 as uuid } from 'uuid';
+import { StyledBadge } from './RightSidebar';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -44,9 +45,14 @@ const Transition = forwardRef(function Transition(
 interface Props {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
+    newChatBadge: (data: any) => void
+    ws: WebSocket | null
+    setWs: React.Dispatch<React.SetStateAction<WebSocket | null>>
+    isOnline: any
+    setIsOnline: React.Dispatch<any>
 }
-const Chat = ({ open, setOpen }: Props) => {
-    const [ws, setWs] = useState<WebSocket | null>(null);
+const Chat = ({ open, setOpen, newChatBadge, ws, setWs, isOnline, setIsOnline }: Props) => {
+    // const [ws, setWs] = useState<WebSocket | null>(null);
     const [message, setMessage] = useState<chatlist[]>([])
     const messagesEndRef = useRef<null | HTMLElement>(null);
     const chatRef = useRef<null | HTMLInputElement>(null)
@@ -58,6 +64,7 @@ const Chat = ({ open, setOpen }: Props) => {
     const [selectedImages, setSelectedImages] = useState<any>([])
     const [selectedImagesUpload, setSelectedImagesUpload] = useState<any>([])
     const { chatNoti } = useAppSelector((state) => state.app)
+    // const [isOnline, setIsOnline] = useState<any>([])
     const dispatch = useAppDispatch()
 
     const handleClose = () => {
@@ -80,6 +87,7 @@ const Chat = ({ open, setOpen }: Props) => {
                     message: msg,
                     senderId: authUser?.id,
                     receiverId: seleteUserId,
+                    read: false
                 }));
             }
         } else if (selectedImagesUpload.length > 0) {
@@ -107,6 +115,7 @@ const Chat = ({ open, setOpen }: Props) => {
                     media: downloadUrl,
                     senderId: authUser?.id,
                     receiverId: seleteUserId,
+                    read: false
                 }));
             }
         }
@@ -160,33 +169,35 @@ const Chat = ({ open, setOpen }: Props) => {
     }
 
     useEffect(() => {
-        chatNoti?.map((noti) => friendList?.map((friend) => {
-
-            let notiList: any = friend.id == noti.sender_id
-            let i = 1
-            if (notiList)
-                i++
-            setUnReadMessage((prevCounts: any) => ({
-                ...prevCounts,
-                [noti.sender_id]: i
-            }));
-            console.log('unreadMessage list', notiList);
-        }))
-    }, [chatNoti])
+        const unreadCounts: { [key: number]: number } = {};
+        chatNoti?.forEach((noti) => {
+            friendList?.forEach((friend) => {
+                if (friend.id === noti.sender_id) {
+                    if (!unreadCounts[noti.sender_id]) {
+                        unreadCounts[noti.sender_id] = 0;
+                    }
+                    unreadCounts[noti.sender_id]++;
+                }
+            });
+        });
+        setUnReadMessage(unreadCounts);
+    }, [chatNoti, friendList])
 
 
     useEffect(() => {
         const websocket = new WebSocket('ws://localhost:8080');
         websocket.onopen = () => {
-            websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
+            // websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
         };
         websocket.onmessage = (event) => {
             const parsedMessage = JSON.parse(event.data);
-            console.log('realtime data', parsedMessage);
+            if (parsedMessage.type === 'login') {
+                console.log(parsedMessage);
+                setIsOnline(parsedMessage.data)
+            }
 
             if (parsedMessage.type === 'message' && selectUser) {
                 console.log('seletedUser', selectUser);
-
                 if (parsedMessage.receiverId == selectUser.id || parsedMessage.senderId == selectUser.id) {
                     setMessage((prevMessages: any) => [
                         ...prevMessages,
@@ -195,29 +206,43 @@ const Chat = ({ open, setOpen }: Props) => {
                             sender_id: parsedMessage.senderId,
                             receiver_id: authUser?.id,
                             message: parsedMessage.message,
-                            media: parsedMessage.media
+                            media: parsedMessage.media,
+                            read: parsedMessage.read
                         },
                     ]);
+
                 }
-            } else if (parsedMessage.type === 'messageCount') {
+
+            }
+
+            if (parsedMessage.type === 'messageCount') {
                 setUnReadMessage((prevCounts: any) => ({
                     ...prevCounts,
-                    [parsedMessage.userId]: parsedMessage.count,
+                    [parsedMessage.userId]: (prevCounts[parsedMessage.userId] || 0) + parsedMessage.count,
                 }));
-                console.log('unreadmessage count', parsedMessage.count);
+            }
 
-            } else if (parsedMessage.type === 'read') {
-                setMessage((prevMessages) => prevMessages.map((msg) =>
-                    msg.sender_id === parsedMessage.receiverId ? { ...msg, read: true } : msg
-                ));
+            // else if (parsedMessage.type === 'read') {
+            //     setMessage((prevMessages) => prevMessages.map((msg) =>
+            //         msg.sender_id === parsedMessage.receiverId ? { ...msg, read: true } : msg
+            //     ));
+            // }
+
+            if (parsedMessage.type === 'message' && parsedMessage.receiverId == authUser?.id) {
+                newChatBadge({
+                    id: Date.now(),
+                    sender_id: parsedMessage.senderId,
+                    receiver_id: authUser?.id,
+                    message: parsedMessage.message,
+                    media: parsedMessage.media,
+                    read: parsedMessage.read
+                })
             }
         };
-
         scrollToBottom();
         setWs(websocket);
-        return () => websocket.close();
-    }, [message]);
-
+        // return () => websocket.close();
+    }, [message, isOnline]);
 
     return (
         <Fragment>
@@ -256,6 +281,14 @@ const Chat = ({ open, setOpen }: Props) => {
                                         <ListItemAvatar>
                                             <Badge badgeContent={unreadMessage[list.id]} color="error">
                                                 <Avatar alt="Travis Howard" src={list.profile} />
+                                                {isOnline.includes(list.id) &&
+                                                    (<StyledBadge
+                                                        overlap="circular"
+                                                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                                        variant="dot"
+                                                    ></StyledBadge>)
+                                                }
+
                                             </Badge>
                                         </ListItemAvatar>
                                         <ListItemText primary={list.name} secondary="Good morning..." />
@@ -304,7 +337,7 @@ const Chat = ({ open, setOpen }: Props) => {
                                                 </Box>
                                             }
                                             {chat.message !== null &&
-                                                <Box className={chat.receiver_id == authUser?.id ? 'receiver' : 'sender'}>
+                                                <Box className={`${chat.receiver_id == authUser?.id ? 'receiver' : 'sender'} `}>
                                                     {chat.message}
                                                 </Box>
                                             }

@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ChatSlice, Chat } from "../../types/chat";
-import { removeChatNoti } from "./appSlice";
+import { removeChatNoti, setChatNoti } from "./appSlice";
 
 export const chatfetch = createAsyncThunk(
     'chatfetch',
@@ -39,6 +39,7 @@ export const sendChatMessage = createAsyncThunk(
         const dataFromServer = await response.json()
         const { data } = dataFromServer
         thunkApi.dispatch(setNewChat(data))
+        thunkApi.dispatch(setChatNoti([data]))
     }
 )
 

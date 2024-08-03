@@ -21,9 +21,10 @@ import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import PostCreate from './PostCreate';
 import '../components/style/style.css'
 import { Avatar } from '@mui/material';
-import { useAppSelector } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import defaultUser from './user.png'
 import Chat from './Chat';
+import { setOnlineUser } from '../store/slices/appSlice';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -75,12 +76,18 @@ export default function Navbar() {
         { id: 4, name: 'Uncle Sum', type: 'reacted love on your photo' },
     ]
 
+    const [ws, setWs] = useState<WebSocket | null>(null);
     const [open, setOpen] = useState<boolean>(false)
     const [openMenu, setOpenMenu] = useState<boolean>(false)
     const [openPostCreate, setOpenPostCreate] = useState<boolean>(false)
     const [openChatModal, setOpenChatModal] = useState(false)
     const { authUser } = useAppSelector((state) => state.auth)
     const { chatNoti } = useAppSelector((state) => state.app)
+    const [isOnline, setIsOnline] = useState<any>([])
+    const dispatch = useAppDispatch()
+    let [chatNotiCount, setChatNotiCount] = useState<any>()
+
+    // const [ws, setWs] = useState<WebSocket | null>(null)
 
     const handlePopup = () => {
         if (openMenu)
@@ -107,19 +114,100 @@ export default function Navbar() {
         setOpenChatModal(!openChatModal)
     }
 
+    const newChatBadge = (data: any) => {
+        setChatNotiCount((prevMessages: any) => [...prevMessages, data])
+    }
+
+    React.useEffect(() => {
+        setChatNotiCount(chatNoti)
+    }, [chatNoti])
+
+    React.useEffect(() => {
+        const websocket = new WebSocket('ws://localhost:8080');
+        websocket.onopen = () => {
+            websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
+        };
+        websocket.onmessage = (event) => {
+            const parsedMessage = JSON.parse(event.data);
+            if (parsedMessage.type === 'login') {
+                console.log(parsedMessage);
+                setIsOnline(parsedMessage.data)
+            }
+
+            if (parsedMessage.type === 'message') {
+                console.log('setChatNotiCount', parsedMessage.message);
+                if (parsedMessage.receiverId == authUser?.id) {
+                    setChatNotiCount((prevMessages: any) => [...prevMessages,
+                    {
+                        id: Date.now(),
+                        sender_id: parsedMessage.senderId,
+                        receiver_id: authUser?.id,
+                        message: parsedMessage.message,
+                        media: parsedMessage.media,
+                        read: parsedMessage.read
+                    },
+                    ])
+                }
+            }
+
+        }
+
+        setWs(websocket);
+        return () => websocket.close();
+
+    }, [authUser])
+
+    React.useEffect(() => {
+        const online = () => {
+            console.log('you are online');
+            if (ws) {
+                ws.send(JSON.stringify({
+                    type: 'login',
+                    userId: authUser?.id
+                }))
+                ws.onmessage = ((event: any) => {
+                    const parsedMessage = JSON.parse(event.data);
+                    if (parsedMessage.type === 'login') {
+                        console.log(parsedMessage);
+                        setIsOnline(parsedMessage.data)
+                        dispatch(setOnlineUser(parsedMessage.data))
+                    }
+                })
+
+            }
+        }
+        const offline = () => {
+            console.log('you are offline');
+            if (ws) {
+
+                ws.send(JSON.stringify({
+                    type: 'login',
+                    userId: authUser?.id
+                }))
+                ws.onmessage = ((event: any) => {
+                    const parsedMessage = JSON.parse(event.data);
+                    if (parsedMessage.type === 'login') {
+                        console.log(parsedMessage);
+                        setIsOnline(parsedMessage.data)
+                        dispatch(setOnlineUser(parsedMessage.data))
+                    }
+                })
+            }
+        }
+        const clear = () => { }
+
+        window.addEventListener('focus', online)
+        window.addEventListener('blur', offline);
+        return () => {
+            window.removeEventListener('focus', clear);
+            window.removeEventListener('blur', clear);
+        };
+    }, [isOnline])
+
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static" >
                 <Toolbar>
-                    {/* <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        aria-label="open drawer"
-                        sx={{ mr: 2 }}
-                    >
-                        <MenuIcon />
-                    </IconButton> */}
                     <Typography
                         variant="h6"
                         noWrap
@@ -147,7 +235,7 @@ export default function Navbar() {
                         <IconButton size="large" aria-label="show 4 new mails" color="inherit"
                             onClick={handleChatModal}
                         >
-                            <Badge badgeContent={chatNoti?.length} color="error">
+                            <Badge badgeContent={chatNotiCount?.length} color="error">
                                 <MailIcon />
                             </Badge>
                         </IconButton>
@@ -189,7 +277,14 @@ export default function Navbar() {
                 />}
             </Box>
             <PostCreate open={openPostCreate} setOpen={setOpenPostCreate} type='Post' />
-            <Chat open={openChatModal} setOpen={setOpenChatModal} />
+            <Chat open={openChatModal}
+                setOpen={setOpenChatModal}
+                newChatBadge={newChatBadge}
+                ws={ws}
+                setWs={setWs}
+                isOnline={isOnline}
+                setIsOnline={setIsOnline}
+            />
         </Box>
     );
 }

@@ -32,6 +32,7 @@ const initialState: AppSlice = {
     chatNoti: null,
     friendList: null,
     friendRequestNoti: null,
+    onlineUser: []
 }
 
 export const appDataSlice = createSlice({
@@ -39,7 +40,11 @@ export const appDataSlice = createSlice({
     initialState,
     reducers: {
         setChatNoti: (state, action: PayloadAction<any>) => {
-            state.chatNoti = action.payload
+            if (state.chatNoti != null) {
+                state.chatNoti = [...state.chatNoti, ...action.payload]
+            } else {
+                state.chatNoti = action.payload
+            }
         },
         removeChatNoti: (state, action: PayloadAction<any>) => {
             if (state.chatNoti)
@@ -50,9 +55,12 @@ export const appDataSlice = createSlice({
         },
         setFriendList: (state, action: PayloadAction<UserDetail[]>) => {
             state.friendList = [...action.payload]
+        },
+        setOnlineUser: (state, action: PayloadAction<[]>) => {
+            state.onlineUser = action.payload
         }
     }
 })
 
-export const { setChatNoti, removeChatNoti, setfriendRequestNoti, setFriendList } = appDataSlice.actions
+export const { setChatNoti, removeChatNoti, setfriendRequestNoti, setFriendList, setOnlineUser } = appDataSlice.actions
 export default appDataSlice.reducer

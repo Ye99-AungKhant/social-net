@@ -107,6 +107,14 @@
     border-top-left-radius: 0;
 }
 
+.read {
+    opacity: 0.6;
+}
+
+.unread {
+    opacity: 1;
+}
+
 .chatImageBox {
     display: flex;
     flex-wrap: wrap;

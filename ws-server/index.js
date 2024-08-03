@@ -9,6 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 let users = {};
+let onlineUser = []
 let messageCounts = {};
 
 const wss = new WebSocket.Server({
@@ -25,18 +26,57 @@ wss.on('connection', (ws) => {
             case 'login':
                 users[parsedMessage.userId] = ws;
                 ws.userId = parsedMessage.userId;
+                if (ws.userId && !onlineUser.includes(ws.userId)) {
+                    onlineUser.push(ws.userId)
+                    ws.send(JSON.stringify({
+                        type: 'login',
+                        data: onlineUser
+                    }))
+                    console.log('onlineUser', onlineUser);
+                } else {
+                    const index = onlineUser.indexOf(ws.userId);
+                    if (index > -1) {
+                        onlineUser.splice(index, 1)
+                    }
+                    ws.send(JSON.stringify({
+                        type: 'login',
+                        data: onlineUser
+                    }))
+                    console.log('onlineUser', onlineUser);
+                }
+
                 break;
             case 'message':
                 const receiverWs = users[parsedMessage.receiverId];
-                if (receiverWs) {
+                const senderReadasMarkWs = users[parsedMessage.senderId];
+                if (onlineUser.includes(parsedMessage.receiverId) && receiverWs) {
                     receiverWs.send(JSON.stringify({
                         type: 'message',
                         message: parsedMessage.message,
                         media: parsedMessage.media,
                         senderId: parsedMessage.senderId,
                         receiverId: parsedMessage.receiverId,
+                        read: true
                     }));
+                    // senderReadasMarkWs.send(JSON.stringify({
+                    //     type: 'read',
+                    //     receiverId: parsedMessage.receiverId,
+                    // }));
                     console.log(parsedMessage);
+
+                } else {
+                    if (receiverWs) {
+                        receiverWs.send(JSON.stringify({
+                            type: 'message',
+                            message: parsedMessage.message,
+                            media: parsedMessage.media,
+                            senderId: parsedMessage.senderId,
+                            receiverId: parsedMessage.receiverId,
+                            read: false
+                        }));
+                        console.log(parsedMessage);
+                    }
+
                 }
 
                 if (!messageCounts[parsedMessage.senderId]) {
