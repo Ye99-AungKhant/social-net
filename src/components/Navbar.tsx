@@ -82,7 +82,7 @@ export default function Navbar() {
     const [openPostCreate, setOpenPostCreate] = useState<boolean>(false)
     const [openChatModal, setOpenChatModal] = useState(false)
     const { authUser } = useAppSelector((state) => state.auth)
-    const { chatNoti } = useAppSelector((state) => state.app)
+    const { chatNoti, notifications } = useAppSelector((state) => state.app)
     const [isOnline, setIsOnline] = useState<any>([])
     const dispatch = useAppDispatch()
     let [chatNotiCount, setChatNotiCount] = useState<any>()
@@ -160,7 +160,7 @@ export default function Navbar() {
     React.useEffect(() => {
         const online = () => {
             console.log('you are online');
-            if (ws) {
+            if (ws && ws.readyState == ws.OPEN) {
                 ws.send(JSON.stringify({
                     type: 'login',
                     userId: authUser?.id
@@ -178,8 +178,7 @@ export default function Navbar() {
         }
         const offline = () => {
             console.log('you are offline');
-            if (ws) {
-
+            if (ws && ws.readyState == ws.OPEN) {
                 ws.send(JSON.stringify({
                     type: 'login',
                     userId: authUser?.id
@@ -245,7 +244,7 @@ export default function Navbar() {
                             color="inherit"
                             onClick={handlePopup}
                         >
-                            <Badge badgeContent={noti.length} color="error">
+                            <Badge badgeContent={notifications.length} color="error">
                                 <NotificationsIcon />
                             </Badge>
                         </IconButton>
@@ -267,7 +266,7 @@ export default function Navbar() {
             <Box sx={{ position: 'absolute', right: 10 }}>
                 {open && <Popup
                     open={open}
-                    notiData={noti}
+                    notiData={notifications}
                 />}
             </Box>
             <Box sx={{ position: 'absolute', right: 10 }}>

@@ -4,17 +4,13 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/Inbox';
-
-interface Notification {
-    id: number;
-    name: string;
-    type: string;
-}
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Avatar from '@mui/material/Avatar';
+import { Noti } from '../types/app';
 
 interface Props {
     open: boolean
-    notiData: Notification[]
+    notiData: Noti[]
 }
 const Popup = ({ open, notiData }: Props) => {
 
@@ -26,10 +22,10 @@ const Popup = ({ open, notiData }: Props) => {
                         <ListItemButton
                             key={item.id}
                         >
-                            <ListItemIcon>
-                                <InboxIcon />
-                            </ListItemIcon>
-                            <ListItemText primary={item.name + item.type} />
+                            <ListItemAvatar>
+                                <Avatar alt="Travis Howard" src={item.user.profile} />
+                            </ListItemAvatar>
+                            <ListItemText primary={item.user.name + ' ' + item.content} />
                         </ListItemButton>
                     ))}
                 </List>

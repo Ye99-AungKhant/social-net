@@ -37,8 +37,16 @@ export interface Post {
     comment_count: number
     liked: any;
 }
+export interface Noti {
+    id: number
+    type: string
+    content: string
+    post_id: number
+    user: UserDetail
+    read: boolean
+}
 export interface AppSlice {
-    notifications: string | null,
+    notifications: Noti[],
     chatNoti: Chat[] | null,
     friendList: UserDetail[] | null,
     friendRequestNoti: string | null,
