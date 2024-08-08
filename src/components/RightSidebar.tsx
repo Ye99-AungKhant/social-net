@@ -10,14 +10,6 @@ import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
 import { useAppSelector } from '../store/hooks';
 import { useEffect, useState } from 'react';
 
-const Friends = [
-    { id: 1, label: 'Feed', icon: <FeedOutlinedIcon />, route: '' },
-    { id: 2, label: 'Photos', icon: <PhotoOutlinedIcon />, route: '' },
-    { id: 3, label: 'Watch Videos', icon: <PlayCircleOutlinedIcon />, route: '' },
-    { id: 4, label: 'Musics', icon: <FeedOutlinedIcon />, route: '' },
-    { id: 5, label: 'Popular', icon: <FeedOutlinedIcon />, route: '' },
-]
-
 export const StyledBadge = styled(Badge)(({ theme }) => ({
     '& .MuiBadge-badge': {
         backgroundColor: '#44b700',
@@ -27,25 +19,6 @@ export const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 const RightSidebar = () => {
     const { friendList, onlineUser } = useAppSelector((state) => state.app)
-    const [ws, setWs] = useState<WebSocket | null>(null);
-    const [isOnline, setIsOnline] = useState<any>([])
-
-    // useEffect(() => {
-    //     const websocket = new WebSocket('ws://localhost:8080');
-    //     websocket.onopen = () => {
-    //         // websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
-    //     };
-    //     websocket.onmessage = ((event: any) => {
-    //         const parsedMessage = JSON.parse(event.data);
-    //         if (parsedMessage.type === 'login') {
-    //             setIsOnline(parsedMessage.data)
-    //         }
-    //     })
-    //     console.log('active friend', isOnline);
-
-    //     // setWs(websocket);
-    //     return () => websocket.close();
-    // }, [friendList, isOnline])
 
     return (
         <Box sx={{ width: '25%', bgcolor: 'background.paper' }}>
@@ -64,15 +37,6 @@ const RightSidebar = () => {
                                     >
                                         <Avatar alt="Remy Sharp" src={item.profile} />
                                     </StyledBadge>
-                                    {/* {onlineUser.includes(item.id) &&
-                                        (<StyledBadge
-                                            overlap="circular"
-                                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                                            variant="dot"
-                                        >
-                                        </StyledBadge>)
-                                    } */}
-
                                 </Stack>
                                 <ListItemText
                                     sx={{ marginLeft: 1 }}

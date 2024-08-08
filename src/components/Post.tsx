@@ -20,7 +20,8 @@ import { storyFetch } from '../store/slices/storySlice';
 import PostCreate from './PostCreate';
 import StoryTextTextDialog from './StoryTextDialog';
 import { postLoading, profileLoading, storyLoading, storyUploadLoading } from './SkeletonComponent';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { fetchNotification } from '../store/slices/appSlice';
 
 
 const Post = () => {
@@ -43,11 +44,18 @@ const Post = () => {
     const [openStoryCreate, setOpenStoryCreate] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(true)
     const [filterPost, setFilterPost] = useState<string>('friendPosts')
+    const [ws, setWs] = useState<WebSocket | null>(null);
     const maxPhotos = 4;
 
-    const handleLike = (postId: number) => {
+    const handleLike = (postId: number, postOwnerId: number) => {
         let postData = { filterPost, postId }
         dispatch(postLike(postData))
+        if (ws) {
+            ws.send(JSON.stringify({
+                type: 'newNoti',
+                postOwnerId: postOwnerId
+            }))
+        }
     }
     const handleCommentDialog = (postId: number) => {
         setOpenCommentDialog(!openCommetDialog)
@@ -89,8 +97,44 @@ const Post = () => {
     }
 
     useEffect(() => {
+        const websocket = new WebSocket('ws://localhost:8080')
+
+        websocket.onopen = () => {
+            console.log('WebSocket connection established');
+        };
+
+        websocket.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        websocket.onclose = () => {
+            console.log('WebSocket connection closed');
+        };
+
+        websocket.onmessage = (event) => {
+            const parsedMessage = JSON.parse(event.data);
+            console.log('new noti', parsedMessage.type);
+            if (parsedMessage.type === 'newNoti') {
+                if (parsedMessage.postOwnerId == authUser?.id) {
+                    dispatch(fetchNotification({}))
+                    console.log('new noti', parsedMessage.postOwnerId);
+                }
+            }
+        }
+
+        setWs(websocket);
+        return () => {
+            if (ws) {
+                ws.close();
+            }
+        };
+    }, [authUser])
+
+
+    useEffect(() => {
         fetchStoryData();
     }, [])
+
     useEffect(() => {
         fetchPostData();
     }, [filterPost]);
@@ -227,6 +271,7 @@ const Post = () => {
                 </InfiniteScroll>
             </Box>
 
+
             <Box className='postSection'>
                 <Box className='postFilter'>
                     <button type='button' className={`filterBtn ${filterPost == 'posts' ? 'filterBtnActive' : ''}`} onClick={() => handleFilterPost('All')}>All</button>
@@ -307,7 +352,7 @@ const Post = () => {
                                         <div className='postAction'>
                                             <div className='postLike'>
 
-                                                <FavoriteRoundedIcon onClick={() => handleLike(post.id)}
+                                                <FavoriteRoundedIcon onClick={() => handleLike(post.id, post.user.id)}
                                                     className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
                                                 <p className='postActionText'>{post.like_count}</p>
                                             </div>
@@ -397,7 +442,7 @@ const Post = () => {
                                         <div className='postAction'>
                                             <div className='postLike'>
 
-                                                <FavoriteRoundedIcon onClick={() => handleLike(post.id)}
+                                                <FavoriteRoundedIcon onClick={() => handleLike(post.id, post.user.id)}
                                                     className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
                                                 <p className='postActionText'>{post.like_count}</p>
                                             </div>

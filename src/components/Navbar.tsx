@@ -24,7 +24,7 @@ import { Avatar } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import defaultUser from './user.png'
 import Chat from './Chat';
-import { setOnlineUser } from '../store/slices/appSlice';
+import { fetchNotification, setOnlineUser } from '../store/slices/appSlice';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -69,12 +69,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function Navbar() {
 
     const menuId = 'primary-search-account-menu';
-    const noti = [
-        { id: 1, name: 'Alice', type: 'reacted love on your post' },
-        { id: 2, name: 'Banjamin', type: 'shared your post' },
-        { id: 3, name: 'Justmin', type: 'reacted love on your photo' },
-        { id: 4, name: 'Uncle Sum', type: 'reacted love on your photo' },
-    ]
 
     const [ws, setWs] = useState<WebSocket | null>(null);
     const [open, setOpen] = useState<boolean>(false)
@@ -86,8 +80,6 @@ export default function Navbar() {
     const [isOnline, setIsOnline] = useState<any>([])
     const dispatch = useAppDispatch()
     let [chatNotiCount, setChatNotiCount] = useState<any>()
-
-    // const [ws, setWs] = useState<WebSocket | null>(null)
 
     const handlePopup = () => {
         if (openMenu)
@@ -129,7 +121,7 @@ export default function Navbar() {
         };
         websocket.onmessage = (event) => {
             const parsedMessage = JSON.parse(event.data);
-            if (parsedMessage.type === 'login') {
+            if (parsedMessage.type === 'onLineUser') {
                 console.log(parsedMessage);
                 setIsOnline(parsedMessage.data)
             }
@@ -149,7 +141,12 @@ export default function Navbar() {
                     ])
                 }
             }
-
+            if (parsedMessage.type === 'newNoti') {
+                console.log('new noti', parsedMessage.type);
+                if (parsedMessage.postOwnerId == authUser?.id) {
+                    dispatch(fetchNotification({}))
+                }
+            }
         }
 
         setWs(websocket);
@@ -161,13 +158,15 @@ export default function Navbar() {
         const online = () => {
             console.log('you are online');
             if (ws && ws.readyState == ws.OPEN) {
-                ws.send(JSON.stringify({
-                    type: 'login',
-                    userId: authUser?.id
-                }))
+                console.log('dsdsd');
+
+                // ws.send(JSON.stringify({
+                //     type: 'onLineUser',
+                //     userId: authUser?.id
+                // }))
                 ws.onmessage = ((event: any) => {
                     const parsedMessage = JSON.parse(event.data);
-                    if (parsedMessage.type === 'login') {
+                    if (parsedMessage.type === 'onLineUser') {
                         console.log(parsedMessage);
                         setIsOnline(parsedMessage.data)
                         dispatch(setOnlineUser(parsedMessage.data))
@@ -176,30 +175,30 @@ export default function Navbar() {
 
             }
         }
-        const offline = () => {
-            console.log('you are offline');
-            if (ws && ws.readyState == ws.OPEN) {
-                ws.send(JSON.stringify({
-                    type: 'login',
-                    userId: authUser?.id
-                }))
-                ws.onmessage = ((event: any) => {
-                    const parsedMessage = JSON.parse(event.data);
-                    if (parsedMessage.type === 'login') {
-                        console.log(parsedMessage);
-                        setIsOnline(parsedMessage.data)
-                        dispatch(setOnlineUser(parsedMessage.data))
-                    }
-                })
-            }
-        }
+        // const offline = () => {
+        //     console.log('you are offline');
+        //     if (ws && ws.readyState == ws.OPEN) {
+        //         ws.send(JSON.stringify({
+        //             type: 'onLineUser',
+        //             userId: authUser?.id
+        //         }))
+        //         ws.onmessage = ((event: any) => {
+        //             const parsedMessage = JSON.parse(event.data);
+        //             if (parsedMessage.type === 'onLineUser') {
+        //                 console.log(parsedMessage);
+        //                 setIsOnline(parsedMessage.data)
+        //                 dispatch(setOnlineUser(parsedMessage.data))
+        //             }
+        //         })
+        //     }
+        // }
         const clear = () => { }
 
         window.addEventListener('focus', online)
-        window.addEventListener('blur', offline);
+        // window.addEventListener('blur', offline);
         return () => {
             window.removeEventListener('focus', clear);
-            window.removeEventListener('blur', clear);
+            // window.removeEventListener('blur', clear);
         };
     }, [isOnline])
 
@@ -279,8 +278,6 @@ export default function Navbar() {
             <Chat open={openChatModal}
                 setOpen={setOpenChatModal}
                 newChatBadge={newChatBadge}
-                ws={ws}
-                setWs={setWs}
                 isOnline={isOnline}
                 setIsOnline={setIsOnline}
             />

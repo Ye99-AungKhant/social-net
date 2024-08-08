@@ -46,13 +46,13 @@ interface Props {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
     newChatBadge: (data: any) => void
-    ws: WebSocket | null
-    setWs: React.Dispatch<React.SetStateAction<WebSocket | null>>
+    // ws: WebSocket | null
+    // setWs: React.Dispatch<React.SetStateAction<WebSocket | null>>
     isOnline: any
     setIsOnline: React.Dispatch<any>
 }
-const Chat = ({ open, setOpen, newChatBadge, ws, setWs, isOnline, setIsOnline }: Props) => {
-    // const [ws, setWs] = useState<WebSocket | null>(null);
+const Chat = ({ open, setOpen, newChatBadge, isOnline, setIsOnline }: Props) => {
+    const [ws, setWs] = useState<WebSocket | null>(null);
     const [message, setMessage] = useState<chatlist[]>([])
     const messagesEndRef = useRef<null | HTMLElement>(null);
     const chatRef = useRef<null | HTMLInputElement>(null)
@@ -187,15 +187,15 @@ const Chat = ({ open, setOpen, newChatBadge, ws, setWs, isOnline, setIsOnline }:
     useEffect(() => {
         const websocket = new WebSocket('ws://localhost:8080');
         websocket.onopen = () => {
-            // websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
+            websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
         };
         websocket.onmessage = (event) => {
             const parsedMessage = JSON.parse(event.data);
-            if (parsedMessage.type === 'login') {
+            console.log('parsedMessage', parsedMessage);
+            if (parsedMessage.type === 'onLineUser') {
                 console.log(parsedMessage);
                 setIsOnline(parsedMessage.data)
             }
-
             if (parsedMessage.type === 'message' && selectUser) {
                 console.log('seletedUser', selectUser);
                 if (parsedMessage.receiverId == selectUser.id || parsedMessage.senderId == selectUser.id) {
@@ -241,8 +241,8 @@ const Chat = ({ open, setOpen, newChatBadge, ws, setWs, isOnline, setIsOnline }:
         };
         scrollToBottom();
         setWs(websocket);
-        // return () => websocket.close();
-    }, [message, isOnline]);
+        return () => websocket.close();
+    }, [message, authUser]);
 
     return (
         <Fragment>

@@ -26,58 +26,55 @@ wss.on('connection', (ws) => {
             case 'login':
                 users[parsedMessage.userId] = ws;
                 ws.userId = parsedMessage.userId;
+
                 if (ws.userId && !onlineUser.includes(ws.userId)) {
                     onlineUser.push(ws.userId)
                     ws.send(JSON.stringify({
-                        type: 'login',
+                        type: 'onLineUser',
                         data: onlineUser
                     }))
-                    console.log('onlineUser', onlineUser);
-                } else {
-                    const index = onlineUser.indexOf(ws.userId);
-                    if (index > -1) {
-                        onlineUser.splice(index, 1)
-                    }
-                    ws.send(JSON.stringify({
-                        type: 'login',
-                        data: onlineUser
-                    }))
-                    console.log('onlineUser', onlineUser);
+                    console.log(onlineUser);
                 }
-
                 break;
             case 'message':
                 const receiverWs = users[parsedMessage.receiverId];
-                const senderReadasMarkWs = users[parsedMessage.senderId];
-                if (onlineUser.includes(parsedMessage.receiverId) && receiverWs) {
+                if (receiverWs) {
                     receiverWs.send(JSON.stringify({
                         type: 'message',
                         message: parsedMessage.message,
                         media: parsedMessage.media,
                         senderId: parsedMessage.senderId,
                         receiverId: parsedMessage.receiverId,
-                        read: true
+                        read: false
                     }));
-                    // senderReadasMarkWs.send(JSON.stringify({
-                    //     type: 'read',
-                    //     receiverId: parsedMessage.receiverId,
-                    // }));
                     console.log(parsedMessage);
-
-                } else {
-                    if (receiverWs) {
-                        receiverWs.send(JSON.stringify({
-                            type: 'message',
-                            message: parsedMessage.message,
-                            media: parsedMessage.media,
-                            senderId: parsedMessage.senderId,
-                            receiverId: parsedMessage.receiverId,
-                            read: false
-                        }));
-                        console.log(parsedMessage);
-                    }
-
                 }
+
+                // if (onlineUser.includes(parsedMessage.receiverId) && receiverWs) {
+                //     receiverWs.send(JSON.stringify({
+                //         type: 'message',
+                //         message: parsedMessage.message,
+                //         media: parsedMessage.media,
+                //         senderId: parsedMessage.senderId,
+                //         receiverId: parsedMessage.receiverId,
+                //         read: true
+                //     }));
+                //     console.log(parsedMessage);
+
+                // } else {
+                //     if (receiverWs) {
+                //         receiverWs.send(JSON.stringify({
+                //             type: 'message',
+                //             message: parsedMessage.message,
+                //             media: parsedMessage.media,
+                //             senderId: parsedMessage.senderId,
+                //             receiverId: parsedMessage.receiverId,
+                //             read: false
+                //         }));
+                //         console.log(parsedMessage);
+                //     }
+
+                // }
 
                 if (!messageCounts[parsedMessage.senderId]) {
                     messageCounts[parsedMessage.senderId] = 0;
@@ -107,6 +104,37 @@ wss.on('connection', (ws) => {
                     }));
                 }
                 break;
+            case 'newNoti':
+                const postOwner = users[parsedMessage.postOwnerId]
+                if (postOwner) {
+                    postOwner.send(JSON.stringify({
+                        type: 'newNoti',
+                        postOwnerId: parsedMessage.postOwnerId
+                    }))
+                }
+                break;
+            // case 'onLineUser':
+            //     users[parsedMessage.userId] = ws;
+            //     ws.userId = parsedMessage.userId;
+            //     if (ws.userId && !onlineUser.includes(ws.userId)) {
+            //         onlineUser.push(ws.userId)
+            //         ws.send(JSON.stringify({
+            //             type: 'onLineUser',
+            //             data: onlineUser
+            //         }))
+            //         console.log('onlineUser', onlineUser);
+            //     } else {
+            //         const index = onlineUser.indexOf(ws.userId);
+            //         if (index > -1) {
+            //             onlineUser.splice(index, 1)
+            //         }
+            //         ws.send(JSON.stringify({
+            //             type: 'onLineUser',
+            //             data: onlineUser
+            //         }))
+            //         console.log('onlineUser', onlineUser);
+            //     }
+            //     break;
 
             default:
                 break;

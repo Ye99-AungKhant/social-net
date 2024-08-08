@@ -7,6 +7,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import { Noti } from '../types/app';
+import { Link } from 'react-router-dom';
 
 interface Props {
     open: boolean
@@ -22,10 +23,12 @@ const Popup = ({ open, notiData }: Props) => {
                         <ListItemButton
                             key={item.id}
                         >
-                            <ListItemAvatar>
-                                <Avatar alt="Travis Howard" src={item.user.profile} />
-                            </ListItemAvatar>
-                            <ListItemText primary={item.user.name + ' ' + item.content} />
+                            <Link to={`/post/${item.post_id}`}>
+                                <ListItemAvatar>
+                                    <Avatar alt="Travis Howard" src={item.user.profile} />
+                                </ListItemAvatar>
+                                <ListItemText primary={item.user.name + ' ' + item.content} />
+                            </Link>
                         </ListItemButton>
                     ))}
                 </List>

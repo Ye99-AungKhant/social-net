@@ -49,6 +49,26 @@ export const friendPostFetch = createAsyncThunk(
     }
 )
 
+export const userPostFetch = createAsyncThunk(
+    'userPostFetch',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`${config.ApiBaseUrl}/post/${payload}`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+        const dataFromServer = await response.json()
+        const { success, data } = dataFromServer
+        return data
+
+    }
+)
+
 export const createPost = createAsyncThunk(
     'createpost',
     async (payload: PostCreate, thunkApi) => {
@@ -95,7 +115,7 @@ export const postLike = createAsyncThunk(
             } else {
                 thunkApi.dispatch(setUnLike(data))
             }
-        } else {
+        } else if (payload.filterPost == 'friendPosts') {
             if (liked) {
                 thunkApi.dispatch(setFriendPostLike(data))
             } else {

@@ -28,12 +28,31 @@ export const fetchData = createAsyncThunk(
     }
 )
 
+export const fetchNotification = createAsyncThunk(
+    'app/fetchNoti',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/notification`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+        const dataFromServer = await response.json()
+        const { notification } = dataFromServer
+        thunkApi.dispatch(setNotification(notification))
+    }
+)
+
 const initialState: AppSlice = {
     notifications: [],
     chatNoti: null,
     friendList: null,
     friendRequestNoti: null,
-    onlineUser: []
+    onlineUser: [],
 }
 
 export const appDataSlice = createSlice({
@@ -41,7 +60,7 @@ export const appDataSlice = createSlice({
     initialState,
     reducers: {
         setNotification: (state, action: PayloadAction<Noti[]>) => {
-            state.notifications = [...action.payload, ...state.notifications]
+            state.notifications = [...action.payload]
         },
         setChatNoti: (state, action: PayloadAction<any>) => {
             if (state.chatNoti != null) {
@@ -62,7 +81,7 @@ export const appDataSlice = createSlice({
         },
         setOnlineUser: (state, action: PayloadAction<[]>) => {
             state.onlineUser = action.payload
-        }
+        },
     }
 })
 
