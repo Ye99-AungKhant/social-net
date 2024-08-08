@@ -46,13 +46,13 @@ interface Props {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
     newChatBadge: (data: any) => void
-    // ws: WebSocket | null
-    // setWs: React.Dispatch<React.SetStateAction<WebSocket | null>>
+    ws: WebSocket | null
+    setWs: React.Dispatch<React.SetStateAction<WebSocket | null>>
     isOnline: any
     setIsOnline: React.Dispatch<any>
 }
-const Chat = ({ open, setOpen, newChatBadge, isOnline, setIsOnline }: Props) => {
-    const [ws, setWs] = useState<WebSocket | null>(null);
+const Chat = ({ open, setOpen, newChatBadge, ws, setWs, isOnline, setIsOnline }: Props) => {
+    // const [ws, setWs] = useState<WebSocket | null>(null);
     const [message, setMessage] = useState<chatlist[]>([])
     const messagesEndRef = useRef<null | HTMLElement>(null);
     const chatRef = useRef<null | HTMLInputElement>(null)
@@ -185,63 +185,60 @@ const Chat = ({ open, setOpen, newChatBadge, isOnline, setIsOnline }: Props) => 
 
 
     useEffect(() => {
-        const websocket = new WebSocket('ws://localhost:8080');
-        websocket.onopen = () => {
-            websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
-        };
-        websocket.onmessage = (event) => {
-            const parsedMessage = JSON.parse(event.data);
-            console.log('parsedMessage', parsedMessage);
-            if (parsedMessage.type === 'onLineUser') {
-                console.log(parsedMessage);
-                setIsOnline(parsedMessage.data)
-            }
-            if (parsedMessage.type === 'message' && selectUser) {
-                console.log('seletedUser', selectUser);
-                if (parsedMessage.receiverId == selectUser.id || parsedMessage.senderId == selectUser.id) {
-                    setMessage((prevMessages: any) => [
-                        ...prevMessages,
-                        {
-                            id: Date.now(),
-                            sender_id: parsedMessage.senderId,
-                            receiver_id: authUser?.id,
-                            message: parsedMessage.message,
-                            media: parsedMessage.media,
-                            read: parsedMessage.read
-                        },
-                    ]);
+        if (ws) {
+            ws.onmessage = (event) => {
+                const parsedMessage = JSON.parse(event.data);
+                console.log('parsedMessage', parsedMessage);
+                if (parsedMessage.type === 'onLineUser') {
+                    console.log(parsedMessage);
+                    setIsOnline(parsedMessage.data)
+                }
+                if (parsedMessage.type === 'message' && selectUser) {
+                    console.log('seletedUser', selectUser);
+                    if (parsedMessage.receiverId == selectUser.id || parsedMessage.senderId == selectUser.id) {
+                        setMessage((prevMessages: any) => [
+                            ...prevMessages,
+                            {
+                                id: Date.now(),
+                                sender_id: parsedMessage.senderId,
+                                receiver_id: authUser?.id,
+                                message: parsedMessage.message,
+                                media: parsedMessage.media,
+                                read: parsedMessage.read
+                            },
+                        ]);
+
+                    }
 
                 }
 
-            }
+                if (parsedMessage.type === 'messageCount') {
+                    setUnReadMessage((prevCounts: any) => ({
+                        ...prevCounts,
+                        [parsedMessage.userId]: (prevCounts[parsedMessage.userId] || 0) + parsedMessage.count,
+                    }));
+                }
 
-            if (parsedMessage.type === 'messageCount') {
-                setUnReadMessage((prevCounts: any) => ({
-                    ...prevCounts,
-                    [parsedMessage.userId]: (prevCounts[parsedMessage.userId] || 0) + parsedMessage.count,
-                }));
-            }
+                // else if (parsedMessage.type === 'read') {
+                //     setMessage((prevMessages) => prevMessages.map((msg) =>
+                //         msg.sender_id === parsedMessage.receiverId ? { ...msg, read: true } : msg
+                //     ));
+                // }
 
-            // else if (parsedMessage.type === 'read') {
-            //     setMessage((prevMessages) => prevMessages.map((msg) =>
-            //         msg.sender_id === parsedMessage.receiverId ? { ...msg, read: true } : msg
-            //     ));
-            // }
+                if (parsedMessage.type === 'message' && parsedMessage.receiverId == authUser?.id) {
+                    newChatBadge({
+                        id: Date.now(),
+                        sender_id: parsedMessage.senderId,
+                        receiver_id: authUser?.id,
+                        message: parsedMessage.message,
+                        media: parsedMessage.media,
+                        read: parsedMessage.read
+                    })
+                }
+            };
+        }
 
-            if (parsedMessage.type === 'message' && parsedMessage.receiverId == authUser?.id) {
-                newChatBadge({
-                    id: Date.now(),
-                    sender_id: parsedMessage.senderId,
-                    receiver_id: authUser?.id,
-                    message: parsedMessage.message,
-                    media: parsedMessage.media,
-                    read: parsedMessage.read
-                })
-            }
-        };
         scrollToBottom();
-        setWs(websocket);
-        return () => websocket.close();
     }, [message, authUser]);
 
     return (

@@ -116,7 +116,7 @@ const UserProfile = () => {
 
     return (
         <Box>
-            <Navbar />
+            {/* <Navbar /> */}
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <LeftSidebar />

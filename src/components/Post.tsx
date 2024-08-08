@@ -22,6 +22,8 @@ import StoryTextTextDialog from './StoryTextDialog';
 import { postLoading, profileLoading, storyLoading, storyUploadLoading } from './SkeletonComponent';
 import { Link, useParams } from 'react-router-dom';
 import { fetchNotification } from '../store/slices/appSlice';
+import { useOutletContext } from "react-router-dom";
+import { useWs } from './Layout';
 
 
 const Post = () => {
@@ -44,7 +46,8 @@ const Post = () => {
     const [openStoryCreate, setOpenStoryCreate] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(true)
     const [filterPost, setFilterPost] = useState<string>('friendPosts')
-    const [ws, setWs] = useState<WebSocket | null>(null);
+    // const [ws, setWs] = useState<WebSocket | null>(null);
+    const { ws, setWs } = useWs()
     const maxPhotos = 4;
 
     const handleLike = (postId: number, postOwnerId: number) => {
@@ -96,39 +99,25 @@ const Post = () => {
         setPostMenuId(postId)
     }
 
-    useEffect(() => {
-        const websocket = new WebSocket('ws://localhost:8080')
+    // useEffect(() => {
 
-        websocket.onopen = () => {
-            console.log('WebSocket connection established');
-        };
+    //     if (ws) {
+    //         ws.onmessage = (event) => {
+    //             console.log('hello ws from post');
+    //             const parsedMessage = JSON.parse(event.data);
+    //             console.log('new noti', parsedMessage.type);
+    //             if (parsedMessage.type === 'newNoti') {
+    //                 if (parsedMessage.postOwnerId == authUser?.id) {
+    //                     dispatch(fetchNotification({}))
+    //                     console.log('new noti', parsedMessage.postOwnerId);
+    //                 }
+    //             }
+    //         }
+    //         setWs(ws)
+    //     }
 
-        websocket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
 
-        websocket.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
-
-        websocket.onmessage = (event) => {
-            const parsedMessage = JSON.parse(event.data);
-            console.log('new noti', parsedMessage.type);
-            if (parsedMessage.type === 'newNoti') {
-                if (parsedMessage.postOwnerId == authUser?.id) {
-                    dispatch(fetchNotification({}))
-                    console.log('new noti', parsedMessage.postOwnerId);
-                }
-            }
-        }
-
-        setWs(websocket);
-        return () => {
-            if (ws) {
-                ws.close();
-            }
-        };
-    }, [authUser])
+    // }, [authUser])
 
 
     useEffect(() => {
