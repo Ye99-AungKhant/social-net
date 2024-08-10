@@ -1,0 +1,16 @@
+.notiBox {
+    width: '100%';
+    max-width: 360px;
+    max-height: 500px;
+    overflow-y: scroll;
+}
+
+.notiBox::-webkit-scrollbar {
+    width: 0;
+    background-color: #F5F5F5;
+
+}
+
+.unread {
+    background-image: linear-gradient(to top, #e2ebf0 0%, #cfd9df 100%);
+}

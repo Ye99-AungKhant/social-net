@@ -71,7 +71,7 @@ export const appDataSlice = createSlice({
         },
         removeChatNoti: (state, action: PayloadAction<any>) => {
             if (state.chatNoti)
-                state.chatNoti = state.chatNoti.filter((noti) => (noti.sender_id !== action.payload))
+                state.chatNoti = state.chatNoti.filter((noti) => (noti.sender_id != action.payload))
         },
         setfriendRequestNoti: (state, action: PayloadAction<any>) => {
             state.friendRequestNoti = action.payload

@@ -22,7 +22,6 @@ import PostCreate from './PostCreate';
 import '../components/style/style.css'
 import { Avatar } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import defaultUser from './user.png'
 import Chat from './Chat';
 import { fetchNotification, setOnlineUser } from '../store/slices/appSlice';
 import { useWebSocket, WebSocketContextType } from './WebSocketProvider';
@@ -85,13 +84,17 @@ export default function Navbar() {
     const dispatch = useAppDispatch()
     let [chatNotiCount, setChatNotiCount] = useState<any>()
 
-    const handlePopup = () => {
-        if (openMenu)
-            setOpenMenu(false)
-        if (open)
-            return setOpen(false)
-        return setOpen(true)
-    }
+    const toggleNoti = () => {
+        setOpen(!open);
+    };
+
+    const openNoti = () => {
+        setOpen(true);
+    };
+
+    const closeNoti = () => {
+        setOpen(false);
+    };
 
     const handleOpenMenu = () => {
         if (open)
@@ -128,7 +131,7 @@ export default function Navbar() {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="static" >
+            <AppBar position="static">
                 <Toolbar>
                     <Typography
                         variant="h6"
@@ -165,7 +168,7 @@ export default function Navbar() {
                             size="large"
                             aria-label="show 17 new notifications"
                             color="inherit"
-                            onClick={handlePopup}
+                            onClick={toggleNoti}
                         >
                             <Badge badgeContent={notifications.length} color="error">
                                 <NotificationsIcon />
@@ -186,11 +189,12 @@ export default function Navbar() {
 
                 </Toolbar>
             </AppBar>
-            <Box sx={{ position: 'absolute', right: 10 }}>
-                {open && <Popup
+            <Box>
+                <Popup
                     open={open}
+                    closeMenu={closeNoti}
                     notiData={notifications}
-                />}
+                />
             </Box>
             <Box sx={{ position: 'absolute', right: 10 }}>
                 {openMenu && <Menu
