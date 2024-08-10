@@ -25,6 +25,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import defaultUser from './user.png'
 import Chat from './Chat';
 import { fetchNotification, setOnlineUser } from '../store/slices/appSlice';
+import { useWebSocket, WebSocketContextType } from './WebSocketProvider';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -66,18 +67,21 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
+// interface Props {
+//     ws: WebSocket | null
+//     setWs: React.Dispatch<React.SetStateAction<WebSocket | null>>
+// }
+
 export default function Navbar() {
 
     const menuId = 'primary-search-account-menu';
-
-    const [ws, setWs] = useState<WebSocket | null>(null);
+    const { ws, wsMessage, wsNoti, wsOnlineUser } = useWebSocket() || {};
     const [open, setOpen] = useState<boolean>(false)
     const [openMenu, setOpenMenu] = useState<boolean>(false)
     const [openPostCreate, setOpenPostCreate] = useState<boolean>(false)
     const [openChatModal, setOpenChatModal] = useState(false)
     const { authUser } = useAppSelector((state) => state.auth)
     const { chatNoti, notifications } = useAppSelector((state) => state.app)
-    const [isOnline, setIsOnline] = useState<any>([])
     const dispatch = useAppDispatch()
     let [chatNotiCount, setChatNotiCount] = useState<any>()
 
@@ -115,92 +119,12 @@ export default function Navbar() {
     }, [chatNoti])
 
     React.useEffect(() => {
-        const websocket = new WebSocket('ws://localhost:8080');
-        websocket.onopen = () => {
-            websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
-        };
-        websocket.onmessage = (event) => {
-            const parsedMessage = JSON.parse(event.data);
-            if (parsedMessage.type === 'onLineUser') {
-                console.log(parsedMessage);
-                setIsOnline(parsedMessage.data)
-            }
-
-            if (parsedMessage.type === 'message') {
-                console.log('setChatNotiCount', parsedMessage.message);
-                if (parsedMessage.receiverId == authUser?.id) {
-                    setChatNotiCount((prevMessages: any) => [...prevMessages,
-                    {
-                        id: Date.now(),
-                        sender_id: parsedMessage.senderId,
-                        receiver_id: authUser?.id,
-                        message: parsedMessage.message,
-                        media: parsedMessage.media,
-                        read: parsedMessage.read
-                    },
-                    ])
-                }
-            }
-            if (parsedMessage.type === 'newNoti') {
-                console.log('new noti', parsedMessage.type);
-                if (parsedMessage.postOwnerId == authUser?.id) {
-                    dispatch(fetchNotification({}))
-                }
+        if (wsNoti && wsNoti.type === 'newNoti') {
+            if (wsNoti.postOwnerId == authUser?.id) {
+                dispatch(fetchNotification({}))
             }
         }
-
-        setWs(websocket);
-        return () => websocket.close();
-
-    }, [authUser])
-
-    React.useEffect(() => {
-        const online = () => {
-            console.log('you are online');
-            if (ws && ws.readyState == ws.OPEN) {
-                console.log('dsdsd');
-
-                // ws.send(JSON.stringify({
-                //     type: 'onLineUser',
-                //     userId: authUser?.id
-                // }))
-                ws.onmessage = ((event: any) => {
-                    const parsedMessage = JSON.parse(event.data);
-                    if (parsedMessage.type === 'onLineUser') {
-                        console.log(parsedMessage);
-                        setIsOnline(parsedMessage.data)
-                        dispatch(setOnlineUser(parsedMessage.data))
-                    }
-                })
-
-            }
-        }
-        // const offline = () => {
-        //     console.log('you are offline');
-        //     if (ws && ws.readyState == ws.OPEN) {
-        //         ws.send(JSON.stringify({
-        //             type: 'onLineUser',
-        //             userId: authUser?.id
-        //         }))
-        //         ws.onmessage = ((event: any) => {
-        //             const parsedMessage = JSON.parse(event.data);
-        //             if (parsedMessage.type === 'onLineUser') {
-        //                 console.log(parsedMessage);
-        //                 setIsOnline(parsedMessage.data)
-        //                 dispatch(setOnlineUser(parsedMessage.data))
-        //             }
-        //         })
-        //     }
-        // }
-        const clear = () => { }
-
-        window.addEventListener('focus', online)
-        // window.addEventListener('blur', offline);
-        return () => {
-            window.removeEventListener('focus', clear);
-            // window.removeEventListener('blur', clear);
-        };
-    }, [isOnline])
+    }, [wsNoti])
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -278,8 +202,6 @@ export default function Navbar() {
             <Chat open={openChatModal}
                 setOpen={setOpenChatModal}
                 newChatBadge={newChatBadge}
-                isOnline={isOnline}
-                setIsOnline={setIsOnline}
             />
         </Box>
     );

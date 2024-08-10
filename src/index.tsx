@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import { store } from './store/index';
 import { BrowserRouter } from 'react-router-dom';
+import { WebSocketProvider } from './components/WebSocketProvider';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -14,7 +15,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <BrowserRouter>
     <Provider store={store}>
-      <App />
+      <WebSocketProvider>
+        <App />
+      </WebSocketProvider>
     </Provider>
   </BrowserRouter>
 );

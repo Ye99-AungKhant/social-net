@@ -33,7 +33,15 @@ wss.on('connection', (ws) => {
                         type: 'onLineUser',
                         data: onlineUser
                     }))
-                    console.log(onlineUser);
+                } else {
+                    const index = onlineUser.indexOf(ws.userId);
+                    if (index > -1) {
+                        onlineUser.splice(index, 1)
+                    }
+                    ws.send(JSON.stringify({
+                        type: 'onLineUser',
+                        data: onlineUser
+                    }))
                 }
                 break;
             case 'message':
@@ -113,29 +121,6 @@ wss.on('connection', (ws) => {
                     }))
                 }
                 break;
-            // case 'onLineUser':
-            //     users[parsedMessage.userId] = ws;
-            //     ws.userId = parsedMessage.userId;
-            //     if (ws.userId && !onlineUser.includes(ws.userId)) {
-            //         onlineUser.push(ws.userId)
-            //         ws.send(JSON.stringify({
-            //             type: 'onLineUser',
-            //             data: onlineUser
-            //         }))
-            //         console.log('onlineUser', onlineUser);
-            //     } else {
-            //         const index = onlineUser.indexOf(ws.userId);
-            //         if (index > -1) {
-            //             onlineUser.splice(index, 1)
-            //         }
-            //         ws.send(JSON.stringify({
-            //             type: 'onLineUser',
-            //             data: onlineUser
-            //         }))
-            //         console.log('onlineUser', onlineUser);
-            //     }
-            //     break;
-
             default:
                 break;
         }
