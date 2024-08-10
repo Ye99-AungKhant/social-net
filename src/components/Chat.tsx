@@ -50,18 +50,19 @@ interface Props {
 }
 const Chat = ({ open, setOpen, newChatBadge }: Props) => {
 
-    const { ws, wsMessage, wsMessageCount } = useWebSocket() || {};
+    const { ws, wsMessage, wsMessageCount, wsOnlineUser } = useWebSocket() || {};
     const [message, setMessage] = useState<chatlist[]>([])
     const messagesEndRef = useRef<null | HTMLElement>(null);
     const chatRef = useRef<null | HTMLInputElement>(null)
     const [selectUser, setSelectUser] = useState<any>()
-    const { friendList, onlineUser } = useAppSelector((state) => state.app)
+    const { friendList } = useAppSelector((state) => state.app)
     const { chats } = useAppSelector((state) => state.chat)
     const { authUser } = useAppSelector((state) => state.auth)
     const [unreadMessage, setUnReadMessage] = useState<any>({})
     const [selectedImages, setSelectedImages] = useState<any>([])
     const [selectedImagesUpload, setSelectedImagesUpload] = useState<any>([])
     const { chatNoti } = useAppSelector((state) => state.app)
+    const [onlineUser, setOnlineUser] = useState<any>()
     const dispatch = useAppDispatch()
 
     const handleClose = () => {
@@ -229,6 +230,11 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
         scrollToBottom();
     }, [wsMessageCount, authUser]);
 
+    useEffect(() => {
+        setOnlineUser(wsOnlineUser?.data)
+        // console.log('wsOnlineUser', wsOnlineUser);
+    }, [wsOnlineUser])
+
     return (
         <Fragment>
             <Dialog
@@ -266,7 +272,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                         <ListItemAvatar>
                                             <Badge badgeContent={unreadMessage[list.id]} color="error">
                                                 <Avatar alt="Travis Howard" src={list.profile} />
-                                                {onlineUser.includes(list.id) &&
+                                                {onlineUser && onlineUser.includes(list.id) &&
                                                     (<StyledBadge
                                                         overlap="circular"
                                                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

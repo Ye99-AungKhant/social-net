@@ -47,6 +47,8 @@ export const WebSocketProvider = ({ children }: any) => {
                 setWsNoti(parsedMessage)
             } else if (parsedMessage.type === 'onLineUser') {
                 setWsOnlineUser(parsedMessage)
+                console.log('onlineuser', parsedMessage);
+
             }
         };
 

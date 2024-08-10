@@ -75,8 +75,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function Navbar() {
 
     const menuId = 'primary-search-account-menu';
-
-    // const [ws, setWs] = useState<WebSocket | null>(null);
     const { ws, wsMessage, wsNoti, wsOnlineUser } = useWebSocket() || {};
     const [open, setOpen] = useState<boolean>(false)
     const [openMenu, setOpenMenu] = useState<boolean>(false)
@@ -120,27 +118,6 @@ export default function Navbar() {
         setChatNotiCount(chatNoti)
     }, [chatNoti])
 
-    // React.useEffect(() => {
-
-    //     if (wsMessage) {
-    //         if (wsMessage.type === 'message') {
-    //             if (wsMessage.receiverId == authUser?.id) {
-    //                 setChatNotiCount((prevMessages: any) => [...prevMessages,
-    //                 {
-    //                     id: Date.now(),
-    //                     sender_id: wsMessage.senderId,
-    //                     receiver_id: authUser?.id,
-    //                     message: wsMessage.message,
-    //                     media: wsMessage.media,
-    //                     read: wsMessage.read
-    //                 },
-    //                 ])
-    //             }
-    //         }
-    //     }
-
-    // }, [])
-
     React.useEffect(() => {
         if (wsNoti && wsNoti.type === 'newNoti') {
             if (wsNoti.postOwnerId == authUser?.id) {
@@ -148,46 +125,6 @@ export default function Navbar() {
             }
         }
     }, [wsNoti])
-
-    React.useEffect(() => {
-        const online = () => {
-            console.log('you are online');
-            if (ws && ws.readyState == ws.OPEN) {
-                console.log('dsdsd')
-
-                // if (wsOnlineUser && wsOnlineUser.type === 'onLineUser') {
-                //     console.log(wsOnlineUser);
-                //     dispatch(setOnlineUser(wsOnlineUser.data))
-                // }
-
-            }
-        }
-        // const offline = () => {
-        //     console.log('you are offline');
-        //     if (ws && ws.readyState == ws.OPEN) {
-        //         ws.send(JSON.stringify({
-        //             type: 'onLineUser',
-        //             userId: authUser?.id
-        //         }))
-        //         ws.onmessage = ((event: any) => {
-        //             const parsedMessage = JSON.parse(event.data);
-        //             if (parsedMessage.type === 'onLineUser') {
-        //                 console.log(parsedMessage);
-        //                 setIsOnline(parsedMessage.data)
-        //                 dispatch(setOnlineUser(parsedMessage.data))
-        //             }
-        //         })
-        //     }
-        // }
-        const clear = () => { }
-
-        window.addEventListener('focus', online)
-        // window.addEventListener('blur', offline);
-        return () => {
-            window.removeEventListener('focus', clear);
-            // window.removeEventListener('blur', clear);
-        };
-    }, [wsOnlineUser])
 
     return (
         <Box sx={{ flexGrow: 1 }}>

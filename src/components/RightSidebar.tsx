@@ -21,9 +21,12 @@ export const StyledBadge = styled(Badge)(({ theme }) => ({
 const RightSidebar = () => {
     const { friendList } = useAppSelector((state) => state.app)
     const { wsOnlineUser } = useWebSocket() || {};
-    const onlineUser = wsOnlineUser?.data
-    console.log('wsOnlineUser', wsOnlineUser);
+    const [onlineUser, setOnlineUser] = useState<any>()
 
+    useEffect(() => {
+        setOnlineUser(wsOnlineUser?.data)
+        console.log('wsOnlineUser', wsOnlineUser);
+    }, [wsOnlineUser])
 
     return (
         <Box sx={{ width: '25%', bgcolor: 'background.paper' }}>
