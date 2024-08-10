@@ -24,6 +24,7 @@ import { Link, useParams } from 'react-router-dom';
 import { fetchNotification } from '../store/slices/appSlice';
 import { useOutletContext } from "react-router-dom";
 import { useWs } from './Layout';
+import { useWebSocket } from './WebSocketProvider';
 
 
 const Post = () => {
@@ -47,7 +48,7 @@ const Post = () => {
     const [loading, setLoading] = useState<boolean>(true)
     const [filterPost, setFilterPost] = useState<string>('friendPosts')
     // const [ws, setWs] = useState<WebSocket | null>(null);
-    const { ws, setWs } = useWs()
+    const { ws, wsMessage } = useWebSocket() || {};
     const maxPhotos = 4;
 
     const handleLike = (postId: number, postOwnerId: number) => {
@@ -98,26 +99,6 @@ const Post = () => {
         setOpenMenu(!openMenu)
         setPostMenuId(postId)
     }
-
-    // useEffect(() => {
-
-    //     if (ws) {
-    //         ws.onmessage = (event) => {
-    //             console.log('hello ws from post');
-    //             const parsedMessage = JSON.parse(event.data);
-    //             console.log('new noti', parsedMessage.type);
-    //             if (parsedMessage.type === 'newNoti') {
-    //                 if (parsedMessage.postOwnerId == authUser?.id) {
-    //                     dispatch(fetchNotification({}))
-    //                     console.log('new noti', parsedMessage.postOwnerId);
-    //                 }
-    //             }
-    //         }
-    //         setWs(ws)
-    //     }
-
-
-    // }, [authUser])
 
 
     useEffect(() => {

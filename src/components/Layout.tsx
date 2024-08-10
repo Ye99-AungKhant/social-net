@@ -24,39 +24,14 @@ const Layout = () => {
             return navigate('sign-in')
         }
         dispatch(fetchData({}))
-
     }, [])
-
-    useEffect(() => {
-        const websocket = new WebSocket('ws://localhost:8080')
-
-        websocket.onopen = () => {
-            websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
-            console.log('WebSocket connection established');
-        };
-
-        websocket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
-
-        websocket.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
-
-        setWs(websocket);
-        return () => {
-            if (ws) {
-                ws.close();
-            }
-        };
-    }, [authUser])
 
     return (
         <Box>
-            <Navbar ws={ws} setWs={setWs} />
+            <Navbar />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', height: 500 }}>
                 <LeftSidebar />
-                <Outlet context={{ ws, setWs } satisfies ContextType} />
+                <Outlet />
                 <RightSidebar />
             </Box>
         </Box>

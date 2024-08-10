@@ -32,6 +32,7 @@ import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import { v4 as uuid } from 'uuid';
 import { StyledBadge } from './RightSidebar';
+import { useWebSocket } from './WebSocketProvider';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -46,25 +47,21 @@ interface Props {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
     newChatBadge: (data: any) => void
-    ws: WebSocket | null
-    setWs: React.Dispatch<React.SetStateAction<WebSocket | null>>
-    isOnline: any
-    setIsOnline: React.Dispatch<any>
 }
-const Chat = ({ open, setOpen, newChatBadge, ws, setWs, isOnline, setIsOnline }: Props) => {
-    // const [ws, setWs] = useState<WebSocket | null>(null);
+const Chat = ({ open, setOpen, newChatBadge }: Props) => {
+
+    const { ws, wsMessage, wsMessageCount } = useWebSocket() || {};
     const [message, setMessage] = useState<chatlist[]>([])
     const messagesEndRef = useRef<null | HTMLElement>(null);
     const chatRef = useRef<null | HTMLInputElement>(null)
     const [selectUser, setSelectUser] = useState<any>()
-    const { friendList } = useAppSelector((state) => state.app)
+    const { friendList, onlineUser } = useAppSelector((state) => state.app)
     const { chats } = useAppSelector((state) => state.chat)
     const { authUser } = useAppSelector((state) => state.auth)
     const [unreadMessage, setUnReadMessage] = useState<any>({})
     const [selectedImages, setSelectedImages] = useState<any>([])
     const [selectedImagesUpload, setSelectedImagesUpload] = useState<any>([])
     const { chatNoti } = useAppSelector((state) => state.app)
-    // const [isOnline, setIsOnline] = useState<any>([])
     const dispatch = useAppDispatch()
 
     const handleClose = () => {
@@ -128,7 +125,6 @@ const Chat = ({ open, setOpen, newChatBadge, ws, setWs, isOnline, setIsOnline }:
     const handleSelectUser = (user: any) => {
 
         if (unreadMessage[user.id] != 0) {
-            console.log('unreadmessage count handle', unreadMessage[user.id])
             setUnReadMessage((prevCounts: any) => ({
                 ...prevCounts,
                 [user.id]: 0,
@@ -185,61 +181,53 @@ const Chat = ({ open, setOpen, newChatBadge, ws, setWs, isOnline, setIsOnline }:
 
 
     useEffect(() => {
-        if (ws) {
-            ws.onmessage = (event) => {
-                const parsedMessage = JSON.parse(event.data);
-                console.log('parsedMessage', parsedMessage);
-                if (parsedMessage.type === 'onLineUser') {
-                    console.log(parsedMessage);
-                    setIsOnline(parsedMessage.data)
+        if (wsMessage) {
+            if (wsMessage.type === 'message' && selectUser != null) {
+                console.log('seletedUser', selectUser);
+                if (wsMessage.receiverId == selectUser.id || wsMessage.senderId == selectUser.id) {
+                    setMessage((prevMessages: any) => [
+                        ...prevMessages,
+                        {
+                            id: Date.now(),
+                            sender_id: wsMessage.senderId,
+                            receiver_id: authUser?.id,
+                            message: wsMessage.message,
+                            media: wsMessage.media,
+                            read: wsMessage.read
+                        },
+                    ]);
+                    console.log('incoming message', wsMessage);
                 }
-                if (parsedMessage.type === 'message' && selectUser) {
-                    console.log('seletedUser', selectUser);
-                    if (parsedMessage.receiverId == selectUser.id || parsedMessage.senderId == selectUser.id) {
-                        setMessage((prevMessages: any) => [
-                            ...prevMessages,
-                            {
-                                id: Date.now(),
-                                sender_id: parsedMessage.senderId,
-                                receiver_id: authUser?.id,
-                                message: parsedMessage.message,
-                                media: parsedMessage.media,
-                                read: parsedMessage.read
-                            },
-                        ]);
+            }
+            if (wsMessage.type === 'message' && wsMessage.receiverId == authUser?.id) {
+                newChatBadge({
+                    id: Date.now(),
+                    sender_id: wsMessage.senderId,
+                    receiver_id: authUser?.id,
+                    message: wsMessage.message,
+                    media: wsMessage.media,
+                    read: wsMessage.read
+                })
+            }
 
-                    }
 
-                }
+            // else if (parsedMessage.type === 'read') {
+            //     //     setMessage((prevMessages) => prevMessages.map((msg) =>
+            //     //         msg.sender_id === parsedMessage.receiverId ? { ...msg, read: true } : msg
+            //     //     ));
+            //     // }
 
-                if (parsedMessage.type === 'messageCount') {
-                    setUnReadMessage((prevCounts: any) => ({
-                        ...prevCounts,
-                        [parsedMessage.userId]: (prevCounts[parsedMessage.userId] || 0) + parsedMessage.count,
-                    }));
-                }
-
-                // else if (parsedMessage.type === 'read') {
-                //     setMessage((prevMessages) => prevMessages.map((msg) =>
-                //         msg.sender_id === parsedMessage.receiverId ? { ...msg, read: true } : msg
-                //     ));
-                // }
-
-                if (parsedMessage.type === 'message' && parsedMessage.receiverId == authUser?.id) {
-                    newChatBadge({
-                        id: Date.now(),
-                        sender_id: parsedMessage.senderId,
-                        receiver_id: authUser?.id,
-                        message: parsedMessage.message,
-                        media: parsedMessage.media,
-                        read: parsedMessage.read
-                    })
-                }
-            };
+        }
+        if (wsMessageCount && !selectUser) {
+            if (wsMessageCount.type === 'messageCount') {
+                setUnReadMessage({
+                    [wsMessageCount.userId]: wsMessageCount.count,
+                });
+            }
         }
 
         scrollToBottom();
-    }, [message, authUser]);
+    }, [wsMessageCount, authUser]);
 
     return (
         <Fragment>
@@ -278,7 +266,7 @@ const Chat = ({ open, setOpen, newChatBadge, ws, setWs, isOnline, setIsOnline }:
                                         <ListItemAvatar>
                                             <Badge badgeContent={unreadMessage[list.id]} color="error">
                                                 <Avatar alt="Travis Howard" src={list.profile} />
-                                                {isOnline.includes(list.id) &&
+                                                {onlineUser.includes(list.id) &&
                                                     (<StyledBadge
                                                         overlap="circular"
                                                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

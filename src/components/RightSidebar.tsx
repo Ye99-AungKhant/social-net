@@ -9,6 +9,7 @@ import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
 import { useAppSelector } from '../store/hooks';
 import { useEffect, useState } from 'react';
+import { useWebSocket } from './WebSocketProvider';
 
 export const StyledBadge = styled(Badge)(({ theme }) => ({
     '& .MuiBadge-badge': {
@@ -18,7 +19,11 @@ export const StyledBadge = styled(Badge)(({ theme }) => ({
     },
 }));
 const RightSidebar = () => {
-    const { friendList, onlineUser } = useAppSelector((state) => state.app)
+    const { friendList } = useAppSelector((state) => state.app)
+    const { wsOnlineUser } = useWebSocket() || {};
+    const onlineUser = wsOnlineUser?.data
+    console.log('wsOnlineUser', wsOnlineUser);
+
 
     return (
         <Box sx={{ width: '25%', bgcolor: 'background.paper' }}>
@@ -33,7 +38,7 @@ const RightSidebar = () => {
                                     <StyledBadge
                                         overlap="circular"
                                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                                        variant={onlineUser.includes(item.id) ? 'dot' : 'standard'}
+                                        variant={onlineUser && onlineUser.includes(item.id) ? 'dot' : 'standard'}
                                     >
                                         <Avatar alt="Remy Sharp" src={item.profile} />
                                     </StyledBadge>
