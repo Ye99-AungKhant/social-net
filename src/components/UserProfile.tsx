@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Typography } from '@mui/material'
+import { Box, Button, Card, CardContent, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import './style/profile.css'
 import defaultUser from './user.png'
@@ -22,6 +22,7 @@ import { addfriend, profileDataFetch, profilePostFetch, removePost, removeWaitin
 import LeftSidebar from './LeftSidebar';
 import ConfirmDialog from './ConfirmDialog';
 import FriendButton from './FriendButton';
+import CreateAboutUsDialog from './CreateAboutUsDialog';
 
 const UserProfile = () => {
     const { posts, profileDetail, friendLists, waitingfriendLists } = useAppSelector((state) => state.profileData)
@@ -37,6 +38,7 @@ const UserProfile = () => {
     const { authUser } = useAppSelector((state) => state.auth)
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
+    const [openCreateAboutUsDialog, setOpenCreateAboutUsDialog] = useState<boolean>(false)
     const { profileId }: any = useParams();
     const profileIdNum = Number(profileId)
 
@@ -113,6 +115,9 @@ const UserProfile = () => {
 
     const matchedFriend = waitingfriendLists.find(friendlist => friendlist.adding_user == profileId);
 
+    const handleCreateAboutUs = () => {
+        setOpenCreateAboutUsDialog(!openCreateAboutUsDialog)
+    }
 
     return (
         <Box>
@@ -174,23 +179,8 @@ const UserProfile = () => {
                                     <li>
                                         <img src="images/profile-job.png" /> Director at 99media Ltd
                                     </li>
-                                    <li>
-                                        <img src="images/profile-study.png" />
-                                        Studied at Amity University
-                                    </li>
-                                    <li>
-                                        <img src="images/profile-study.png" />
-                                        Went to DPS Delhi
-                                    </li>
-                                    <li>
-                                        <img src="images/profile-home.png" />
-                                        Lives in Bangalore, India
-                                    </li>
-                                    <li>
-                                        <img src="images/profile-location.png" />
-                                        From Bangalore, India
-                                    </li>
                                 </ul>
+                                <Button variant='contained' fullWidth onClick={handleCreateAboutUs}>Edit About us</Button>
                             </Box>
 
                             <Box className="profile-intro">
@@ -347,6 +337,9 @@ const UserProfile = () => {
                 open={openComfirmDialog}
                 setOpen={setOpenComfirmDialog}
                 handleConfirmUnfriend={handleConfirmUnfriend}
+            />
+            <CreateAboutUsDialog
+                open={openCreateAboutUsDialog} setOpen={setOpenCreateAboutUsDialog}
             />
         </Box>
     )
