@@ -1,3 +1,3 @@
-.iconBg {
-    background: #f0f0f0;
+.activeTab {
+    background-image: linear-gradient(to top, #e2ebf0 0%, #e2ebf0 100%);
 }

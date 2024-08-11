@@ -37,8 +37,6 @@ export const WebSocketProvider = ({ children }: any) => {
 
         websocket.onmessage = (event) => {
             const parsedMessage = JSON.parse(event.data);
-            console.log('WS Provider Message received:', parsedMessage);
-            // setWsMessage((prev: any) => ([...prev, parsedMessage]));
             if (parsedMessage.type === 'message') {
                 setWsMessage(parsedMessage)
             } else if (parsedMessage.type === 'messageCount') {

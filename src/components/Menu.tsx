@@ -30,18 +30,19 @@ const Menu = ({ open, Id }: Props) => {
             }
         }))
     }
+    const handleLinkToProfile = () => {
+        navigate(`/profile/${Id}`)
+    }
 
     return (
         <>
             {open && <Box sx={{ width: '100%', maxWidth: 360, bgcolor: '#FAFAFA', position: 'relative', zIndex: 2 }}>
                 <List component="nav" aria-label="main mailbox folders">
-                    <ListItemButton>
-                        <Link to={`/profile/${Id}`}>
-                            <ListItemIcon>
-                                <AccountCircle />
-                            </ListItemIcon>
-                            <ListItemText primary='Profile' />
-                        </Link>
+                    <ListItemButton onClick={handleLinkToProfile}>
+                        <ListItemIcon>
+                            <AccountCircle />
+                        </ListItemIcon>
+                        <ListItemText primary='Profile' />
                     </ListItemButton>
                     <ListItemButton>
                         <ListItemIcon>

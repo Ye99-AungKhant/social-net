@@ -11,8 +11,10 @@ import CropOriginalRoundedIcon from '@mui/icons-material/CropOriginalRounded';
 import SlideshowRoundedIcon from '@mui/icons-material/SlideshowRounded';
 import { Typography, Badge } from '@mui/material';
 import { blue } from '@mui/material/colors';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../store/hooks';
+import { useState } from 'react';
+import './style/style.css'
 
 const sidebarMenu = [
     { id: 1, label: 'Feed', icon: <SpaceDashboardRoundedIcon />, route: '/', Iconcolor: '#2196f3' },
@@ -22,27 +24,32 @@ const sidebarMenu = [
 ]
 const LeftSidebar = () => {
     const { friendRequestNoti } = useAppSelector((state) => state.app)
+    const [active, setActive] = useState<number>();
+    const navigate = useNavigate()
+
+    const handleLinkTo = (route: string, id: number) => {
+        navigate(route)
+        setActive(id)
+    }
 
     return (
         <Box sx={{ width: '20%', bgcolor: 'background.paper' }}>
             <nav aria-label="main mailbox folders">
                 <List>
                     {sidebarMenu.map((item) => (
-                        <Link key={item.id} to={item.route}>
-                            <ListItem key={item.id} disablePadding>
-                                <ListItemButton className='iconBg'>
-                                    <ListItemIcon sx={{ color: item.Iconcolor }}>
-                                        {item.id == 2 ? <Badge badgeContent={friendRequestNoti} color="error">
-                                            {item.icon}
-                                        </Badge>
-                                            : <>{item.icon}</>
-                                        }
+                        <ListItem key={item.id} disablePadding onClick={() => handleLinkTo(item.route, item.id)}>
+                            <ListItemButton className={active == item.id ? 'activeTab' : ''}>
+                                <ListItemIcon sx={{ color: item.Iconcolor }}>
+                                    {item.id == 2 ? <Badge badgeContent={friendRequestNoti} color="error">
+                                        {item.icon}
+                                    </Badge>
+                                        : <>{item.icon}</>
+                                    }
 
-                                    </ListItemIcon>
-                                    <ListItemText primary={item.label} />
-                                </ListItemButton>
-                            </ListItem>
-                        </Link>
+                                </ListItemIcon>
+                                <ListItemText primary={item.label} />
+                            </ListItemButton>
+                        </ListItem>
                     ))}
                     <Divider />
 

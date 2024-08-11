@@ -36,6 +36,7 @@ const Post = () => {
     const [openStoryPhotoDialog, setOpenStoryPhotoDialog] = useState<any>({})
     const [openStoryTextDialog, setOpenStoryTextDialog] = useState<any>({})
     const [postCommentId, setPostCommentId] = useState<number>(0)
+    const [postCommentOwnerId, setPostCommentOwnerId] = useState<number>(0)
     const [postMenuId, setPostMenuId] = useState<number>(0)
     const [openMenu, setOpenMenu] = useState(false)
     const [showMore, setShowMore] = useState<any>({})
@@ -47,7 +48,6 @@ const Post = () => {
     const [openStoryCreate, setOpenStoryCreate] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(true)
     const [filterPost, setFilterPost] = useState<string>('friendPosts')
-    // const [ws, setWs] = useState<WebSocket | null>(null);
     const { ws, wsMessage } = useWebSocket() || {};
     const maxPhotos = 4;
 
@@ -61,9 +61,10 @@ const Post = () => {
             }))
         }
     }
-    const handleCommentDialog = (postId: number) => {
+    const handleCommentDialog = (postId: number, postUserId: number) => {
         setOpenCommentDialog(!openCommetDialog)
         setPostCommentId(postId)
+        setPostCommentOwnerId(postUserId)
         dispatch(fetchComment(postId))
     }
 
@@ -326,7 +327,7 @@ const Post = () => {
                                                     className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
                                                 <p className='postActionText'>{post.like_count}</p>
                                             </div>
-                                            <div className='postComment' onClick={() => handleCommentDialog(post.id)}>
+                                            <div className='postComment' onClick={() => handleCommentDialog(post.id, post.user.id)}>
                                                 <ChatIcon />
                                                 <p className='postActionText'>{post.comment_count}</p>
                                             </div>
@@ -416,7 +417,7 @@ const Post = () => {
                                                     className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
                                                 <p className='postActionText'>{post.like_count}</p>
                                             </div>
-                                            <div className='postComment' onClick={() => handleCommentDialog(post.id)}>
+                                            <div className='postComment' onClick={() => handleCommentDialog(post.id, post.user.id)}>
                                                 <ChatIcon />
                                                 <p className='postActionText'>{post.comment_count}</p>
                                             </div>
@@ -441,6 +442,7 @@ const Post = () => {
                     open={openCommetDialog}
                     setOpen={setOpenCommentDialog}
                     postId={postCommentId}
+                    postOwnerId={postCommentOwnerId}
                 />
 
             </Box>

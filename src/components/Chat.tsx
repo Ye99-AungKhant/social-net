@@ -119,10 +119,6 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
         }
     };
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    };
-
     const handleSelectUser = (user: any) => {
 
         if (unreadMessage[user.id] != 0) {
@@ -180,8 +176,16 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
         setUnReadMessage(unreadCounts);
     }, [chatNoti, friendList])
 
-
+    const scrollToBottom = () => {
+        if (messagesEndRef.current)
+            messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+        // messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    };
     useEffect(() => {
+        scrollToBottom();
+    }, [message])
+    useEffect(() => {
+
         if (wsMessage) {
             if (wsMessage.type === 'message' && selectUser != null) {
                 console.log('seletedUser', selectUser);
@@ -226,13 +230,10 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                 });
             }
         }
-
-        scrollToBottom();
-    }, [wsMessageCount, authUser]);
+    }, [wsMessage]);
 
     useEffect(() => {
         setOnlineUser(wsOnlineUser?.data)
-        // console.log('wsOnlineUser', wsOnlineUser);
     }, [wsOnlineUser])
 
     return (
@@ -310,7 +311,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                         </IconButton>
                                     </ListItemButton>
                                 </Box>
-                                <Box className='messages'>
+                                <Box className='messages' ref={messagesEndRef}>
                                     {message && message.map((chat) => (
                                         <Box key={chat.id} className={chat.receiver_id == authUser?.id ? 'messageReceiver' : 'messageSender'}>
 
@@ -334,7 +335,6 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                             }
                                         </Box>
                                     ))}
-                                    <Box ref={messagesEndRef} />
                                 </Box>
                             </Box>
                             <Box className="imagePreviewContainer">
