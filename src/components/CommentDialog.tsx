@@ -1,6 +1,5 @@
 import { Box, Button, FormControl, IconButton, Modal, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
-import "./style/post.css"
 import "./style/comment.css"
 import defaultUser from './user.png'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -10,12 +9,14 @@ import MenuPopup from './MenuPopup';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { createComment, removeAllComment, removeEditComment, updateComment } from '../store/slices/commentSlice';
 import { EditComment } from '../types/comment';
+import { useWebSocket } from './WebSocketProvider';
 
 
 interface Props {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    postId: number
+    postId: number,
+    postOwnerId: number
 }
 
 const style = {
@@ -30,7 +31,7 @@ const style = {
     pr: 4,
     pb: 4,
 };
-const CommentDialog = ({ open, setOpen, postId }: Props) => {
+const CommentDialog = ({ open, setOpen, postId, postOwnerId }: Props) => {
     const [openMenu, setOpenMenu] = useState(false)
     const [showMore, setShowMore] = useState<any>({})
     const [comment, setComment] = useState({ content: '' })
@@ -40,6 +41,7 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
     const [commentId, setCommentId] = useState<number>(0)
     const dispatch = useAppDispatch()
     const inputRef = useRef<HTMLInputElement>(null);
+    const { ws } = useWebSocket() || {};
 
     const closeModal = () => {
         setOpen(false)
@@ -85,6 +87,12 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
                 inputRef.current.value = '' // Clear input field
             }
             setComment({ content: '' })
+            if (ws) {
+                ws.send(JSON.stringify({
+                    type: 'newNoti',
+                    postOwnerId: postOwnerId
+                }))
+            }
         }
     }
 
@@ -150,14 +158,16 @@ const CommentDialog = ({ open, setOpen, postId }: Props) => {
                         </div>
                     ))}
                 </Box>
-                <div className='commentInputBox'>
-                    <input type="text" className='commentInput' placeholder='Write comment...' autoFocus
-                        value={comment.content}
-                        ref={inputRef}
-                        onChange={(e) => { setComment({ ...comment, content: e.target.value }) }}
-                    />
-                    <button className='commentSentBtn' onClick={isCreateOrNewComment}><SendIcon /></button>
-                </div>
+                <Box className='commentInputBox'>
+                    <Box className="input-container">
+                        <input type="text" placeholder='Write comment...' autoFocus
+                            value={comment.content}
+                            ref={inputRef}
+                            onChange={(e) => { setComment({ ...comment, content: e.target.value }) }}
+                        />
+                        <button className='send-button' onClick={isCreateOrNewComment}><SendIcon /></button>
+                    </Box>
+                </Box>
             </Box>
         </Modal>
     )

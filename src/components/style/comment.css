@@ -12,6 +12,10 @@
     scroll-behavior: smooth;
 }
 
+.commentBox::-webkit-scrollbar {
+    width: 0px;
+}
+
 .commentShowBox {
     min-height: 50px;
     width: 100%;
@@ -43,6 +47,52 @@
 }
 
 .commentInputBox {
+    padding: 10px;
+    width: 100%;
+    border-radius: 8px;
+    background-color: #ecebebea;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.295);
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
+
+.input-container {
+    display: flex;
+    width: 100%;
+}
+
+.input-container input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 4px 0 0 4px;
+    font-size: 16px
+}
+
+.input-container input:focus {
+    outline: none;
+}
+
+.send-button {
+    background-color: #3498db;
+    /* Blue color */
+    color: white;
+    border: none;
+    padding: 0 15px;
+    border-radius: 0 4px 4px 0;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* .send-button svg {
+    height: 18px;
+    width: 18px;
+    fill: white;
+} */
+
+/* .commentInputBox {
     padding: 5px 0 5px 0;
     position: absolute;
     right: 0;
@@ -52,7 +102,7 @@
     margin: 5px 5px 0 5px;
     display: flex;
     align-content: stretch;
-}
+} */
 
 .commentInput,
 .commentSentBtn {

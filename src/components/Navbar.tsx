@@ -170,7 +170,7 @@ export default function Navbar() {
                             color="inherit"
                             onClick={toggleNoti}
                         >
-                            <Badge badgeContent={notifications.length} color="error">
+                            <Badge badgeContent={notifications.filter((notification) => notification.read == false).length} color="error">
                                 <NotificationsIcon />
                             </Badge>
                         </IconButton>

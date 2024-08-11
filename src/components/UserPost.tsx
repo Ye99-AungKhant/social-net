@@ -11,6 +11,7 @@ import { Post } from '../types/app'
 import defaultUser from './user.png'
 import MenuPopup from './MenuPopup'
 import { fetchComment } from '../store/slices/commentSlice'
+import CommentDialog from './CommentDialog'
 
 const UserPost = () => {
     const maxPhotos = 4;
@@ -67,13 +68,8 @@ const UserPost = () => {
         }))
     };
 
-    const handleBack = () => {
-        navigate('/')
-    }
-
     return (
         <Box className='postSection'>
-            <Button onClick={handleBack}>Back</Button>
             {post &&
                 (<Box className='postContainer' key={post.id}>
                     <Card sx={{ width: 500 }}>
@@ -163,6 +159,13 @@ const UserPost = () => {
                     </Card>
                 </Box>)
             }
+
+            <CommentDialog
+                open={openCommetDialog}
+                setOpen={setOpenCommentDialog}
+                postId={postCommentId}
+                postOwnerId={0}
+            />
 
         </Box>
     )

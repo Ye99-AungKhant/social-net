@@ -9,7 +9,8 @@ import Avatar from '@mui/material/Avatar';
 import { Noti } from '../types/app';
 import { Link, useNavigate } from 'react-router-dom';
 import './style/notification.css'
-import { Backdrop } from '@mui/material';
+import { notiRead } from '../store/slices/appSlice';
+import { useAppDispatch } from '../store/hooks';
 
 interface Props {
     open: boolean
@@ -19,8 +20,10 @@ interface Props {
 const Popup = ({ open, closeMenu, notiData }: Props) => {
 
     const navigate = useNavigate()
-    const handleLinkToPost = (postId: number) => {
+    const dispatch = useAppDispatch()
+    const handleLinkToPost = (postId: number, notiId: number) => {
         navigate(`/post/${postId}`)
+        dispatch(notiRead(notiId))
     }
 
     return (
@@ -31,7 +34,7 @@ const Popup = ({ open, closeMenu, notiData }: Props) => {
                         {notiData.map((item) => (
                             <ListItemButton
                                 key={item.id}
-                                onClick={() => handleLinkToPost(item.post_id)}
+                                onClick={() => handleLinkToPost(item.post_id, item.id)}
                                 className={`${item.read ? '' : 'unread'}`}
                             >
                                 <ListItemAvatar>
