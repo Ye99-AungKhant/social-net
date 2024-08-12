@@ -1,10 +1,21 @@
 import { Box, Button, IconButton, Modal, Typography } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useState, ChangeEvent } from 'react'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import AboutUsInputGroup from './AboutUsInputGroup';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
+import { SelectChangeEvent } from '@mui/material/Select';
 import './style/aboutUs.css'
+import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import { useAppDispatch } from '../store/hooks';
+import { createAboutus } from '../store/slices/profileDataSlice';
+
+
+const iconList = [
+    { id: 1, icon: <WorkRoundedIcon /> },
+    { id: 2, icon: <HomeRoundedIcon /> },
+]
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -23,24 +34,47 @@ interface Props {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
+export interface InputChange {
+    index: number
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement> | SelectChangeEvent<number>
+}
+
+export interface InputFields {
+    textValue: string
+    selectValue: number
+}
 
 const CreateAboutUsDialog = ({ open, setOpen }: Props) => {
+    const dispatch = useAppDispatch()
 
     const closeModal = () => {
         setOpen(false)
+        setInputFields([{ textValue: '', selectValue: 0 }])
     }
 
-    const [inputFields, setInputFields] = useState([{ value: '' }]);
+    const [inputFields, setInputFields] = useState<InputFields[]>([{ textValue: '', selectValue: 0 }]);
 
     const handleAddField = () => {
-        setInputFields([...inputFields, { value: '' }]);
+        setInputFields([...inputFields, { textValue: '', selectValue: 0 }]);
     };
 
-    const handleInputChange = ({ index, event }: any) => {
-        const newInputFields = [...inputFields];
-        newInputFields[index].value = event.target.value;
-        setInputFields(newInputFields);
+    const handleInputChange = ({ index, event }: InputChange) => {
+        const { name, value } = event.target;
+
+        setInputFields((prevFields) => {
+            const newFields = [...prevFields];
+            newFields[index] = {
+                ...newFields[index],
+                [name]: value,
+            };
+            return newFields;
+        });
     };
+
+    const handleAboutUsSave = () => {
+        dispatch(createAboutus(inputFields))
+        closeModal()
+    }
 
     return (
         <Modal
@@ -68,21 +102,19 @@ const CreateAboutUsDialog = ({ open, setOpen }: Props) => {
                         <Chip label="Content" />
                     </Stack>
                     {inputFields.map((input, index) => (
-                        <Box key={index}>
-                            {/* <input
-                                type="text"
-                                value={input.value}
-                                onChange={(event) => handleInputChange({ index, event })}
-                                placeholder={`Input Field ${index + 1}`}
-                            /> */}
-                            <AboutUsInputGroup />
+                        <Box key={index} style={{ marginBottom: '10px' }}>
+                            <AboutUsInputGroup
+                                indexValue={index}
+                                inputValue={input}
+                                handleInputChange={handleInputChange}
+                            />
                         </Box>
                     ))}
                     <Button variant='outlined' onClick={handleAddField}>Add More</Button>
                 </Box>
                 <Box sx={{ position: 'absolute', right: 3, bottom: 10 }}>
-                    <Button variant='contained' onClick={handleAddField} sx={{ marginRight: 3, bgcolor: 'gray' }}>cancel</Button>
-                    <Button variant='contained' onClick={handleAddField}>Save</Button>
+                    <Button variant='contained' onClick={closeModal} sx={{ marginRight: 3, bgcolor: 'gray' }}>cancel</Button>
+                    <Button variant='contained' onClick={handleAboutUsSave}>Save</Button>
                 </Box>
             </Box>
 

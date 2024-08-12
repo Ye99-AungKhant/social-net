@@ -1,15 +1,14 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
-import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import NativeSelect from '@mui/material/NativeSelect';
 import InputBase from '@mui/material/InputBase';
 import { Box } from '@mui/material';
 
 import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import { InputChange } from './CreateAboutUsDialog';
 
 const BootstrapInput = styled(InputBase)(({ theme }) => ({
     '.MuiInputBase-input': {
@@ -45,28 +44,37 @@ const iconList = [
     { id: 1, icon: <WorkRoundedIcon /> },
     { id: 2, icon: <HomeRoundedIcon /> },
 ]
-
-const AboutUsInputGroup = () => {
-    const [age, setAge] = React.useState('');
-    const handleChange = (event: { target: { value: string } }) => {
-        setAge(event.target.value);
+interface AboutUsInputGroupProps {
+    handleInputChange: ({ index, event }: InputChange) => void;
+    inputValue: {
+        textValue: string;
+        selectValue: number;
     };
+    indexValue: number;
+}
+
+const AboutUsInputGroup = ({ handleInputChange, indexValue, inputValue }: AboutUsInputGroupProps) => {
+
     return (
         <Box sx={{ display: 'flex' }}>
             <FormControl sx={{ m: 1, height: 20, width: '12%' }} variant="standard">
                 <Select
-                    labelId="demo-customized-select-label"
+                    name="selectValue"
                     id="demo-customized-select"
-                    value={age}
-                    onChange={handleChange}
+                    value={inputValue.selectValue}
+                    onChange={(e) => handleInputChange({ index: indexValue, event: e })}
                     input={<BootstrapInput />}
                 >
                     <MenuItem value={0}><em>None</em></MenuItem>
-                    {iconList.map((list) => (<MenuItem value={list.id}>{list.icon}</MenuItem>))}
+                    {iconList.map((list) => (<MenuItem key={list.id} value={list.id}>{list.icon}</MenuItem>))}
                 </Select>
             </FormControl>
             <FormControl sx={{ m: 1, width: '80%' }} variant="standard" fullWidth>
-                <BootstrapInput id="demo-customized-textbox" />
+                <BootstrapInput id="demo-customized-textbox"
+                    name="textValue"
+                    value={inputValue.textValue}
+                    onChange={(e) => handleInputChange({ index: indexValue, event: e })}
+                />
             </FormControl>
         </Box>
     );
