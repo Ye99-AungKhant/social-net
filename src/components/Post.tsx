@@ -28,7 +28,7 @@ import { useWebSocket } from './WebSocketProvider';
 
 
 const Post = () => {
-    const posts = useAppSelector((state) => state.posts)
+    const { posts, friendPosts } = useAppSelector((state) => state.posts)
     const { stories } = useAppSelector((state) => state.stories)
     const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
@@ -42,7 +42,9 @@ const Post = () => {
     const [showMore, setShowMore] = useState<any>({})
     const { authUser } = useAppSelector((state) => state.auth)
     const [hasMore, setHasMore] = useState(true);
+    const [friendPostHasMore, setFriendPostHasMore] = useState(true);
     const [page, setPage] = useState(1);
+    const [friendPage, setFriendPage] = useState(1);
     const [storyHasMore, setStoryHasMore] = useState(true);
     const [storyPage, setStoryPage] = useState(1);
     const [openStoryCreate, setOpenStoryCreate] = useState<boolean>(false)
@@ -107,32 +109,43 @@ const Post = () => {
     }, [])
 
     useEffect(() => {
-        fetchPostData();
+        if (filterPost == 'posts') {
+            fetchPostData()
+        } else {
+            fetchFriendPostData()
+        }
     }, [filterPost]);
+
+    const fetchFriendPostData = async () => {
+        console.log('friend post loaded');
+        try {
+            dispatch(friendPostFetch(friendPage)).then((res) => res.payload).then((data) => {
+                if (data != null && data.length == 0) {
+                    setFriendPostHasMore(false);
+                }
+            })
+            setFriendPage((prevPage) => prevPage + 1);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
 
     const fetchPostData = async () => {
         console.log('post loaded');
         try {
-            if (filterPost == 'posts') {
-                dispatch(postFetch(page)).then((res) => res.payload).then((data) => {
-                    if (data != null && data.length == 0) {
-                        setHasMore(false);
-                    }
-                })
-                setPage((prevPage) => prevPage + 1);
-            } else {
-                dispatch(friendPostFetch(page)).then((res) => res.payload).then((data) => {
-                    if (data != null && data.length == 0) {
-                        setHasMore(false);
-                    }
-                })
-                setPage((prevPage) => prevPage + 1);
-            }
+            dispatch(postFetch(page)).then((res) => res.payload).then((data) => {
+                if (data != null && data.length == 0) {
+                    setHasMore(false);
+                }
+            })
+            setPage((prevPage) => prevPage + 1);
 
         } catch (error) {
             console.error('Error fetching data:', error);
         }
     };
+
+
 
     const fetchStoryData = async () => {
         console.log('story loaded');
@@ -249,195 +262,208 @@ const Post = () => {
                     <button type='button' className={`filterBtn ${filterPost !== 'posts' ? 'filterBtnActive' : ''}`} onClick={() => handleFilterPost('Following')}>Following</button>
                 </Box>
 
-                <InfiniteScroll
-                    dataLength={posts.posts.length}
-                    next={fetchPostData}
-                    hasMore={hasMore}
-                    loader=''
-                    endMessage={<p style={{ textAlign: 'center' }}><b>Yay! You have seen it all</b></p>}
-                    scrollableTarget="containerBoxDiv"
-                >
-                    {filterPost == 'posts' && posts.posts.map((post) => (
-                        <Box className='postContainer' key={post.id}>
-                            <Card sx={{ width: 500 }}>
+                {filterPost == 'posts' &&
+                    <InfiniteScroll
+                        dataLength={posts.length}
+                        next={fetchPostData}
+                        hasMore={hasMore}
+                        loader=''
+                        endMessage={<p style={{ textAlign: 'center' }}><b>Yay! You have seen it all</b></p>}
+                        scrollableTarget="containerBoxDiv"
+                    >
+                        {posts.map((post) => (
+                            <Box className='postContainer' key={post.id}>
+                                <Card sx={{ width: 500 }}>
 
-                                {post.image && post.image?.length > 0 &&
-                                    <div className="gallery">
-                                        {post.image.slice(0, maxPhotos).map((photo, index) => (
-                                            <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
-                                                && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
-                                                key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+                                    {post.image && post.image?.length > 0 &&
+                                        <div className="gallery">
+                                            {post.image.slice(0, maxPhotos).map((photo, index) => (
+                                                <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
+                                                    && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
+                                                    key={index} onClick={() => handlePostPhotoDialog(post.id)}>
 
-                                                {loading && postLoading}
-                                                <img
-                                                    src={photo.url}
-                                                    alt='postphoto'
-                                                    className="photo"
-                                                    onLoad={handleLoaded}
-                                                />
-
-                                                {post.image && index === maxPhotos - 1 && post.image.length > maxPhotos && (
-                                                    <div className="overlay">
-                                                        +{post.image.length - maxPhotos}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))
-                                        }
-                                        {openPostPhotoDialog[post.id] && <PostPhotoDialog
-                                            open={true}
-                                            setOpen={setOpenPostPhotoDialog}
-                                            photo={post.image}
-                                        />}
-                                    </div>
-
-                                }
-
-                                <CardContent sx={{ margin: 0, padding: 0, minHeight: 100, width: '100%' }}>
-                                    <div className='postHeader'>
-                                        <div className="postProfile">
-
-                                            {loading && profileLoading}
-                                            <Link to={`profile/${post.user.id}`}>
-                                                <img
-                                                    src={post.user.profile ? post.user.profile : defaultUser}
-                                                    alt="profile"
-                                                    onLoad={handleLoaded}
-                                                />
-                                            </Link>
-                                            <div className='profileText'>
-                                                <Link to={`profile/${post.user.id}`}><p>{post.user.name}</p></Link>
-                                                <p className='postDate'>{post.date}</p>
-                                                {postMenuId == post.id &&
-                                                    < MenuPopup
-                                                        editId={post.id}
-                                                        deleteId={post.id}
-                                                        open={openMenu}
-                                                        setOpen={setOpenMenu}
+                                                    {loading && postLoading}
+                                                    <img
+                                                        src={photo.url}
+                                                        alt='postphoto'
+                                                        className="photo"
+                                                        onLoad={handleLoaded}
                                                     />
-                                                }
-                                            </div>
 
-                                            <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
-                                        </div>
-                                        <div className='postAction'>
-                                            <div className='postLike'>
-
-                                                <FavoriteRoundedIcon onClick={() => handleLike(post.id, post.user.id)}
-                                                    className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
-                                                <p className='postActionText'>{post.like_count}</p>
-                                            </div>
-                                            <div className='postComment' onClick={() => handleCommentDialog(post.id, post.user.id)}>
-                                                <ChatIcon />
-                                                <p className='postActionText'>{post.comment_count}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className='postContent'>
-                                        <Typography variant="body2" color="text.black">
-                                            {showMore[post.id] ? post.content : `${post.content.substring(0, 120)}`}
-                                            {post.content.length > 120 ?
-                                                <button className='showMoreBtn' onClick={() => handlePostToggle(post.id)}>
-                                                    {showMore[post.id] ? "  See less" : "... See more"}
-                                                </button> : ''
+                                                    {post.image && index === maxPhotos - 1 && post.image.length > maxPhotos && (
+                                                        <div className="overlay">
+                                                            +{post.image.length - maxPhotos}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))
                                             }
-                                        </Typography>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Box>
-                    ))}
+                                            {openPostPhotoDialog[post.id] && <PostPhotoDialog
+                                                open={true}
+                                                setOpen={setOpenPostPhotoDialog}
+                                                photo={post.image}
+                                            />}
+                                        </div>
 
-                    {filterPost == 'friendPosts' && posts.friendPosts.map((post) => (
-                        <Box className='postContainer' key={post.id}>
-                            <Card sx={{ width: 500 }}>
+                                    }
 
-                                {post.image && post.image?.length > 0 &&
-                                    <div className="gallery">
-                                        {post.image.slice(0, maxPhotos).map((photo, index) => (
-                                            <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
-                                                && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
-                                                key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+                                    <CardContent sx={{ margin: 0, padding: 0, minHeight: 100, width: '100%' }}>
+                                        <div className='postHeader'>
+                                            <div className="postProfile">
 
-                                                {loading && postLoading}
-                                                <img
-                                                    src={photo.url}
-                                                    alt='postphoto'
-                                                    className="photo"
-                                                    onLoad={handleLoaded}
-                                                />
-
-                                                {post.image && index === maxPhotos - 1 && post.image.length > maxPhotos && (
-                                                    <div className="overlay">
-                                                        +{post.image.length - maxPhotos}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))
-                                        }
-                                        {openPostPhotoDialog[post.id] && <PostPhotoDialog
-                                            open={true}
-                                            setOpen={setOpenPostPhotoDialog}
-                                            photo={post.image}
-                                        />}
-                                    </div>
-
-                                }
-
-                                <CardContent sx={{ margin: 0, padding: 0, minHeight: 100, width: '100%' }}>
-                                    <div className='postHeader'>
-                                        <div className="postProfile">
-
-                                            {loading && profileLoading}
-                                            <Link to={`profile/${post.user.id}`}>
-                                                <img
-                                                    src={post.user.profile ? post.user.profile : defaultUser}
-                                                    alt="profile"
-                                                    onLoad={handleLoaded}
-                                                />
-                                            </Link>
-                                            <div className='profileText'>
-                                                <Link to={`profile/${post.user.id}`}><p>{post.user.name}</p></Link>
-                                                <p className='postDate'>{post.date}</p>
-                                                {postMenuId == post.id &&
-                                                    < MenuPopup
-                                                        editId={post.id}
-                                                        deleteId={post.id}
-                                                        open={openMenu}
-                                                        setOpen={setOpenMenu}
+                                                {loading && profileLoading}
+                                                <Link to={`profile/${post.user.id}`}>
+                                                    <img
+                                                        src={post.user.profile ? post.user.profile : defaultUser}
+                                                        alt="profile"
+                                                        onLoad={handleLoaded}
                                                     />
-                                                }
-                                            </div>
-                                            <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
-                                        </div>
-                                        <div className='postAction'>
-                                            <div className='postLike'>
+                                                </Link>
+                                                <div className='profileText'>
+                                                    <Link to={`profile/${post.user.id}`}><p>{post.user.name}</p></Link>
+                                                    <p className='postDate'>{post.date}</p>
+                                                    {postMenuId == post.id &&
+                                                        < MenuPopup
+                                                            editId={post.id}
+                                                            deleteId={post.id}
+                                                            open={openMenu}
+                                                            setOpen={setOpenMenu}
+                                                        />
+                                                    }
+                                                </div>
 
-                                                <FavoriteRoundedIcon onClick={() => handleLike(post.id, post.user.id)}
-                                                    className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
-                                                <p className='postActionText'>{post.like_count}</p>
+                                                <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
                                             </div>
-                                            <div className='postComment' onClick={() => handleCommentDialog(post.id, post.user.id)}>
-                                                <ChatIcon />
-                                                <p className='postActionText'>{post.comment_count}</p>
+                                            <div className='postAction'>
+                                                <div className='postLike'>
+
+                                                    <FavoriteRoundedIcon onClick={() => handleLike(post.id, post.user.id)}
+                                                        className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
+                                                    <p className='postActionText'>{post.like_count}</p>
+                                                </div>
+                                                <div className='postComment' onClick={() => handleCommentDialog(post.id, post.user.id)}>
+                                                    <ChatIcon />
+                                                    <p className='postActionText'>{post.comment_count}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className='postContent'>
-                                        <Typography variant="body2" color="text.black">
-                                            {showMore[post.id] ? post.content : `${post.content.substring(0, 120)}`}
-                                            {post.content.length > 120 ?
-                                                <button className='showMoreBtn' onClick={() => handlePostToggle(post.id)}>
-                                                    {showMore[post.id] ? "  See less" : "... See more"}
-                                                </button> : ''
+                                        <div className='postContent'>
+                                            <Typography variant="body2" color="text.black">
+                                                {showMore[post.id] ? post.content : `${post.content.substring(0, 120)}`}
+                                                {post.content.length > 120 ?
+                                                    <button className='showMoreBtn' onClick={() => handlePostToggle(post.id)}>
+                                                        {showMore[post.id] ? "  See less" : "... See more"}
+                                                    </button> : ''
+                                                }
+                                            </Typography>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </Box>
+                        ))}
+                    </InfiniteScroll>
+                }
+
+                {filterPost == 'friendPosts' &&
+                    <InfiniteScroll
+                        dataLength={friendPosts.length}
+                        next={fetchFriendPostData}
+                        hasMore={friendPostHasMore}
+                        loader=''
+                        endMessage={<p style={{ textAlign: 'center' }}><b>Yay! You have seen it all</b></p>}
+                        scrollableTarget="containerBoxDiv"
+                    >
+                        {friendPosts.map((post) => (
+                            <Box className='postContainer' key={post.id}>
+                                <Card sx={{ width: 500 }}>
+
+                                    {post.image && post.image?.length > 0 &&
+                                        <div className="gallery">
+                                            {post.image.slice(0, maxPhotos).map((photo, index) => (
+                                                <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
+                                                    && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
+                                                    key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+
+                                                    {loading && postLoading}
+                                                    <img
+                                                        src={photo.url}
+                                                        alt='postphoto'
+                                                        className="photo"
+                                                        onLoad={handleLoaded}
+                                                    />
+
+                                                    {post.image && index === maxPhotos - 1 && post.image.length > maxPhotos && (
+                                                        <div className="overlay">
+                                                            +{post.image.length - maxPhotos}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))
                                             }
-                                        </Typography>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Box>
-                    ))}
-                </InfiniteScroll>
+                                            {openPostPhotoDialog[post.id] && <PostPhotoDialog
+                                                open={true}
+                                                setOpen={setOpenPostPhotoDialog}
+                                                photo={post.image}
+                                            />}
+                                        </div>
+
+                                    }
+
+                                    <CardContent sx={{ margin: 0, padding: 0, minHeight: 100, width: '100%' }}>
+                                        <div className='postHeader'>
+                                            <div className="postProfile">
+
+                                                {loading && profileLoading}
+                                                <Link to={`profile/${post.user.id}`}>
+                                                    <img
+                                                        src={post.user.profile ? post.user.profile : defaultUser}
+                                                        alt="profile"
+                                                        onLoad={handleLoaded}
+                                                    />
+                                                </Link>
+                                                <div className='profileText'>
+                                                    <Link to={`profile/${post.user.id}`}><p>{post.user.name}</p></Link>
+                                                    <p className='postDate'>{post.date}</p>
+                                                    {postMenuId == post.id &&
+                                                        < MenuPopup
+                                                            editId={post.id}
+                                                            deleteId={post.id}
+                                                            open={openMenu}
+                                                            setOpen={setOpenMenu}
+                                                        />
+                                                    }
+                                                </div>
+                                                <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
+                                            </div>
+                                            <div className='postAction'>
+                                                <div className='postLike'>
+
+                                                    <FavoriteRoundedIcon onClick={() => handleLike(post.id, post.user.id)}
+                                                        className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
+                                                    <p className='postActionText'>{post.like_count}</p>
+                                                </div>
+                                                <div className='postComment' onClick={() => handleCommentDialog(post.id, post.user.id)}>
+                                                    <ChatIcon />
+                                                    <p className='postActionText'>{post.comment_count}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className='postContent'>
+                                            <Typography variant="body2" color="text.black">
+                                                {showMore[post.id] ? post.content : `${post.content.substring(0, 120)}`}
+                                                {post.content.length > 120 ?
+                                                    <button className='showMoreBtn' onClick={() => handlePostToggle(post.id)}>
+                                                        {showMore[post.id] ? "  See less" : "... See more"}
+                                                    </button> : ''
+                                                }
+                                            </Typography>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </Box>
+                        ))}
+                    </InfiniteScroll>
+                }
                 <CommentDialog
                     open={openCommetDialog}
                     setOpen={setOpenCommentDialog}

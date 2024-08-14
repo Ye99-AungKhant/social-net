@@ -6,6 +6,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import MenuPopup from './MenuPopup';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -30,6 +31,7 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import UpdateProfile from './UpdateProfile';
 
 
 const iconList = [
@@ -52,6 +54,7 @@ const UserProfile = () => {
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
     const [openCreateAboutUsDialog, setOpenCreateAboutUsDialog] = useState<boolean>(false)
+    const [openUpdateProfileDialog, setOpenUpdateProfileDialog] = useState<boolean>(false)
     const [addBio, setAddBio] = useState(false)
     const [bioContent, setBioContent] = useState('')
     const { profileId }: any = useParams();
@@ -139,6 +142,10 @@ const UserProfile = () => {
         setOpenCreateAboutUsDialog(!openCreateAboutUsDialog)
     }
 
+    const handleUpdateProfile = () => {
+        setOpenUpdateProfileDialog(!openUpdateProfileDialog)
+    }
+
     const handleLinkToFriend = (friendId: number) => {
         navigate(`/profile/${friendId}`)
     }
@@ -161,16 +168,18 @@ const UserProfile = () => {
                     <Box className="profile-details">
                         <Box className="pd-left">
                             <Box className="pd-row">
-                                <img src={profileDetail?.profile ? profileDetail.profile : defaultUser} className="pd-image" />
+                                <img alt={profileDetail?.name} src={profileDetail?.profile ? profileDetail.profile : defaultUser} className="pd-image" />
                                 <Box>
                                     <Typography variant='h3'>{profileDetail?.name}</Typography>
                                     <Typography>{friendLists.length} Friend</Typography>
                                     <AvatarGroup max={4}>
                                         {friendLists.map((friendlist) => (
-                                            <Avatar alt={friendlist.name} src={friendlist.profile} />
+                                            <Avatar className='img' alt={friendlist.name} src={friendlist.profile} />
                                         ))}
                                     </AvatarGroup>
-
+                                </Box>
+                                <Box onClick={handleUpdateProfile}>
+                                    <MoreVertRoundedIcon sx={{ cursor: 'pointer' }} />
                                 </Box>
                             </Box>
                         </Box>
@@ -262,7 +271,7 @@ const UserProfile = () => {
                                 </ul>
                             </Box>
 
-                            <Box className="profile-intro">
+                            {/* <Box className="profile-intro">
                                 <Box className="title-box">
                                     <h3>Photos</h3>
                                     <a href="">All Photos</a>
@@ -287,7 +296,7 @@ const UserProfile = () => {
                                         <img src="https://firebasestorage.googleapis.com/v0/b/react-ef343.appspot.com/o/files%2Fsn_5db837ee-f7c2-4195-a2e6-3df61d725449?alt=media&token=9e43ec2a-3432-40cc-b3d6-628b041aa342" />
                                     </Box>
                                 </Box>
-                            </Box>
+                            </Box> */}
 
                             <Box className="profile-intro">
                                 <Box className="title-box">
@@ -416,7 +425,13 @@ const UserProfile = () => {
                 handleConfirmUnfriend={handleConfirmUnfriend}
             />
             <CreateAboutUsDialog
-                open={openCreateAboutUsDialog} setOpen={setOpenCreateAboutUsDialog}
+                open={openCreateAboutUsDialog}
+                setOpen={setOpenCreateAboutUsDialog}
+            />
+            <UpdateProfile
+                open={openUpdateProfileDialog}
+                setOpen={setOpenUpdateProfileDialog}
+                profileData={profileDetail}
             />
         </Box>
     )

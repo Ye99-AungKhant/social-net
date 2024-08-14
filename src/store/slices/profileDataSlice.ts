@@ -107,6 +107,27 @@ export const updateBio = createAsyncThunk(
     }
 )
 
+export const updateProfile = createAsyncThunk(
+    'profile/update',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/profile/update`, {
+            method: "PATCH",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify(payload)
+        })
+        const dataFromServer = await response.json()
+        const { success, data } = dataFromServer
+        thunkApi.dispatch(profileDetail(data))
+        return success
+    }
+)
+
 export const createAboutus = createAsyncThunk(
     'aboutus/create',
     async (payload: any, thunkApi) => {

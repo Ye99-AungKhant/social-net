@@ -91,6 +91,7 @@ const PostCreate = ({ open, setOpen, type }: Props) => {
     }
 
     const handleCreatePost = async () => {
+
         try {
 
             if (selectedImagesUpload.length !== 0 && type == 'Post') {
@@ -209,7 +210,6 @@ const PostCreate = ({ open, setOpen, type }: Props) => {
                                         <div className='imagePreviewBox' key={index}>
                                             <IconButton sx={{ position: 'absolute', right: 0 }}
                                                 onClick={() => deletePreviewImageHandler(image)}
-
                                             >
                                                 <CloseRoundedIcon className='removePreviewImage' />
                                             </IconButton>
@@ -228,7 +228,8 @@ const PostCreate = ({ open, setOpen, type }: Props) => {
                                     <input
                                         type='file'
                                         id="formId"
-                                        multiple accept="image/png , image/jpeg, image/webp"
+                                        multiple
+                                        accept="image/png , image/jpeg, image/webp"
                                         hidden
                                     />
                                     Photo/Video
