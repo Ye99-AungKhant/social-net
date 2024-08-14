@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { User, UserSlice } from "../../types/user";
-import { ProfileDataDetail, ProfileDataSlice } from "../../types/profileData";
+import { ProfileAboutUs, ProfileDataDetail, ProfileDataSlice } from "../../types/profileData";
 import { setPost } from "./postSlice";
 import { Post } from "../../types/app";
 
@@ -39,10 +39,11 @@ export const profileDataFetch = createAsyncThunk(
             }
         })
         const dataFromServer = await response.json()
-        const { success, profileData, friendList, waitingfriendList } = dataFromServer
+        const { success, profileData, friendList, waitingfriendList, aboutus } = dataFromServer
         thunkApi.dispatch(profileDetail(profileData))
         thunkApi.dispatch(friendLists(friendList))
         thunkApi.dispatch(waitingfriendLists(waitingfriendList))
+        thunkApi.dispatch(setAboutUs(aboutus))
     }
 )
 
@@ -87,12 +88,73 @@ export const addfriend = createAsyncThunk(
     }
 )
 
+export const updateBio = createAsyncThunk(
+    'profile/updateBio',
+    async (payload: string, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/profile/bio`, {
+            method: "PATCH",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ 'bio': payload })
+        })
+        const dataFromServer = await response.json()
+        const { success } = dataFromServer
+    }
+)
+
+export const createAboutus = createAsyncThunk(
+    'aboutus/create',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/profile/aboutus`, {
+            method: "POST",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ 'data': payload })
+        })
+        const dataFromServer = await response.json()
+        const { success, data } = dataFromServer
+        if (success)
+            thunkApi.dispatch(setAboutUs(data))
+    }
+)
+
+export const deleteAboutUs = createAsyncThunk(
+    'aboutUs/delete',
+    async (payload: number, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/profile/aboutus/${payload}`, {
+            method: "DELETE",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+        })
+        const dataFromServer = await response.json()
+        const { success } = dataFromServer
+        if (success)
+            thunkApi.dispatch(replaceAboutUs(payload))
+    }
+)
+
 
 const initialState: ProfileDataSlice = {
     posts: [],
     profileDetail: null,
     friendLists: [],
-    waitingfriendLists: []
+    waitingfriendLists: [],
+    aboutUs: [],
 }
 export const profileDataSlice = createSlice({
     name: 'profileDataDetail',
@@ -118,10 +180,19 @@ export const profileDataSlice = createSlice({
         },
         removeWaitingFriend: (state) => {
             state.waitingfriendLists = []
+        },
+        setAboutUs: (state, action: PayloadAction<ProfileAboutUs[]>) => {
+            state.aboutUs = [...action.payload, ...state.aboutUs]
+        },
+        removeAboutUs: (state) => {
+            state.aboutUs = []
+        },
+        replaceAboutUs: (state, action: PayloadAction<number>) => {
+            state.aboutUs = state.aboutUs.filter((list) => (list.id !== action.payload))
         }
     },
 })
 
-export const { setProfilePost, profileDetail, friendLists, waitingfriendLists, removePost, removeFriend, removeWaitingFriend } = profileDataSlice.actions
+export const { setProfilePost, profileDetail, friendLists, waitingfriendLists, removePost, removeFriend, removeWaitingFriend, setAboutUs, removeAboutUs, replaceAboutUs } = profileDataSlice.actions
 
 export default profileDataSlice.reducer

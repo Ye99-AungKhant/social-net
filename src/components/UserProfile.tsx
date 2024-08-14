@@ -1,5 +1,5 @@
-import { Box, Card, CardContent, Typography } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import { Avatar, AvatarGroup, Box, Button, Card, CardContent, IconButton, TextField, Typography } from '@mui/material'
+import React, { useEffect, useState, ChangeEvent } from 'react'
 import './style/profile.css'
 import defaultUser from './user.png'
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -17,14 +17,28 @@ import PostPhotoDialog from './PostPhotoDialog';
 import Navbar from './Navbar';
 import { fetchData } from '../store/slices/appSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Link, useParams } from 'react-router-dom';
-import { addfriend, profileDataFetch, profilePostFetch, removePost, removeWaitingFriend, unfriend } from './../store/slices/profileDataSlice';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { addfriend, deleteAboutUs, profileDataFetch, profilePostFetch, removeAboutUs, removePost, removeWaitingFriend, unfriend, updateBio } from './../store/slices/profileDataSlice';
 import LeftSidebar from './LeftSidebar';
 import ConfirmDialog from './ConfirmDialog';
 import FriendButton from './FriendButton';
+import CreateAboutUsDialog from './CreateAboutUsDialog';
+import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+
+
+const iconList = [
+    { id: 1, icon: <WorkRoundedIcon /> },
+    { id: 2, icon: <HomeRoundedIcon /> },
+]
 
 const UserProfile = () => {
-    const { posts, profileDetail, friendLists, waitingfriendLists } = useAppSelector((state) => state.profileData)
+    const { posts, profileDetail, friendLists, waitingfriendLists, aboutUs } = useAppSelector((state) => state.profileData)
     const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
     const [openComfirmDialog, setOpenComfirmDialog] = useState<boolean>(false)
@@ -37,8 +51,11 @@ const UserProfile = () => {
     const { authUser } = useAppSelector((state) => state.auth)
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
+    const [openCreateAboutUsDialog, setOpenCreateAboutUsDialog] = useState<boolean>(false)
+    const [addBio, setAddBio] = useState(false)
+    const [bioContent, setBioContent] = useState('')
     const { profileId }: any = useParams();
-    const profileIdNum = Number(profileId)
+    const navigate = useNavigate()
 
     const maxPhotos = 4;
 
@@ -90,10 +107,15 @@ const UserProfile = () => {
 
     useEffect(() => {
         dispatch(removePost())
+        dispatch(removeAboutUs())
         dispatch(fetchData({}))
         dispatch(profileDataFetch(profileId))
         fetchPostData()
     }, [profileId])
+
+    useEffect(() => {
+        setBioContent(profileDetail?.bio ? profileDetail?.bio : '')
+    }, [profileDetail])
 
     const fetchPostData = async () => {
         console.log('post loaded');
@@ -113,6 +135,21 @@ const UserProfile = () => {
 
     const matchedFriend = waitingfriendLists.find(friendlist => friendlist.adding_user == profileId);
 
+    const handleCreateAboutUs = () => {
+        setOpenCreateAboutUsDialog(!openCreateAboutUsDialog)
+    }
+
+    const handleLinkToFriend = (friendId: number) => {
+        navigate(`/profile/${friendId}`)
+    }
+
+    const handleAboutUsDelete = (id: number) => {
+        dispatch(deleteAboutUs(id))
+    }
+
+    const handleBio = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setBioContent(event.target.value)
+    }
 
     return (
         <Box>
@@ -128,10 +165,12 @@ const UserProfile = () => {
                                 <Box>
                                     <Typography variant='h3'>{profileDetail?.name}</Typography>
                                     <Typography>{friendLists.length} Friend</Typography>
-                                    <img src="https://firebasestorage.googleapis.com/v0/b/react-ef343.appspot.com/o/files%2Fsn_5db837ee-f7c2-4195-a2e6-3df61d725449?alt=media&token=9e43ec2a-3432-40cc-b3d6-628b041aa342" />
-                                    <img src="https://firebasestorage.googleapis.com/v0/b/react-ef343.appspot.com/o/files%2Fsn_5db837ee-f7c2-4195-a2e6-3df61d725449?alt=media&token=9e43ec2a-3432-40cc-b3d6-628b041aa342" />
-                                    <img src="https://firebasestorage.googleapis.com/v0/b/react-ef343.appspot.com/o/files%2Fsn_5db837ee-f7c2-4195-a2e6-3df61d725449?alt=media&token=9e43ec2a-3432-40cc-b3d6-628b041aa342" />
-                                    <img src="https://firebasestorage.googleapis.com/v0/b/react-ef343.appspot.com/o/files%2Fsn_5db837ee-f7c2-4195-a2e6-3df61d725449?alt=media&token=9e43ec2a-3432-40cc-b3d6-628b041aa342" />
+                                    <AvatarGroup max={4}>
+                                        {friendLists.map((friendlist) => (
+                                            <Avatar alt={friendlist.name} src={friendlist.profile} />
+                                        ))}
+                                    </AvatarGroup>
+
                                 </Box>
                             </Box>
                         </Box>
@@ -164,32 +203,62 @@ const UserProfile = () => {
                     <Box className="profile-info">
                         <Box className="info-col" sx={{ height: 500 }}>
                             <Box className="profile-intro">
-                                <h3>Bio</h3>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <h3>Bio</h3>
+                                    <Box component='div'
+                                        sx={{ cursor: 'pointer' }}
+                                        onClick={() => setAddBio(!addBio)}
+                                    >
+                                        {authUser?.id == profileId && <EditNoteRoundedIcon />}
+                                    </Box>
+                                </Box>
+                                {addBio &&
+                                    <Box>
+                                        <TextField fullWidth onChange={(e) => handleBio(e)} />
+                                        <IconButton color="error" aria-label="add to shopping cart"
+                                            onClick={() => setAddBio(!addBio)}
+                                        >
+                                            <CloseRoundedIcon />
+                                        </IconButton>
+                                        <IconButton color="primary" aria-label="add to shopping cart"
+                                            onClick={() => {
+                                                dispatch(updateBio(bioContent))
+                                                setAddBio(!addBio)
+                                            }}
+                                        >
+                                            <CheckRoundedIcon />
+                                        </IconButton>
+                                    </Box>
+                                }
                                 <Typography className="intro-text">
-                                    Believe in yourself and you can do unbelieveable thing.
-                                    <img src="images/feeling.png" />
+                                    {bioContent}
                                 </Typography>
                                 <hr />
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <h3>Detail</h3>
+                                    <Box component='div'
+                                        sx={{ cursor: 'pointer' }}
+                                        onClick={handleCreateAboutUs}
+                                    >
+                                        {authUser?.id == profileId && <AddRoundedIcon />}
+                                    </Box>
+                                </Box>
+
                                 <ul>
-                                    <li>
-                                        <img src="images/profile-job.png" /> Director at 99media Ltd
-                                    </li>
-                                    <li>
-                                        <img src="images/profile-study.png" />
-                                        Studied at Amity University
-                                    </li>
-                                    <li>
-                                        <img src="images/profile-study.png" />
-                                        Went to DPS Delhi
-                                    </li>
-                                    <li>
-                                        <img src="images/profile-home.png" />
-                                        Lives in Bangalore, India
-                                    </li>
-                                    <li>
-                                        <img src="images/profile-location.png" />
-                                        From Bangalore, India
-                                    </li>
+                                    {aboutUs.map((aboutUsList) => (
+                                        <li>
+                                            {iconList.map((list) => list.id == aboutUsList.icon && list.icon)}
+                                            <i style={{ marginLeft: 10 }}>{aboutUsList.content}</i>
+
+                                            {authUser?.id == profileId &&
+                                                (<Box component='div' className='aboutUsAction' onClick={() => handleAboutUsDelete(aboutUsList.id)}>
+                                                    <DeleteIcon sx={{ fontSize: 20 }} />
+                                                </Box>)
+                                            }
+
+                                        </li>
+                                    ))}
+
                                 </ul>
                             </Box>
 
@@ -228,11 +297,9 @@ const UserProfile = () => {
                                 <p>{friendLists.length}</p>
                                 <Box className="friends-box">
                                     {friendLists.map((friendlist) => (
-                                        <Box className='item' key={friendlist.id}>
-                                            <Link to={`/profile/${friendlist.id}`}>
-                                                <img src={friendlist.profile ? friendlist.profile : defaultUser} />
-                                                <p>{friendlist.name}</p>
-                                            </Link>
+                                        <Box component='div' className='item' key={friendlist.id} onClick={() => handleLinkToFriend(friendlist.id)}>
+                                            <img src={friendlist.profile ? friendlist.profile : defaultUser} />
+                                            <p>{friendlist.name}</p>
                                         </Box>
                                     ))}
                                 </Box>
@@ -347,6 +414,9 @@ const UserProfile = () => {
                 open={openComfirmDialog}
                 setOpen={setOpenComfirmDialog}
                 handleConfirmUnfriend={handleConfirmUnfriend}
+            />
+            <CreateAboutUsDialog
+                open={openCreateAboutUsDialog} setOpen={setOpenCreateAboutUsDialog}
             />
         </Box>
     )
