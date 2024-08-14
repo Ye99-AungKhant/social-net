@@ -45,6 +45,7 @@ const UserProfile = () => {
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
     const [openComfirmDialog, setOpenComfirmDialog] = useState<boolean>(false)
     const [openPostPhotoDialog, setOpenPostPhotoDialog] = useState<any>({})
+    const [postPhotoIndex, setPostPhotoIndex] = useState<number>(0)
     const [postCommentId, setPostCommentId] = useState<number>(0)
     const [loading, setLoading] = useState<boolean>(true)
     const [postMenuId, setPostMenuId] = useState<number>(0)
@@ -71,7 +72,8 @@ const UserProfile = () => {
         dispatch(fetchComment(postId))
     }
 
-    const handlePostPhotoDialog = (postId: number) => {
+    const handlePostPhotoDialog = (postId: number, index: number) => {
+        setPostPhotoIndex(index)
         setOpenPostPhotoDialog((prevState: any) => ({
             ...prevState,
             [postId]: !prevState[postId]
@@ -335,7 +337,7 @@ const UserProfile = () => {
                                                     {post.image.slice(0, maxPhotos).map((photo, index) => (
                                                         <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
                                                             && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
-                                                            key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+                                                            key={index} onClick={() => handlePostPhotoDialog(post.id, index)}>
 
                                                             {loading && postLoading}
                                                             <img
@@ -357,6 +359,7 @@ const UserProfile = () => {
                                                         open={true}
                                                         setOpen={setOpenPostPhotoDialog}
                                                         photo={post.image}
+                                                        photoIndex={postPhotoIndex}
                                                     />}
                                                 </div>
 

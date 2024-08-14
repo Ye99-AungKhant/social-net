@@ -21,6 +21,7 @@ const UserPost = () => {
     const [post, setPost] = useState<Post>()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
     const [openPostPhotoDialog, setOpenPostPhotoDialog] = useState<any>({})
+    const [postPhotoIndex, setPostPhotoIndex] = useState<number>(0)
     const [postCommentId, setPostCommentId] = useState<number>(0)
     const [postMenuId, setPostMenuId] = useState<number>(0)
     const [openMenu, setOpenMenu] = useState(false)
@@ -34,7 +35,8 @@ const UserPost = () => {
         )
     }, [userpostId])
 
-    const handlePostPhotoDialog = (postId: number) => {
+    const handlePostPhotoDialog = (postId: number, index: number) => {
+        setPostPhotoIndex(index)
         setOpenPostPhotoDialog((prevState: any) => ({
             ...prevState,
             [postId]: !prevState[postId]
@@ -79,7 +81,7 @@ const UserPost = () => {
                                 {post.image.slice(0, maxPhotos).map((photo, index) => (
                                     <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
                                         && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
-                                        key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+                                        key={index} onClick={() => handlePostPhotoDialog(post.id, index)}>
 
                                         {loading && postLoading}
                                         <img
@@ -101,6 +103,7 @@ const UserPost = () => {
                                     open={true}
                                     setOpen={setOpenPostPhotoDialog}
                                     photo={post.image}
+                                    photoIndex={postPhotoIndex}
                                 />}
                             </div>
 

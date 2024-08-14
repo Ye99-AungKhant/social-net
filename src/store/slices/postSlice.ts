@@ -4,6 +4,7 @@ import { Post } from '../../types/app';
 import { PostCreate } from '../../types/post';
 import { config } from './../../config/index';
 import { profileDetail } from './profileDataSlice';
+import { setSearchPostLike, setSearchPostUnLike } from './appSlice';
 
 export const postFetch = createAsyncThunk(
     'postFetch',
@@ -120,6 +121,12 @@ export const postLike = createAsyncThunk(
                 thunkApi.dispatch(setFriendPostLike(data))
             } else {
                 thunkApi.dispatch(setFriendPostUnLike(data))
+            }
+        } else {
+            if (liked) {
+                thunkApi.dispatch(setSearchPostLike(data))
+            } else {
+                thunkApi.dispatch(setSearchPostUnLike(data))
             }
         }
     }

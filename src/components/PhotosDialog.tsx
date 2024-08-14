@@ -22,7 +22,7 @@ const style = {
     width: 600,
     transform: 'translate(-50%, -50%)',
 };
-const PostPhotoDialog = ({ open, setOpen, photo, photoIndex }: Props) => {
+const PhotosDialog = ({ open, setOpen, photo, photoIndex }: Props) => {
     const [loading, setLoading] = useState<boolean>(true)
     const closeModal = () => {
         setOpen(false)
@@ -90,4 +90,4 @@ const PostPhotoDialog = ({ open, setOpen, photo, photoIndex }: Props) => {
     )
 }
 
-export default PostPhotoDialog
+export default PhotosDialog

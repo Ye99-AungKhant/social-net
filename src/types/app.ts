@@ -51,4 +51,6 @@ export interface AppSlice {
     friendList: UserDetail[] | null,
     friendRequestNoti: string | null,
     onlineUser: number[],
+    searchUser: UserDetail[],
+    searchPost: Post[]
 }

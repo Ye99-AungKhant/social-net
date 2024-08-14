@@ -1,5 +1,4 @@
 import { Avatar, Box, Button, Card, CardActions, CardContent, CardHeader, CardMedia, ImageList, ImageListItem, Typography } from '@mui/material'
-import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import "./style/post.css"
 import './style/PhotoGallery.css'
 import defaultUser from './user.png'
@@ -21,9 +20,6 @@ import PostCreate from './PostCreate';
 import StoryTextTextDialog from './StoryTextDialog';
 import { postLoading, profileLoading, storyLoading, storyUploadLoading } from './SkeletonComponent';
 import { Link, useParams } from 'react-router-dom';
-import { fetchNotification } from '../store/slices/appSlice';
-import { useOutletContext } from "react-router-dom";
-import { useWs } from './Layout';
 import { useWebSocket } from './WebSocketProvider';
 
 
@@ -33,7 +29,9 @@ const Post = () => {
     const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
     const [openPostPhotoDialog, setOpenPostPhotoDialog] = useState<any>({})
+    const [postPhotoIndex, setPostPhotoIndex] = useState<number>(0)
     const [openStoryPhotoDialog, setOpenStoryPhotoDialog] = useState<any>({})
+    const [storyPhotoIndex, setStoryPhotoIndex] = useState<number>(0)
     const [openStoryTextDialog, setOpenStoryTextDialog] = useState<any>({})
     const [postCommentId, setPostCommentId] = useState<number>(0)
     const [postCommentOwnerId, setPostCommentOwnerId] = useState<number>(0)
@@ -70,7 +68,8 @@ const Post = () => {
         dispatch(fetchComment(postId))
     }
 
-    const handlePostPhotoDialog = (postId: number) => {
+    const handlePostPhotoDialog = (postId: number, index: number) => {
+        setPostPhotoIndex(index)
         setOpenPostPhotoDialog((prevState: any) => ({
             ...prevState,
             [postId]: !prevState[postId]
@@ -242,6 +241,7 @@ const Post = () => {
                                     open={true}
                                     setOpen={setOpenStoryPhotoDialog}
                                     photo={[story]}
+                                    photoIndex={postPhotoIndex}
                                 />}
                                 {openStoryTextDialog[story.id] && <StoryTextTextDialog
                                     open={true}
@@ -280,7 +280,7 @@ const Post = () => {
                                             {post.image.slice(0, maxPhotos).map((photo, index) => (
                                                 <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
                                                     && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
-                                                    key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+                                                    key={index} onClick={() => handlePostPhotoDialog(post.id, index)}>
 
                                                     {loading && postLoading}
                                                     <img
@@ -302,6 +302,7 @@ const Post = () => {
                                                 open={true}
                                                 setOpen={setOpenPostPhotoDialog}
                                                 photo={post.image}
+                                                photoIndex={postPhotoIndex}
                                             />}
                                         </div>
 
@@ -382,7 +383,7 @@ const Post = () => {
                                             {post.image.slice(0, maxPhotos).map((photo, index) => (
                                                 <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
                                                     && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
-                                                    key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+                                                    key={index} onClick={() => handlePostPhotoDialog(post.id, index)}>
 
                                                     {loading && postLoading}
                                                     <img
@@ -404,6 +405,7 @@ const Post = () => {
                                                 open={true}
                                                 setOpen={setOpenPostPhotoDialog}
                                                 photo={post.image}
+                                                photoIndex={postPhotoIndex}
                                             />}
                                         </div>
 

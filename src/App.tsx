@@ -9,6 +9,8 @@ import UserPost from './components/UserPost';
 import { useWebSocket } from './components/WebSocketProvider';
 import { useEffect } from 'react';
 import { useAppSelector } from './store/hooks';
+import Photos from './components/Photos';
+import SearchView from './components/SearchView';
 
 interface WaitSocket {
   socket: WebSocket | null | undefined,
@@ -77,7 +79,9 @@ function App() {
       <Route path='/' element={<Layout />} >
         <Route index element={<Post />} />
         <Route path="/friend" element={<FriendRequest />} />
+        <Route path="/photos" element={<Photos />} />
         <Route path="/post/:userpostId" element={<UserPost />} />
+        <Route path="/search" element={<SearchView />} />
       </Route>
       <Route path='sign-in' element={<SignInUp />} />
       <Route path='profile/:profileId' element={<UserProfile />} />

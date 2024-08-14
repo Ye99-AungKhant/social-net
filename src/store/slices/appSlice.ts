@@ -3,6 +3,7 @@ import { AppSlice, Noti, Post, UserDetail } from '../../types/app'
 import { setPost } from './postSlice'
 import { authUser } from './userSlice'
 import { PayloadAction } from '@reduxjs/toolkit';
+import { stat } from 'fs';
 
 export const fetchData = createAsyncThunk(
     'app/fetchData',
@@ -68,12 +69,55 @@ export const notiRead = createAsyncThunk(
     }
 )
 
+export const search = createAsyncThunk(
+    'search',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/search?search=${payload}`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+        const dataFromServer = await response.json()
+        const { users, posts } = dataFromServer
+        console.log(dataFromServer);
+
+        thunkApi.dispatch(setSearchData(dataFromServer))
+    }
+)
+
+export const fetchPhotos = createAsyncThunk(
+    'fetchPhotos',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/photos?page=${payload}`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+        const dataFromServer = await response.json()
+        const { success, data } = dataFromServer
+        if (success)
+            return data
+    }
+)
+
 const initialState: AppSlice = {
     notifications: [],
     chatNoti: null,
     friendList: null,
     friendRequestNoti: null,
     onlineUser: [],
+    searchUser: [],
+    searchPost: [],
 }
 
 export const appDataSlice = createSlice({
@@ -108,8 +152,33 @@ export const appDataSlice = createSlice({
         setOnlineUser: (state, action: PayloadAction<[]>) => {
             state.onlineUser = action.payload
         },
+        setSearchData: (state, action: PayloadAction<any>) => {
+            state.searchUser = [...action.payload.users]
+            state.searchPost = [...action.payload.posts]
+        },
+        setSearchPostLike: (state, action: PayloadAction<any>) => {
+            const postId = action.payload.post_id
+            state.searchPost.map((post) => {
+                if (post.id === postId) {
+                    post.like_count += 1;
+                    post.liked.push(action.payload)
+                }
+                return post;
+            })
+        },
+        setSearchPostUnLike: (state, action: PayloadAction<any>) => {
+            const postId = action.payload.post_id
+            state.searchPost.map((post) => {
+                if (post.id === postId) {
+                    post.like_count -= 1;
+                    post.liked.pop()
+                }
+                return post;
+            })
+
+        },
     }
 })
 
-export const { setNotification, updateNotification, setChatNoti, removeChatNoti, setfriendRequestNoti, setFriendList, setOnlineUser } = appDataSlice.actions
+export const { setNotification, updateNotification, setChatNoti, removeChatNoti, setfriendRequestNoti, setFriendList, setOnlineUser, setSearchData, setSearchPostLike, setSearchPostUnLike } = appDataSlice.actions
 export default appDataSlice.reducer
