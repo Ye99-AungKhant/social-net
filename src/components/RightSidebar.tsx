@@ -51,7 +51,7 @@ const RightSidebar = () => {
                                     primary={item.name}
                                 />
                                 <Box>
-                                    <Typography sx={{ fontSize: 11, color: '#9a9a9a' }}>10 min</Typography>
+                                    <Typography sx={{ fontSize: 11, color: '#9a9a9a' }}>{onlineUser && onlineUser.includes(item.id) ? 'Online' : 'Offline'}</Typography>
                                 </Box>
                             </ListItemButton>
                         </ListItem>

@@ -32,6 +32,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import UpdateProfile from './UpdateProfile';
+import CommentDialog from './CommentDialog';
 
 
 const iconList = [
@@ -47,6 +48,7 @@ const UserProfile = () => {
     const [openPostPhotoDialog, setOpenPostPhotoDialog] = useState<any>({})
     const [postPhotoIndex, setPostPhotoIndex] = useState<number>(0)
     const [postCommentId, setPostCommentId] = useState<number>(0)
+    const [postCommentOwnerId, setPostCommentOwnerId] = useState<number>(0)
     const [loading, setLoading] = useState<boolean>(true)
     const [postMenuId, setPostMenuId] = useState<number>(0)
     const [openMenu, setOpenMenu] = useState(false)
@@ -63,8 +65,10 @@ const UserProfile = () => {
 
     const maxPhotos = 4;
 
-    const handleLike = (postId: number) => {
-        dispatch(postLike(postId))
+    const handleLike = (postId: number, postOwnerId: number) => {
+        let filterPost = 'ProfilePost'
+        let postData = { filterPost, postId }
+        dispatch(postLike(postData))
     }
     const handleCommentDialog = (postId: number) => {
         setOpenCommentDialog(!openCommetDialog)
@@ -392,7 +396,7 @@ const UserProfile = () => {
                                                     <div className='postAction'>
                                                         <div className='postLike'>
 
-                                                            <FavoriteRoundedIcon onClick={() => handleLike(post.id)}
+                                                            <FavoriteRoundedIcon onClick={() => handleLike(post.id, post.user.id)}
                                                                 className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
                                                             <p className='postActionText'>{post.like_count}</p>
                                                         </div>
@@ -435,6 +439,12 @@ const UserProfile = () => {
                 open={openUpdateProfileDialog}
                 setOpen={setOpenUpdateProfileDialog}
                 profileData={profileDetail}
+            />
+            <CommentDialog
+                open={openCommetDialog}
+                setOpen={setOpenCommentDialog}
+                postId={postCommentId}
+                postOwnerId={postCommentOwnerId}
             />
         </Box>
     )

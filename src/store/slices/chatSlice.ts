@@ -64,8 +64,31 @@ export const chatNotiRemove = createAsyncThunk(
     }
 )
 
+export const getlastMessage = createAsyncThunk(
+    'lastMessage',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/chat/lastmessage`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+        })
+        const dataFromServer = await response.json()
+        const { data } = dataFromServer
+        console.log('lastmessage', data);
+
+        thunkApi.dispatch(setLastMessage(data))
+
+    }
+)
+
 const initialState: ChatSlice = {
     chats: [],
+    lastMessage: [],
 }
 export const chatSlice = createSlice({
     name: 'user',
@@ -76,10 +99,13 @@ export const chatSlice = createSlice({
         },
         setNewChat: (state, action: PayloadAction<Chat>) => {
             state.chats = [...state.chats, action.payload]
-        }
+        },
+        setLastMessage: (state, action: PayloadAction<Chat[]>) => {
+            state.lastMessage = [...action.payload]
+        },
     },
 })
 
-export const { setChatList, setNewChat } = chatSlice.actions
+export const { setChatList, setNewChat, setLastMessage } = chatSlice.actions
 
 export default chatSlice.reducer

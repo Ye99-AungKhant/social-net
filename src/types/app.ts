@@ -17,6 +17,7 @@ export interface UserDetail {
     id: number
     name: string
     profile?: string
+    lastOnline?: string
 }
 export interface postImage {
     id: number

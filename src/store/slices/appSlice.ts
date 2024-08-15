@@ -69,6 +69,27 @@ export const notiRead = createAsyncThunk(
     }
 )
 
+export const markAsReadAllNoti = createAsyncThunk(
+    'app/markAsReadAllNoti',
+    async (payload: number[], thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/notification/markAsReadAll`, {
+            method: "PATCH",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ 'notiId': payload })
+        })
+        const dataFromServer = await response.json()
+        const { success } = dataFromServer
+        if (success)
+            thunkApi.dispatch(updateAllNotiAsRead(payload))
+    }
+)
+
 export const search = createAsyncThunk(
     'search',
     async (payload: any, thunkApi) => {
@@ -110,6 +131,23 @@ export const fetchPhotos = createAsyncThunk(
     }
 )
 
+export const updateLastOnline = createAsyncThunk(
+    'updateLastOnline',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/user/updateLastOnline`, {
+            method: "PATCH",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ 'userId': payload })
+        })
+    }
+)
+
 const initialState: AppSlice = {
     notifications: [],
     chatNoti: null,
@@ -131,6 +169,14 @@ export const appDataSlice = createSlice({
             state.notifications = state.notifications.map((noti) =>
                 noti.id === action.payload ? { ...noti, read: true } : noti
             );
+        },
+        updateAllNotiAsRead: (state, action: PayloadAction<number[]>) => {
+            state.notifications = state.notifications.map((noti) => {
+                if (action.payload.includes(noti.id)) {
+                    return { ...noti, read: true };
+                }
+                return noti;
+            });
         },
         setChatNoti: (state, action: PayloadAction<any>) => {
             if (state.chatNoti != null) {
@@ -180,5 +226,6 @@ export const appDataSlice = createSlice({
     }
 })
 
-export const { setNotification, updateNotification, setChatNoti, removeChatNoti, setfriendRequestNoti, setFriendList, setOnlineUser, setSearchData, setSearchPostLike, setSearchPostUnLike } = appDataSlice.actions
+export const { setNotification, updateNotification, updateAllNotiAsRead, setChatNoti, removeChatNoti, setfriendRequestNoti,
+    setFriendList, setOnlineUser, setSearchData, setSearchPostLike, setSearchPostUnLike } = appDataSlice.actions
 export default appDataSlice.reducer

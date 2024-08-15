@@ -51,12 +51,12 @@ const Menu = ({ open, Id }: Props) => {
                         <ListItemText primary='Setting & Privacy' />
                     </ListItemButton>
 
-                    <ListItemButton>
+                    {/* <ListItemButton>
                         <ListItemIcon>
                             <NightlightRoundRoundedIcon />
                         </ListItemIcon>
                         <ListItemText primary='Display' />
-                    </ListItemButton>
+                    </ListItemButton> */}
                     <Divider />
                     <ListItemButton onClick={handleLogOut}>
                         <ListItemIcon>

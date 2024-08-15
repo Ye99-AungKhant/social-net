@@ -13,5 +13,6 @@ export interface Chat {
 }
 
 export interface ChatSlice {
-    chats: Chat[]
+    chats: Chat[],
+    lastMessage: Chat[],
 }

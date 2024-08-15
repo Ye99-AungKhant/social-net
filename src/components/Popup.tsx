@@ -9,8 +9,9 @@ import Avatar from '@mui/material/Avatar';
 import { Noti } from '../types/app';
 import { Link, useNavigate } from 'react-router-dom';
 import './style/notification.css'
-import { notiRead } from '../store/slices/appSlice';
+import { markAsReadAllNoti, notiRead } from '../store/slices/appSlice';
 import { useAppDispatch } from '../store/hooks';
+import { Divider } from '@mui/material';
 
 interface Props {
     open: boolean
@@ -25,12 +26,20 @@ const Popup = ({ open, closeMenu, notiData }: Props) => {
         navigate(`/post/${postId}`)
         dispatch(notiRead(notiId))
     }
+    const handleMarkAsReadAll = () => {
+        if (notiData.length > 0) {
+            let allNoti = notiData.map((noti) => noti.id)
+            dispatch(markAsReadAllNoti(allNoti))
+        }
+    }
 
     return (
         <>
             {open && (
                 <Box onClick={closeMenu} sx={{ bgcolor: '#FAFAFA', position: 'fixed', right: 0, zIndex: 3 }}>
-                    <List component="nav" aria-label="main mailbox folders">
+                    <Box component='div' className='markAsRead' onClick={handleMarkAsReadAll}><Box>Mark as Read</Box></Box>
+                    <Divider />
+                    <List component="nav" aria-label="main mailbox folders" className='notiBox'>
                         {notiData.map((item) => (
                             <ListItemButton
                                 key={item.id}
@@ -40,7 +49,7 @@ const Popup = ({ open, closeMenu, notiData }: Props) => {
                                 <ListItemAvatar>
                                     <Avatar alt="Travis Howard" src={item.user.profile} />
                                 </ListItemAvatar>
-                                <ListItemText primary={item.user.name + ' ' + item.content} />
+                                <ListItemText primary={item.user.name + ' ' + item.content} className={`${item.read ? '' : 'unread'}`} />
                             </ListItemButton>
                         ))}
                     </List>

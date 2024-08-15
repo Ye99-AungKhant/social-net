@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { Post } from '../../types/app';
 import { PostCreate } from '../../types/post';
 import { config } from './../../config/index';
-import { profileDetail } from './profileDataSlice';
+import { profileDetail, setProfilePostLike, setProfilePostUnLike } from './profileDataSlice';
 import { setSearchPostLike, setSearchPostUnLike } from './appSlice';
 
 export const postFetch = createAsyncThunk(
@@ -122,11 +122,17 @@ export const postLike = createAsyncThunk(
             } else {
                 thunkApi.dispatch(setFriendPostUnLike(data))
             }
-        } else {
+        } else if (payload.filterPost == 'searchPost') {
             if (liked) {
                 thunkApi.dispatch(setSearchPostLike(data))
             } else {
                 thunkApi.dispatch(setSearchPostUnLike(data))
+            }
+        } else if (payload.filterPost == 'ProfilePost') {
+            if (liked) {
+                thunkApi.dispatch(setProfilePostLike(data))
+            } else {
+                thunkApi.dispatch(setProfilePostUnLike(data))
             }
         }
     }

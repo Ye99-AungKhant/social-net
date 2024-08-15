@@ -21,7 +21,7 @@ import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRound
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import './style/chat.css'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { chatfetch, chatNotiRemove, sendChatMessage } from '../store/slices/chatSlice';
+import { chatfetch, chatNotiRemove, getlastMessage, sendChatMessage } from '../store/slices/chatSlice';
 import { Chat as chatlist, ChatMedia, ChatSlice } from '../types/chat';
 import Badge from '@mui/material/Badge';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -50,13 +50,13 @@ interface Props {
 }
 const Chat = ({ open, setOpen, newChatBadge }: Props) => {
 
-    const { ws, wsMessage, wsMessageCount, wsOnlineUser } = useWebSocket() || {};
+    const { ws, wsMessage, wsMessageCount, wsOnlineUser, wsReadMessage } = useWebSocket() || {};
     const [message, setMessage] = useState<chatlist[]>([])
     const messagesEndRef = useRef<null | HTMLElement>(null);
     const chatRef = useRef<null | HTMLInputElement>(null)
     const [selectUser, setSelectUser] = useState<any>()
     const { friendList } = useAppSelector((state) => state.app)
-    const { chats } = useAppSelector((state) => state.chat)
+    const { chats, lastMessage } = useAppSelector((state) => state.chat)
     const { authUser } = useAppSelector((state) => state.auth)
     const [unreadMessage, setUnReadMessage] = useState<any>({})
     const [selectedImages, setSelectedImages] = useState<any>([])
@@ -179,11 +179,12 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
     const scrollToBottom = () => {
         if (messagesEndRef.current)
             messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
-        // messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     };
     useEffect(() => {
         scrollToBottom();
+        dispatch(getlastMessage({}))
     }, [message])
+
     useEffect(() => {
 
         if (wsMessage) {
@@ -203,6 +204,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                     ]);
                     console.log('incoming message', wsMessage);
                 }
+
             }
             if (wsMessage.type === 'message' && wsMessage.receiverId == authUser?.id) {
                 newChatBadge({
@@ -216,11 +218,11 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
             }
 
 
-            // else if (parsedMessage.type === 'read') {
-            //     //     setMessage((prevMessages) => prevMessages.map((msg) =>
-            //     //         msg.sender_id === parsedMessage.receiverId ? { ...msg, read: true } : msg
-            //     //     ));
-            //     // }
+            if (wsReadMessage) {
+                setMessage((prevMessages) => prevMessages.map((msg) =>
+                    msg.sender_id === wsReadMessage.receiverId ? { ...msg, read: true } : msg
+                ));
+            }
 
         }
         if (wsMessageCount && !selectUser) {
@@ -230,11 +232,40 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                 });
             }
         }
+        // markMessagesAsRead(authUser?.id);
     }, [wsMessage]);
 
     useEffect(() => {
         setOnlineUser(wsOnlineUser?.data)
     }, [wsOnlineUser])
+
+    const markMessagesAsRead = async (senderId: any) => {
+        // Send read status to the WebSocket server
+        if (ws) {
+            ws.send(JSON.stringify({
+                type: 'read',
+                senderId: senderId,
+                receiverId: authUser?.id,
+            }));
+            // Send read status to the Laravel backend to update in the database
+            await fetch('http://localhost:8000/api/chat/read', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    sender_id: senderId,
+                    receiver_id: authUser?.id,
+                }),
+            });
+
+            setMessage((prevMessages) => prevMessages.map((msg) =>
+                msg.sender_id === senderId ? { ...msg, read: true } : msg
+            ));
+        }
+
+    };
 
     return (
         <Fragment>
@@ -268,7 +299,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                     <ListItemButton onClick={() => handleSelectUser(list)}>
                                         <ListItemText
                                             sx={{ position: 'absolute', right: 0, top: 0, marginTop: 2, marginRight: 1, color: '#9a9a9a' }}
-                                            secondary='2m'
+                                            secondary={onlineUser && onlineUser.includes(list.id) ? 'Online' : 'Offline'}
                                         />
                                         <ListItemAvatar>
                                             <Badge badgeContent={unreadMessage[list.id]} color="error">
@@ -283,7 +314,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
 
                                             </Badge>
                                         </ListItemAvatar>
-                                        <ListItemText primary={list.name} secondary="Good morning..." />
+                                        <ListItemText primary={list.name} secondary={lastMessage.map((message) => message.sender_id == list.id ? message.message : '')} />
                                     </ListItemButton>
                                     <Divider />
                                 </Box>
@@ -329,7 +360,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                                 </Box>
                                             }
                                             {chat.message !== null &&
-                                                <Box className={`${chat.receiver_id == authUser?.id ? 'receiver' : 'sender'} `}>
+                                                <Box className={`${chat.receiver_id == authUser?.id ? 'receiver' : 'sender'} ${chat.read ? '' : ''}`}>
                                                     {chat.message}
                                                 </Box>
                                             }

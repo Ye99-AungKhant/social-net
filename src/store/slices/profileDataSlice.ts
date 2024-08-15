@@ -210,10 +210,39 @@ export const profileDataSlice = createSlice({
         },
         replaceAboutUs: (state, action: PayloadAction<number>) => {
             state.aboutUs = state.aboutUs.filter((list) => (list.id !== action.payload))
-        }
+        },
+        setProfilePostLike: (state, action: PayloadAction<any>) => {
+            const postId = action.payload.post_id
+            state.posts.map((post) => {
+                if (post.id === postId) {
+                    post.like_count += 1;
+                    post.liked.push(action.payload)
+                }
+                return post;
+            })
+        },
+        setProfilePostUnLike: (state, action: PayloadAction<any>) => {
+            const postId = action.payload.post_id
+            state.posts.map((post) => {
+                if (post.id === postId) {
+                    post.like_count -= 1;
+                    post.liked.pop()
+                }
+                return post;
+            })
+
+        },
+        setProfilePostCommentCountIncrease: (state, action: PayloadAction<number>) => {
+            state.posts.map((post) => (post.id === action.payload ? post.comment_count += 1 : post))
+        },
+        setProfilePostCommentCountDecrease: (state, action: PayloadAction<number>) => {
+            state.posts.map((post) => (post.id === action.payload ? post.comment_count -= 1 : post))
+        },
     },
 })
 
-export const { setProfilePost, profileDetail, friendLists, waitingfriendLists, removePost, removeFriend, removeWaitingFriend, setAboutUs, removeAboutUs, replaceAboutUs } = profileDataSlice.actions
+export const { setProfilePost, profileDetail, friendLists,
+    waitingfriendLists, removePost, removeFriend, removeWaitingFriend, setAboutUs,
+    removeAboutUs, replaceAboutUs, setProfilePostLike, setProfilePostUnLike } = profileDataSlice.actions
 
 export default profileDataSlice.reducer
