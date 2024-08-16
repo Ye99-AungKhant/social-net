@@ -8,18 +8,24 @@
     scroll-behavior: smooth;
 }
 
-.containerBox::-webkit-scrollbar-track {
+.containerBox::-webkit-scrollbar-track,
+.textareaBox::-webkit-scrollbar-track,
+.imagePreviewContainer::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     background-color: #F5F5F5;
 }
 
-.containerBox::-webkit-scrollbar {
+.containerBox::-webkit-scrollbar,
+.textareaBox::-webkit-scrollbar,
+.imagePreviewContainer::-webkit-scrollbar {
     width: 3px;
     background-color: #F5F5F5;
 
 }
 
-.containerBox::-webkit-scrollbar-thumb {
+.containerBox::-webkit-scrollbar-thumb,
+.textareaBox::-webkit-scrollbar-thumb,
+.imagePreviewContainer::-webkit-scrollbar-thumb {
     background-color: #000000;
 }
 
@@ -342,7 +348,7 @@
 
 .write-post-container {
     width: 100%;
-    min-height: 180px;
+    min-height: 250px;
     background: var(--bg-color);
     border-radius: 6px;
     padding: 20px;
@@ -352,10 +358,12 @@
 .post-intput-container {
     padding-left: 55px;
     padding-top: 20px;
+    /* min-height: 180px; */
 }
 
-.post-intput-container textarea {
+.post-intput-container .textareaBox {
     width: 100%;
+    min-height: 50px;
     border: 0;
     outline: 0;
     /* border-bottom: 1px solid #ccc; */
@@ -404,7 +412,7 @@
     width: 100%;
     padding: 5px 0 5px 0;
     border: none;
-    background: #522da87c;
+    background: #0d0d0e7c;
     color: white;
     text-align: center;
     position: absolute;
@@ -421,10 +429,11 @@
 }
 
 .imagePreviewContainer {
+    margin-top: 20px;
     width: 100%;
     max-height: 150px;
     display: flex;
-    overflow-y: auto;
+    overflow-y: scroll;
     flex-wrap: wrap;
 }
 

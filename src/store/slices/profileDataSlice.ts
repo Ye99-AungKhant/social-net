@@ -3,6 +3,7 @@ import { User, UserSlice } from "../../types/user";
 import { ProfileAboutUs, ProfileDataDetail, ProfileDataSlice } from "../../types/profileData";
 import { setPost } from "./postSlice";
 import { Post } from "../../types/app";
+import { PostEditData } from "../../types/post";
 
 
 export const profilePostFetch = createAsyncThunk(
@@ -107,6 +108,45 @@ export const updateBio = createAsyncThunk(
     }
 )
 
+export const updatePost = createAsyncThunk(
+    'updatePost',
+    async (payload: PostEditData, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/post`, {
+            method: "PATCH",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify(payload),
+        });
+        const dataFromServer = await response.json();
+        const { success, data } = dataFromServer
+        thunkApi.dispatch(updateProfilePost(data))
+        console.log('post with image', payload);
+        return success
+    }
+)
+
+export const deletePostImage = createAsyncThunk(
+    'deletePostImage',
+    async (payload: string, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/post/media/delete`, {
+            method: "PATCH",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ 'media': payload })
+        });
+    }
+)
+
 export const updateProfile = createAsyncThunk(
     'profile/update',
     async (payload: any, thunkApi) => {
@@ -184,6 +224,9 @@ export const profileDataSlice = createSlice({
         setProfilePost: (state, action: PayloadAction<Post[]>) => {
             state.posts = [...state.posts, ...action.payload]
         },
+        updateProfilePost: (state, action: PayloadAction<Post>) => {
+            state.posts = state.posts.map((post) => post.id == action.payload.id ? action.payload : post);
+        },
         profileDetail: (state, action: PayloadAction<ProfileDataDetail>) => {
             state.profileDetail = action.payload
         },
@@ -243,6 +286,6 @@ export const profileDataSlice = createSlice({
 
 export const { setProfilePost, profileDetail, friendLists,
     waitingfriendLists, removePost, removeFriend, removeWaitingFriend, setAboutUs,
-    removeAboutUs, replaceAboutUs, setProfilePostLike, setProfilePostUnLike } = profileDataSlice.actions
+    removeAboutUs, replaceAboutUs, setProfilePostLike, setProfilePostUnLike, updateProfilePost } = profileDataSlice.actions
 
 export default profileDataSlice.reducer

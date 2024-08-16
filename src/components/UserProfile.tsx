@@ -33,6 +33,7 @@ import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import UpdateProfile from './UpdateProfile';
 import CommentDialog from './CommentDialog';
+import PostEdit from './PostEdit';
 
 
 const iconList = [
@@ -52,6 +53,8 @@ const UserProfile = () => {
     const [loading, setLoading] = useState<boolean>(true)
     const [postMenuId, setPostMenuId] = useState<number>(0)
     const [openMenu, setOpenMenu] = useState(false)
+    const [postEditId, setPostEditId] = useState<number>(0)
+    const [openPostEdit, setOpenPostEdit] = useState(false)
     const [showMore, setShowMore] = useState<any>({})
     const { authUser } = useAppSelector((state) => state.auth)
     const [hasMore, setHasMore] = useState(true);
@@ -91,6 +94,10 @@ const UserProfile = () => {
     const handlePostMenu = (postId: number) => {
         setOpenMenu(!openMenu)
         setPostMenuId(postId)
+    }
+    const handlePostEdit = (postId: number) => {
+        setOpenPostEdit(!openPostEdit)
+        setPostEditId(postId)
     }
 
     const handlePostToggle = (postId: number) => {
@@ -180,7 +187,7 @@ const UserProfile = () => {
                                     <Typography>{friendLists.length} Friend</Typography>
                                     <AvatarGroup max={4}>
                                         {friendLists.map((friendlist) => (
-                                            <Avatar className='img' alt={friendlist.name} src={friendlist.profile} />
+                                            <Avatar key={friendlist.id} className='img' alt={friendlist.name} src={friendlist.profile} />
                                         ))}
                                     </AvatarGroup>
                                 </Box>
@@ -261,7 +268,7 @@ const UserProfile = () => {
 
                                 <ul>
                                     {aboutUs.map((aboutUsList) => (
-                                        <li>
+                                        <li key={aboutUsList.id}>
                                             {iconList.map((list) => list.id == aboutUsList.icon && list.icon)}
                                             <i style={{ marginLeft: 10 }}>{aboutUsList.content}</i>
 
@@ -383,15 +390,22 @@ const UserProfile = () => {
                                                             <p>{post.user.name}</p>
                                                             <p className='postDate'>{post.date}</p>
                                                             {postMenuId == post.id &&
-                                                                < MenuPopup
+                                                                <MenuPopup
                                                                     editId={post.id}
                                                                     deleteId={post.id}
                                                                     open={openMenu}
                                                                     setOpen={setOpenMenu}
                                                                 />
                                                             }
+                                                            {postEditId == post.id &&
+                                                                <PostEdit
+                                                                    open={openPostEdit}
+                                                                    setOpen={setOpenPostEdit}
+                                                                    post={post}
+                                                                />
+                                                            }
                                                         </div>
-                                                        <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
+                                                        <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostEdit(post.id)}>▼</p>
                                                     </div>
                                                     <div className='postAction'>
                                                         <div className='postLike'>
