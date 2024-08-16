@@ -147,6 +147,27 @@ export const deletePostImage = createAsyncThunk(
     }
 )
 
+export const deletePost = createAsyncThunk(
+    'deletePost',
+    async (payload: number, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/post/delete/${payload}`, {
+            method: "DELETE",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
+        const dataFromServer = await response.json();
+        const { success } = dataFromServer
+        if (success) {
+            thunkApi.dispatch(removeProfilePost(payload))
+        }
+    }
+)
+
 export const updateProfile = createAsyncThunk(
     'profile/update',
     async (payload: any, thunkApi) => {
@@ -227,6 +248,9 @@ export const profileDataSlice = createSlice({
         updateProfilePost: (state, action: PayloadAction<Post>) => {
             state.posts = state.posts.map((post) => post.id == action.payload.id ? action.payload : post);
         },
+        removeProfilePost: (state, action: PayloadAction<number>) => {
+            state.posts = state.posts.filter((post) => (post.id !== action.payload))
+        },
         profileDetail: (state, action: PayloadAction<ProfileDataDetail>) => {
             state.profileDetail = action.payload
         },
@@ -284,8 +308,8 @@ export const profileDataSlice = createSlice({
     },
 })
 
-export const { setProfilePost, profileDetail, friendLists,
-    waitingfriendLists, removePost, removeFriend, removeWaitingFriend, setAboutUs,
-    removeAboutUs, replaceAboutUs, setProfilePostLike, setProfilePostUnLike, updateProfilePost } = profileDataSlice.actions
+export const { setProfilePost, profileDetail, friendLists, waitingfriendLists, removePost,
+    removeFriend, removeWaitingFriend, setAboutUs, removeAboutUs, replaceAboutUs,
+    setProfilePostLike, setProfilePostUnLike, updateProfilePost, removeProfilePost } = profileDataSlice.actions
 
 export default profileDataSlice.reducer

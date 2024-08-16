@@ -9,9 +9,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 interface Props {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
-    handleConfirmUnfriend: () => void
+    handleConfirm: () => void
+    title: string
 }
-export default function ConfirmDialog({ open, setOpen, handleConfirmUnfriend }: Props) {
+export default function ConfirmDialog({ open, setOpen, handleConfirm, title }: Props) {
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -30,7 +31,7 @@ export default function ConfirmDialog({ open, setOpen, handleConfirmUnfriend }: 
                 aria-describedby="alert-dialog-description"
             >
                 <DialogTitle id="alert-dialog-title">
-                    {"Are you sure unfriend him?"}
+                    Are you sure {title}?
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
@@ -39,7 +40,7 @@ export default function ConfirmDialog({ open, setOpen, handleConfirmUnfriend }: 
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleConfirmUnfriend} autoFocus>
+                    <Button onClick={handleConfirm} autoFocus>
                         Confirm
                     </Button>
                 </DialogActions>

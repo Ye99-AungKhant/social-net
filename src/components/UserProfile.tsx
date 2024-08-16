@@ -19,7 +19,7 @@ import Navbar from './Navbar';
 import { fetchData } from '../store/slices/appSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { addfriend, deleteAboutUs, profileDataFetch, profilePostFetch, removeAboutUs, removePost, removeWaitingFriend, unfriend, updateBio } from './../store/slices/profileDataSlice';
+import { addfriend, deleteAboutUs, deletePost, profileDataFetch, profilePostFetch, removeAboutUs, removePost, removeWaitingFriend, unfriend, updateBio } from './../store/slices/profileDataSlice';
 import LeftSidebar from './LeftSidebar';
 import ConfirmDialog from './ConfirmDialog';
 import FriendButton from './FriendButton';
@@ -34,6 +34,7 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import UpdateProfile from './UpdateProfile';
 import CommentDialog from './CommentDialog';
 import PostEdit from './PostEdit';
+import PostMenuPopup from './PostMenuPopup';
 
 
 const iconList = [
@@ -46,6 +47,8 @@ const UserProfile = () => {
     const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
     const [openComfirmDialog, setOpenComfirmDialog] = useState<boolean>(false)
+    const [comfirmDialogType, setComfirmDialogType] = useState<string>('unfriend')
+    const [comfirmDialogFunc, setComfirmDialogFunc] = useState<any>()
     const [openPostPhotoDialog, setOpenPostPhotoDialog] = useState<any>({})
     const [postPhotoIndex, setPostPhotoIndex] = useState<number>(0)
     const [postCommentId, setPostCommentId] = useState<number>(0)
@@ -94,6 +97,7 @@ const UserProfile = () => {
     const handlePostMenu = (postId: number) => {
         setOpenMenu(!openMenu)
         setPostMenuId(postId)
+        localStorage.setItem('deletePostId', postId.toString())
     }
     const handlePostEdit = (postId: number) => {
         setOpenPostEdit(!openPostEdit)
@@ -107,17 +111,32 @@ const UserProfile = () => {
         }))
     };
 
-    const handleComfirmDialog = () => {
-        setOpenComfirmDialog(true)
-    }
-
-    const handleAddFriend = () => {
-        dispatch(addfriend(profileId))
+    const handleDeletePost = () => {
+        let storePostId = localStorage.getItem('deletePostId')
+        let id = parseInt(storePostId ? storePostId : '0')
+        dispatch(deletePost(id))
+        localStorage.removeItem('deletePostId')
+        setOpenComfirmDialog(false)
     }
 
     const handleConfirmUnfriend = () => {
         dispatch(unfriend(profileId))
         setOpenComfirmDialog(false)
+        dispatch(profileDataFetch(profileId))
+    }
+
+    const handleComfirmDialog = (deleteType: string) => {
+        if (deleteType == 'deletePost') {
+            setComfirmDialogType('delete this post')
+            setComfirmDialogFunc(() => handleDeletePost)
+            return setOpenComfirmDialog(true)
+        }
+        setComfirmDialogFunc(() => handleConfirmUnfriend)
+        setOpenComfirmDialog(true)
+    }
+
+    const handleAddFriend = () => {
+        dispatch(addfriend(profileId))
         dispatch(profileDataFetch(profileId))
     }
 
@@ -149,7 +168,11 @@ const UserProfile = () => {
         }
     };
 
-    const matchedFriend = waitingfriendLists.find(friendlist => friendlist.adding_user == profileId);
+    let matchedFriend = waitingfriendLists.find(friendlist => friendlist.adding_user?.id == profileId);
+    useEffect(() => {
+        matchedFriend = waitingfriendLists.find(friendlist => friendlist.adding_user?.id == profileId);
+
+    }, [waitingfriendLists])
 
     const handleCreateAboutUs = () => {
         setOpenCreateAboutUsDialog(!openCreateAboutUsDialog)
@@ -201,9 +224,9 @@ const UserProfile = () => {
                                 {matchedFriend ? (
                                     <FriendButton
                                         status={matchedFriend.status}
-                                        adding_user={matchedFriend.adding_user}
+                                        adding_user={matchedFriend.adding_user.id}
                                         profileId={profileId}
-                                        friendBtnAction={matchedFriend.status === 'Accepted' ? handleComfirmDialog : ''}
+                                        friendBtnAction={matchedFriend.status === 'Accepted' ? () => handleComfirmDialog('unfriend') : ''}
                                     />
                                 ) : (
                                     <FriendButton status="" adding_user={0} profileId={profileId} friendBtnAction={handleAddFriend} />
@@ -390,9 +413,9 @@ const UserProfile = () => {
                                                             <p>{post.user.name}</p>
                                                             <p className='postDate'>{post.date}</p>
                                                             {postMenuId == post.id &&
-                                                                <MenuPopup
-                                                                    editId={post.id}
-                                                                    deleteId={post.id}
+                                                                <PostMenuPopup
+                                                                    editPost={() => handlePostEdit(post.id)}
+                                                                    deletePost={() => handleComfirmDialog('deletePost')}
                                                                     open={openMenu}
                                                                     setOpen={setOpenMenu}
                                                                 />
@@ -405,7 +428,7 @@ const UserProfile = () => {
                                                                 />
                                                             }
                                                         </div>
-                                                        <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostEdit(post.id)}>▼</p>
+                                                        <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
                                                     </div>
                                                     <div className='postAction'>
                                                         <div className='postLike'>
@@ -443,7 +466,8 @@ const UserProfile = () => {
             <ConfirmDialog
                 open={openComfirmDialog}
                 setOpen={setOpenComfirmDialog}
-                handleConfirmUnfriend={handleConfirmUnfriend}
+                handleConfirm={comfirmDialogFunc}
+                title={comfirmDialogType}
             />
             <CreateAboutUsDialog
                 open={openCreateAboutUsDialog}
