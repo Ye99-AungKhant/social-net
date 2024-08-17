@@ -243,14 +243,14 @@ const UserProfile = () => {
                                 )
                                 }
 
-                                <button type="button">
+                                {/* <button type="button">
                                     <SendRoundedIcon />
                                     Message
                                 </button>
                                 <br />
                                 <a href="#">
                                     <MoreHorizIcon />
-                                </a>
+                                </a> */}
                             </Box>
                         }
                     </Box>

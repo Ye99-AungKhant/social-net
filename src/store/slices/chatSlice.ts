@@ -67,7 +67,7 @@ export const chatNotiRemove = createAsyncThunk(
 export const getlastMessage = createAsyncThunk(
     'lastMessage',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/chat/lastmessage`, {
+        const response = await fetch(`http://localhost:8000/api/last/chat`, {
             method: "GET",
             credentials: 'include',
             headers: {

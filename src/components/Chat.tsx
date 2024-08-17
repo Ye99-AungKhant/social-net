@@ -63,6 +63,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
     const [selectedImagesUpload, setSelectedImagesUpload] = useState<any>([])
     const { chatNoti } = useAppSelector((state) => state.app)
     const [onlineUser, setOnlineUser] = useState<any>()
+    const [sortedFriendList, setSortedFriendList] = useState<any[]>([]);
     const dispatch = useAppDispatch()
 
     const handleClose = () => {
@@ -174,6 +175,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
             });
         });
         setUnReadMessage(unreadCounts);
+
     }, [chatNoti, friendList])
 
     const scrollToBottom = () => {
@@ -182,7 +184,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
     };
     useEffect(() => {
         scrollToBottom();
-        dispatch(getlastMessage({}))
+        dispatch(getlastMessage(''))
     }, [message])
 
     useEffect(() => {
@@ -267,6 +269,32 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
 
     };
 
+    useEffect(() => {
+        if (friendList) {
+            const sortedList = [...friendList].sort((a, b) => {
+                const lastMessageA = lastMessage.find(
+                    (message) => message.sender_id === a.id || message.receiver_id === a.id
+                );
+                const lastMessageB = lastMessage.find(
+                    (message) => message.sender_id === b.id || message.receiver_id === b.id
+                );
+
+                if (lastMessageA?.receiver_id === authUser?.id && lastMessageB?.receiver_id !== authUser?.id) {
+                    return -1;
+                } else if (lastMessageA?.receiver_id !== authUser?.id && lastMessageB?.receiver_id === authUser?.id) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            });
+
+            setSortedFriendList(sortedList);
+        }
+
+    }, [friendList, lastMessage, authUser]);
+
+
+
     return (
         <Fragment>
             <Dialog
@@ -294,7 +322,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                             </IconButton>
                         </Box>
                         <Box className="chat-user-list">
-                            {friendList?.map((list) => (
+                            {sortedFriendList?.map((list) => (
                                 <Box key={list.id}>
                                     <ListItemButton onClick={() => handleSelectUser(list)}>
                                         <ListItemText
@@ -314,7 +342,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
 
                                             </Badge>
                                         </ListItemAvatar>
-                                        <ListItemText primary={list.name} secondary={lastMessage.map((message) => message.sender_id == list.id ? message.message : '')} />
+                                        <ListItemText primary={list.name} secondary={lastMessage.map((message) => message.sender_id == list.id || message.receiver_id == list.id ? message.message : '')} />
                                     </ListItemButton>
                                     <Divider />
                                 </Box>
