@@ -7,7 +7,7 @@ import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import Emoji from '@mui/icons-material/SentimentVerySatisfiedRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import "./style/post.css"
-import defaultUser from './user.png'
+import defaultUser from '../utils/default-avatar.jpg'
 import { Divider, IconButton } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import EmojiPicker from 'emoji-picker-react';

@@ -303,7 +303,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                         />
                                         <ListItemAvatar>
                                             <Badge badgeContent={unreadMessage[list.id]} color="error">
-                                                <Avatar alt="Travis Howard" src={list.profile} />
+                                                <Avatar alt={list.name} src={list.profile} />
                                                 {onlineUser && onlineUser.includes(list.id) &&
                                                     (<StyledBadge
                                                         overlap="circular"
@@ -328,7 +328,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                     <ListItemButton>
                                         <ArrowBackRoundedIcon onClick={handleChatWindowClose} />
                                         <ListItemAvatar>
-                                            <Avatar alt="Travis Howard" src={selectUser.profile} />
+                                            <Avatar alt={selectUser.name} src={selectUser.profile} />
                                         </ListItemAvatar>
                                         <ListItemText primary={selectUser.name} />
                                         <IconButton

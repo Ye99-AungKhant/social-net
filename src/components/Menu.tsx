@@ -23,6 +23,7 @@ interface Props {
 const Menu = ({ open, Id }: Props) => {
     const dispatch = useAppDispatch()
     const navigate = useNavigate();
+
     const handleLogOut = async () => {
         dispatch(logOut({
             onSuccess: () => {

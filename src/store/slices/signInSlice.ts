@@ -5,7 +5,7 @@ import { authUser } from "./userSlice";
 export const signInUser = createAsyncThunk(
     'signin',
     async (payload: UserSignIn, thunkApi) => {
-        const { onSuccess } = payload
+        const { onSuccess, onError } = payload
         const response = await fetch(`http://localhost:8000/api/signin`, {
             method: "POST",
             headers: {
@@ -16,7 +16,7 @@ export const signInUser = createAsyncThunk(
         });
         const dataFromServer = await response.json();
         if (!dataFromServer.success) {
-            thunkApi.dispatch(onError(dataFromServer.errors));
+            onError && onError()
         }
         const { access_token, user_data } = dataFromServer.data
         localStorage.setItem('token', access_token)
@@ -25,6 +25,33 @@ export const signInUser = createAsyncThunk(
         onSuccess && onSuccess()
     }
 )
+
+export const signInGoogle = createAsyncThunk(
+    'signInGoogle',
+    async (payload: any, thunkApi) => {
+        const { onSuccess, onError, email, name } = payload
+        const response = await fetch(`http://localhost:8000/api/signin/google`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+            },
+            body: JSON.stringify({ 'email': email, 'name': name }),
+        });
+        const dataFromServer = await response.json();
+        if (!dataFromServer.success) {
+            onError && onError()
+        }
+        console.log(dataFromServer);
+
+        const { access_token, user_data } = dataFromServer.data
+        localStorage.setItem('token', access_token)
+        let auth = { id: user_data.id, name: user_data.name, profile: user_data.profile }
+        thunkApi.dispatch(authUser(auth))
+        onSuccess && onSuccess()
+    }
+)
+
 
 const initialState: SignInSlice = {
     user: [],

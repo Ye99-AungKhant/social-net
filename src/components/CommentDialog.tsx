@@ -1,7 +1,7 @@
 import { Box, Button, FormControl, IconButton, Modal, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import "./style/comment.css"
-import defaultUser from './user.png'
+import defaultUser from '../utils/default-avatar.jpg'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';

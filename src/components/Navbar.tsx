@@ -27,6 +27,7 @@ import { fetchNotification, search, setOnlineUser } from '../store/slices/appSli
 import { useWebSocket, WebSocketContextType } from './WebSocketProvider';
 import SearchView from './SearchView';
 import { useNavigate } from 'react-router-dom';
+import Favicon from '../utils/SN.png'
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -152,14 +153,7 @@ export default function Navbar() {
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static" >
                 <Toolbar>
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        component="div"
-                        sx={{ display: { xs: 'none', sm: 'block' } }}
-                    >
-                        LOGO
-                    </Typography>
+                    <Avatar src={Favicon} sx={{ width: 56, height: 56 }} variant="rounded" />
                     <Search onClick={() => navigate('/search')}>
                         <SearchIconWrapper>
                             <SearchIcon />

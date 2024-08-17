@@ -1,7 +1,8 @@
 import { Avatar, Box, Button, Card, CardActions, CardContent, CardHeader, CardMedia, ImageList, ImageListItem, Typography } from '@mui/material'
 import "./style/post.css"
 import './style/PhotoGallery.css'
-import defaultUser from './user.png'
+// import defaultUser from './user.png'
+import defaultUser from '../utils/default-avatar.jpg'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -194,8 +195,8 @@ const Post = () => {
                             <div className='backdrop'>
                                 {loading && storyUploadLoading}
                                 <img
-                                    src={authUser?.profile ? authUser?.profile : ''}
-                                    alt=""
+                                    src={authUser?.profile ? authUser?.profile : defaultUser}
+                                    alt=''
                                     className='storyData'
                                     onLoad={handleLoaded}
                                 />

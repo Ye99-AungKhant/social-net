@@ -73,7 +73,7 @@ const FriendRequest = () => {
                     <Box key={reqlist.id}>
                         <ListItem sx={{ paddingBottom: 0 }}>
                             <ListItemAvatar>
-                                <Avatar alt="Remy Sharp" src={reqlist.adding_user.profile} />
+                                <Avatar alt={reqlist.adding_user.name} src={reqlist.adding_user.profile} />
                             </ListItemAvatar>
                             <ListItemText
                                 primary={reqlist.adding_user.name}

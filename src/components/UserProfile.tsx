@@ -1,7 +1,7 @@
 import { Avatar, AvatarGroup, Box, Button, Card, CardContent, IconButton, TextField, Typography } from '@mui/material'
 import React, { useEffect, useState, ChangeEvent } from 'react'
 import './style/profile.css'
-import defaultUser from './user.png'
+import defaultUser from '../utils/default-avatar.jpg'
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -214,9 +214,12 @@ const UserProfile = () => {
                                         ))}
                                     </AvatarGroup>
                                 </Box>
-                                <Box onClick={handleUpdateProfile}>
-                                    <MoreVertRoundedIcon sx={{ cursor: 'pointer' }} />
-                                </Box>
+                                {authUser?.id == profileId &&
+                                    <Box onClick={handleUpdateProfile}>
+                                        <MoreVertRoundedIcon sx={{ cursor: 'pointer' }} />
+                                    </Box>
+                                }
+
                             </Box>
                         </Box>
                         {authUser?.id != profileId &&
