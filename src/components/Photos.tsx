@@ -7,7 +7,6 @@ import { useAppDispatch } from '../store/hooks';
 import { fetchPhotos } from '../store/slices/appSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Skeleton from '@mui/material/Skeleton';
-import PhotosDialog from './PhotosDialog';
 import PostPhotoDialog from './PostPhotoDialog';
 import { useNavigate } from 'react-router-dom';
 

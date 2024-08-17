@@ -35,6 +35,7 @@ import UpdateProfile from './UpdateProfile';
 import CommentDialog from './CommentDialog';
 import PostEdit from './PostEdit';
 import PostMenuPopup from './PostMenuPopup';
+import ProfileViewDialog from './ProfileViewDialog';
 
 
 const iconList = [
@@ -67,6 +68,7 @@ const UserProfile = () => {
     const [addBio, setAddBio] = useState(false)
     const [bioContent, setBioContent] = useState('')
     const { profileId }: any = useParams();
+    const [profilePhotoView, setProfilePhotoView] = useState(false)
     const navigate = useNavigate()
 
     const maxPhotos = 4;
@@ -194,6 +196,10 @@ const UserProfile = () => {
         setBioContent(event.target.value)
     }
 
+    const handleProfilePhotoView = () => {
+        setProfilePhotoView(true)
+    }
+
     return (
         <Box>
             {/* <Navbar /> */}
@@ -204,7 +210,8 @@ const UserProfile = () => {
                     <Box className="profile-details">
                         <Box className="pd-left">
                             <Box className="pd-row">
-                                <img alt={profileDetail?.name} src={profileDetail?.profile ? profileDetail.profile : defaultUser} className="pd-image" />
+                                <img alt={profileDetail?.name} src={profileDetail?.profile ? profileDetail.profile : defaultUser} className="pd-image"
+                                    onClick={handleProfilePhotoView} />
                                 <Box>
                                     <Typography variant='h3'>{profileDetail?.name}</Typography>
                                     <Typography>{friendLists.length} Friend</Typography>
@@ -487,6 +494,14 @@ const UserProfile = () => {
                 postId={postCommentId}
                 postOwnerId={postCommentOwnerId}
             />
+            {profileDetail?.profile &&
+                <ProfileViewDialog
+                    open={profilePhotoView}
+                    setOpen={setProfilePhotoView}
+                    photo={profileDetail.profile}
+                />
+            }
+
         </Box>
     )
 }

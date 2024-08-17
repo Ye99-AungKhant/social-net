@@ -7,7 +7,7 @@ import PostPhotoDialog from './PostPhotoDialog'
 import MenuPopup from './MenuPopup'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import ChatIcon from '@mui/icons-material/Chat';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { postLike } from '../store/slices/postSlice'
 import { fetchComment } from '../store/slices/commentSlice'
 import defaultUser from './user.png'
@@ -30,6 +30,7 @@ const SearchView = () => {
     const dispatch = useAppDispatch()
     const [filterSearch, setFilterSearch] = useState<string>('All')
     const { ws, wsMessage } = useWebSocket() || {};
+    const navigate = useNavigate()
     const maxPhotos = 4;
 
     const handleLike = (postId: number, postOwnerId: number) => {
@@ -69,6 +70,10 @@ const SearchView = () => {
         }))
     };
 
+    const handleLinkToProfile = (userId: number) => {
+        navigate(`/profile/${userId}`)
+    }
+
     return (
         <Box sx={{ width: '50%', bgcolor: 'background.paper' }} className='containerBox'>
             <Box className='postFilter'>
@@ -82,9 +87,8 @@ const SearchView = () => {
                     <List>
                         {searchUser.map((user) => (
                             <Box key={user.id}>
-                                <ListItemButton>
+                                <ListItemButton onClick={() => handleLinkToProfile(user.id)}>
                                     <Stack direction="row" spacing={2}>
-
                                         <Avatar alt="Remy Sharp" src={user.profile} />
                                     </Stack>
                                     <ListItemText
