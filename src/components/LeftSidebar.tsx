@@ -18,9 +18,9 @@ import './style/style.css'
 
 const sidebarMenu = [
     { id: 1, label: 'Feed', icon: <SpaceDashboardRoundedIcon />, route: '/', Iconcolor: '#2196f3' },
-    { id: 2, label: 'Friends', icon: <PeopleAltRoundedIcon />, route: 'friend', Iconcolor: '#2e7d32' },
-    { id: 4, label: 'Photos', icon: <CropOriginalRoundedIcon />, route: '', Iconcolor: '#ef6c00' },
-    { id: 3, label: 'Watch Videos', icon: <SlideshowRoundedIcon />, route: '', Iconcolor: '#9016cd' },
+    { id: 2, label: 'Friends', icon: <PeopleAltRoundedIcon />, route: '/friend', Iconcolor: '#2e7d32' },
+    { id: 4, label: 'Photos', icon: <CropOriginalRoundedIcon />, route: '/photos', Iconcolor: '#ef6c00' },
+    // { id: 3, label: 'Watch Videos', icon: <SlideshowRoundedIcon />, route: '', Iconcolor: '#9016cd' },
 ]
 const LeftSidebar = () => {
     const { friendRequestNoti } = useAppSelector((state) => state.app)

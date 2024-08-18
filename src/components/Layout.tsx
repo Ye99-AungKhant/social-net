@@ -26,6 +26,10 @@ const Layout = () => {
         dispatch(fetchData({}))
     }, [])
 
+    if (!token) {
+        return null;
+    }
+
     return (
         <Box>
             <Navbar />

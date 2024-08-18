@@ -40,6 +40,7 @@ body {
     width: 100px;
     margin-right: 20px;
     border-radius: 6px;
+    cursor: pointer;
 }
 
 .pd-row div h3 {
@@ -51,9 +52,9 @@ body {
     font-size: 13px;
 }
 
-.pd-row div img {
-    width: 25px;
-    border-radius: 50%;
+.pd-row .img {
+    width: 50px;
+    height: 50px;
     margin-top: 12px;
 }
 
@@ -237,4 +238,38 @@ body {
     position: absolute;
     right: 0;
     cursor: pointer;
+}
+
+.updateProfileBox {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background: #F5F5F5;
+    position: relative;
+}
+
+.updateProfileBox .avatarUpload {
+    position: absolute;
+    top: unset;
+    left: 50%;
+    bottom: 70px;
+    transform: translateX(-50%);
+    color: #F5F5F5;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.updateProfileBox .avatarUpload:hover {
+    border: 3px solid #1876f2;
+}
+
+.updateProfileAction {
+    display: flex;
+    justify-content: space-between;
+}
+
+.updateProfileAction .nameEdit {
+    margin-top: 3px;
+    width: 100%;
 }

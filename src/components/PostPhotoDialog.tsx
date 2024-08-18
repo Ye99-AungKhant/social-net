@@ -12,6 +12,7 @@ interface Props {
     open: boolean
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
     photo: any[]
+    photoIndex: number
 }
 
 const style = {
@@ -21,13 +22,13 @@ const style = {
     width: 600,
     transform: 'translate(-50%, -50%)',
 };
-const PostPhotoDialog = ({ open, setOpen, photo }: Props) => {
+const PostPhotoDialog = ({ open, setOpen, photo, photoIndex }: Props) => {
     const [loading, setLoading] = useState<boolean>(true)
     const closeModal = () => {
         setOpen(false)
     }
 
-    const [slide, setSlide] = useState(0);
+    const [slide, setSlide] = useState(photoIndex);
 
     const nextSlide = () => {
         setSlide(slide === photo.length - 1 ? 0 : slide + 1);
@@ -40,6 +41,10 @@ const PostPhotoDialog = ({ open, setOpen, photo }: Props) => {
     const handleLoaded: React.ReactEventHandler<HTMLImageElement> = () => {
         setLoading(false)
     }
+
+    useEffect(() => {
+        setSlide(photoIndex);
+    }, [photoIndex]);
 
     return (
         <Modal

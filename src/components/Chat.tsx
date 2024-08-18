@@ -14,14 +14,14 @@ import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-import { Box } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import './style/chat.css'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { chatfetch, chatNotiRemove, sendChatMessage } from '../store/slices/chatSlice';
+import { chatfetch, chatNotiRemove, chatSearch, getlastMessage, sendChatMessage } from '../store/slices/chatSlice';
 import { Chat as chatlist, ChatMedia, ChatSlice } from '../types/chat';
 import Badge from '@mui/material/Badge';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -33,6 +33,7 @@ import ImageListItem from '@mui/material/ImageListItem';
 import { v4 as uuid } from 'uuid';
 import { StyledBadge } from './RightSidebar';
 import { useWebSocket } from './WebSocketProvider';
+import { ChatSearchLoading } from './SkeletonComponent';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -50,20 +51,24 @@ interface Props {
 }
 const Chat = ({ open, setOpen, newChatBadge }: Props) => {
 
-    const { ws, wsMessage, wsMessageCount, wsOnlineUser } = useWebSocket() || {};
+    const { ws, wsMessage, wsMessageCount, wsOnlineUser, wsReadMessage } = useWebSocket() || {};
     const [message, setMessage] = useState<chatlist[]>([])
     const messagesEndRef = useRef<null | HTMLElement>(null);
     const chatRef = useRef<null | HTMLInputElement>(null)
     const [selectUser, setSelectUser] = useState<any>()
-    const { friendList } = useAppSelector((state) => state.app)
-    const { chats } = useAppSelector((state) => state.chat)
+    const { friendList, chatUserList } = useAppSelector((state) => state.app)
+    const { chats, lastMessage } = useAppSelector((state) => state.chat)
     const { authUser } = useAppSelector((state) => state.auth)
     const [unreadMessage, setUnReadMessage] = useState<any>({})
     const [selectedImages, setSelectedImages] = useState<any>([])
     const [selectedImagesUpload, setSelectedImagesUpload] = useState<any>([])
     const { chatNoti } = useAppSelector((state) => state.app)
     const [onlineUser, setOnlineUser] = useState<any>()
+    const [sortedFriendList, setSortedFriendList] = useState<any[]>([]);
     const dispatch = useAppDispatch()
+    const [searchTerm, setSearchTerm] = useState('');
+    const [typingTimeout, setTypingTimeout] = useState<any>(null);
+    const [loading, setLoading] = useState<boolean>(false)
 
     const handleClose = () => {
         setOpen(false);
@@ -164,7 +169,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
     useEffect(() => {
         const unreadCounts: { [key: number]: number } = {};
         chatNoti?.forEach((noti) => {
-            friendList?.forEach((friend) => {
+            chatUserList?.forEach((friend) => {
                 if (friend.id === noti.sender_id) {
                     if (!unreadCounts[noti.sender_id]) {
                         unreadCounts[noti.sender_id] = 0;
@@ -174,16 +179,18 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
             });
         });
         setUnReadMessage(unreadCounts);
-    }, [chatNoti, friendList])
+
+    }, [chatNoti, chatUserList])
 
     const scrollToBottom = () => {
         if (messagesEndRef.current)
             messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
-        // messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     };
     useEffect(() => {
         scrollToBottom();
+        dispatch(getlastMessage(''))
     }, [message])
+
     useEffect(() => {
 
         if (wsMessage) {
@@ -203,6 +210,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                     ]);
                     console.log('incoming message', wsMessage);
                 }
+
             }
             if (wsMessage.type === 'message' && wsMessage.receiverId == authUser?.id) {
                 newChatBadge({
@@ -216,11 +224,11 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
             }
 
 
-            // else if (parsedMessage.type === 'read') {
-            //     //     setMessage((prevMessages) => prevMessages.map((msg) =>
-            //     //         msg.sender_id === parsedMessage.receiverId ? { ...msg, read: true } : msg
-            //     //     ));
-            //     // }
+            if (wsReadMessage) {
+                setMessage((prevMessages) => prevMessages.map((msg) =>
+                    msg.sender_id === wsReadMessage.receiverId ? { ...msg, read: true } : msg
+                ));
+            }
 
         }
         if (wsMessageCount && !selectUser) {
@@ -230,11 +238,98 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                 });
             }
         }
+        // markMessagesAsRead(authUser?.id);
     }, [wsMessage]);
 
     useEffect(() => {
         setOnlineUser(wsOnlineUser?.data)
     }, [wsOnlineUser])
+
+    const markMessagesAsRead = async (senderId: any) => {
+        // Send read status to the WebSocket server
+        if (ws) {
+            ws.send(JSON.stringify({
+                type: 'read',
+                senderId: senderId,
+                receiverId: authUser?.id,
+            }));
+            // Send read status to the Laravel backend to update in the database
+            await fetch('http://localhost:8000/api/chat/read', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    sender_id: senderId,
+                    receiver_id: authUser?.id,
+                }),
+            });
+
+            setMessage((prevMessages) => prevMessages.map((msg) =>
+                msg.sender_id === senderId ? { ...msg, read: true } : msg
+            ));
+        }
+
+    };
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const query = e.target.value;
+
+        if (query) {
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+
+            setTypingTimeout(
+                setTimeout(() => {
+                    setLoading(true)
+                    dispatch(chatSearch(query)).then((res) => res.payload).then((data) => {
+                        if (data.length > 0) {
+                            setSearchTerm("")
+                            setLoading(false)
+                            return setSortedFriendList([...data])
+                        } else {
+                            setSortedFriendList([])
+                            setLoading(false)
+                            return setSearchTerm("No Results")
+                        }
+                    }
+                    )
+                }, 1000)
+            );
+        } else {
+            chatUserList && setSortedFriendList([...chatUserList])
+            setSearchTerm("")
+            setLoading(false)
+        }
+    };
+
+    useEffect(() => {
+        if (chatUserList) {
+            const sortedList = [...chatUserList].sort((a, b) => {
+                const lastMessageA = lastMessage.find(
+                    (message) => message.sender_id === a.id || message.receiver_id === a.id
+                );
+                const lastMessageB = lastMessage.find(
+                    (message) => message.sender_id === b.id || message.receiver_id === b.id
+                );
+
+                if (lastMessageA?.receiver_id === authUser?.id && lastMessageB?.receiver_id !== authUser?.id) {
+                    return -1;
+                } else if (lastMessageA?.receiver_id !== authUser?.id && lastMessageB?.receiver_id === authUser?.id) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            });
+
+            setSortedFriendList(sortedList);
+        }
+
+    }, [chatUserList, lastMessage, authUser]);
+
+
 
     return (
         <Fragment>
@@ -248,7 +343,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                 <Box sx={{ display: 'flex', height: '100%' }}>
                     <Box sx={{ width: '30%' }}>
                         <Box className="search-container">
-                            <input type="text" placeholder="Search..." className="search-input" />
+                            <input type="text" placeholder="Search..." className="search-input" onChange={handleSearch} />
                             <button className="search-button">
                                 <SearchIcon className="search-icon" />
                             </button>
@@ -263,16 +358,16 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                             </IconButton>
                         </Box>
                         <Box className="chat-user-list">
-                            {friendList?.map((list) => (
+                            {sortedFriendList?.map((list) => (
                                 <Box key={list.id}>
                                     <ListItemButton onClick={() => handleSelectUser(list)}>
                                         <ListItemText
                                             sx={{ position: 'absolute', right: 0, top: 0, marginTop: 2, marginRight: 1, color: '#9a9a9a' }}
-                                            secondary='2m'
+                                            secondary={onlineUser && onlineUser.includes(list.id) ? 'Online' : 'Offline'}
                                         />
                                         <ListItemAvatar>
                                             <Badge badgeContent={unreadMessage[list.id]} color="error">
-                                                <Avatar alt="Travis Howard" src={list.profile} />
+                                                <Avatar alt={list.name} src={list.profile} />
                                                 {onlineUser && onlineUser.includes(list.id) &&
                                                     (<StyledBadge
                                                         overlap="circular"
@@ -283,11 +378,14 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
 
                                             </Badge>
                                         </ListItemAvatar>
-                                        <ListItemText primary={list.name} secondary="Good morning..." />
+                                        <ListItemText primary={list.name} secondary={lastMessage.map((message) => message.sender_id == list.id || message.receiver_id == list.id ? message.message : '')} />
                                     </ListItemButton>
                                     <Divider />
                                 </Box>
                             ))}
+                            {loading && <ChatSearchLoading />}
+
+                            {searchTerm && <Typography variant='subtitle2' align="center" mt={1}>No Results <br></br> Try a new search</Typography>}
                         </Box>
                     </Box>
                     {selectUser &&
@@ -297,7 +395,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                     <ListItemButton>
                                         <ArrowBackRoundedIcon onClick={handleChatWindowClose} />
                                         <ListItemAvatar>
-                                            <Avatar alt="Travis Howard" src={selectUser.profile} />
+                                            <Avatar alt={selectUser.name} src={selectUser.profile} />
                                         </ListItemAvatar>
                                         <ListItemText primary={selectUser.name} />
                                         <IconButton
@@ -329,7 +427,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                                 </Box>
                                             }
                                             {chat.message !== null &&
-                                                <Box className={`${chat.receiver_id == authUser?.id ? 'receiver' : 'sender'} `}>
+                                                <Box className={`${chat.receiver_id == authUser?.id ? 'receiver' : 'sender'} ${chat.read ? '' : ''}`}>
                                                     {chat.message}
                                                 </Box>
                                             }

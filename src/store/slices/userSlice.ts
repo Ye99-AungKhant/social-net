@@ -1,5 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AuthUser, User, UserSlice } from "../../types/user";
+import { googleLogout } from '@react-oauth/google';
 
 export const logOut = createAsyncThunk(
     'userLogout',
@@ -14,6 +15,7 @@ export const logOut = createAsyncThunk(
                 'Authorization': `Bearer ${token}`,
             },
         })
+        googleLogout()
         localStorage.removeItem('token')
         onSuccess && onSuccess()
     }

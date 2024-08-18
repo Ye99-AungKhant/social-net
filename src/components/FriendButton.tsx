@@ -21,7 +21,11 @@ const FriendButton = ({ status, adding_user, profileId, friendBtnAction }: Props
         buttonText = "Add Friend"
     }
 
+    if (status === 'Requested') {
+        return <button onClick={friendBtnAction} disabled>{buttonIcon}{buttonText}</button>;
+    }
     return <button onClick={friendBtnAction}>{buttonIcon}{buttonText}</button>;
+
 };
 
 export default FriendButton;

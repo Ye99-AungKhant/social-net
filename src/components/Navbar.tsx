@@ -23,8 +23,12 @@ import '../components/style/style.css'
 import { Avatar } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import Chat from './Chat';
-import { fetchNotification, setOnlineUser } from '../store/slices/appSlice';
+import { fetchNotification, search, setOnlineUser } from '../store/slices/appSlice';
 import { useWebSocket, WebSocketContextType } from './WebSocketProvider';
+import SearchView from './SearchView';
+import { useNavigate } from 'react-router-dom';
+import Favicon from '../utils/SN.png'
+
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
@@ -66,11 +70,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
-// interface Props {
-//     ws: WebSocket | null
-//     setWs: React.Dispatch<React.SetStateAction<WebSocket | null>>
-// }
-
 export default function Navbar() {
 
     const menuId = 'primary-search-account-menu';
@@ -82,7 +81,10 @@ export default function Navbar() {
     const { authUser } = useAppSelector((state) => state.auth)
     const { chatNoti, notifications } = useAppSelector((state) => state.app)
     const dispatch = useAppDispatch()
+    const navigate = useNavigate()
     let [chatNotiCount, setChatNotiCount] = useState<any>()
+    const [searchTerm, setSearchTerm] = useState('');
+    const [typingTimeout, setTypingTimeout] = useState<any>(null);
 
     const toggleNoti = () => {
         setOpen(!open);
@@ -129,25 +131,37 @@ export default function Navbar() {
         }
     }, [wsNoti])
 
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const query = e.target.value;
+        if (query) {
+            setSearchTerm(query);
+
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+
+            setTypingTimeout(
+                setTimeout(() => {
+                    dispatch(search(query))
+                }, 1000)
+            );
+        }
+    };
+
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="static">
+            <AppBar position="static" >
                 <Toolbar>
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        component="div"
-                        sx={{ display: { xs: 'none', sm: 'block' } }}
-                    >
-                        LOGO
-                    </Typography>
-                    <Search>
+                    <Avatar src={Favicon} sx={{ width: 56, height: 56 }} variant="rounded" />
+                    <Search onClick={() => navigate('/search')}>
                         <SearchIconWrapper>
                             <SearchIcon />
                         </SearchIconWrapper>
                         <StyledInputBase
                             placeholder="Search…"
                             inputProps={{ 'aria-label': 'search' }}
+                            onChange={handleSearch}
                         />
                     </Search>
                     <Box sx={{ flexGrow: 1 }} />

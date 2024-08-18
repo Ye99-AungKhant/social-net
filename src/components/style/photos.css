@@ -1,0 +1,43 @@
+.container {
+    width: 50%;
+    height: 500px;
+    padding: 10px;
+    border-radius: 0;
+    overflow-y: scroll;
+}
+
+.container::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #F5F5F5;
+}
+
+.container::-webkit-scrollbar {
+    width: 3px;
+    background-color: #F5F5F5;
+
+}
+
+.container::-webkit-scrollbar-thumb {
+    background-color: #000000;
+}
+
+.photoContainer {
+    position: relative;
+}
+
+.photoContainer .viewPostBtn {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 5px;
+    width: fit-content;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    cursor: pointer;
+}
+
+.photoContainer:hover .viewPostBtn {
+    opacity: 1;
+}

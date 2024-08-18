@@ -22,7 +22,7 @@
 }
 
 .search-button:hover {
-    background-color: #0056b3;
+    background-color: #512da8;
 }
 
 .search-icon {
@@ -93,7 +93,7 @@
     padding: 10px;
     border-radius: 10px;
     width: fit-content;
-    background-color: #007bff;
+    background: linear-gradient(to right, #5c6bc0, #512da8);
     color: #fff;
     border-top-right-radius: 0;
 }
@@ -163,7 +163,7 @@
 }
 
 .send-button {
-    background-color: #3498db;
+    background-color: #512da8;
     /* Blue color */
     color: white;
     border: none;

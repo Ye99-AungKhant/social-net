@@ -23,6 +23,7 @@ interface Props {
 const Menu = ({ open, Id }: Props) => {
     const dispatch = useAppDispatch()
     const navigate = useNavigate();
+
     const handleLogOut = async () => {
         dispatch(logOut({
             onSuccess: () => {
@@ -51,12 +52,12 @@ const Menu = ({ open, Id }: Props) => {
                         <ListItemText primary='Setting & Privacy' />
                     </ListItemButton>
 
-                    <ListItemButton>
+                    {/* <ListItemButton>
                         <ListItemIcon>
                             <NightlightRoundRoundedIcon />
                         </ListItemIcon>
                         <ListItemText primary='Display' />
-                    </ListItemButton>
+                    </ListItemButton> */}
                     <Divider />
                     <ListItemButton onClick={handleLogOut}>
                         <ListItemIcon>

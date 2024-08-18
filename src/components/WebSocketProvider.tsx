@@ -7,6 +7,7 @@ export interface WebSocketContextType {
     wsMessageCount: any;
     wsNoti: any;
     wsOnlineUser: any;
+    wsReadMessage: any;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -17,6 +18,7 @@ export const WebSocketProvider = ({ children }: any) => {
     const [wsMessageCount, setWsMessageCount] = useState<any>();
     const [wsNoti, setWsNoti] = useState<any>();
     const [wsOnlineUser, setWsOnlineUser] = useState<any>();
+    const [wsReadMessage, setWsReadMessage] = useState<any>();
     const { authUser } = useAppSelector((state) => state.auth)
 
     useEffect(() => {
@@ -45,8 +47,10 @@ export const WebSocketProvider = ({ children }: any) => {
                 setWsNoti(parsedMessage)
             } else if (parsedMessage.type === 'onLineUser') {
                 setWsOnlineUser(parsedMessage)
-                console.log('onlineuser', parsedMessage);
 
+            } else if (parsedMessage.type === 'read') {
+                setWsReadMessage(parsedMessage)
+                console.log('read unread', parsedMessage);
             }
         };
 
@@ -64,7 +68,7 @@ export const WebSocketProvider = ({ children }: any) => {
     }, [wsMessage])
 
     return (
-        <WebSocketContext.Provider value={{ ws, wsMessage, wsMessageCount, wsNoti, wsOnlineUser }}>
+        <WebSocketContext.Provider value={{ ws, wsMessage, wsMessageCount, wsNoti, wsOnlineUser, wsReadMessage }}>
             {children}
         </WebSocketContext.Provider>
     );

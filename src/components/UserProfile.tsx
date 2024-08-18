@@ -1,11 +1,12 @@
 import { Avatar, AvatarGroup, Box, Button, Card, CardContent, IconButton, TextField, Typography } from '@mui/material'
 import React, { useEffect, useState, ChangeEvent } from 'react'
 import './style/profile.css'
-import defaultUser from './user.png'
+import defaultUser from '../utils/default-avatar.jpg'
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import MenuPopup from './MenuPopup';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import ChatIcon from '@mui/icons-material/Chat';
@@ -18,7 +19,7 @@ import Navbar from './Navbar';
 import { fetchData } from '../store/slices/appSlice';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { addfriend, deleteAboutUs, profileDataFetch, profilePostFetch, removeAboutUs, removePost, removeWaitingFriend, unfriend, updateBio } from './../store/slices/profileDataSlice';
+import { addfriend, deleteAboutUs, deletePost, profileDataFetch, profilePostFetch, removeAboutUs, removePost, removeWaitingFriend, unfriend, updateBio } from './../store/slices/profileDataSlice';
 import LeftSidebar from './LeftSidebar';
 import ConfirmDialog from './ConfirmDialog';
 import FriendButton from './FriendButton';
@@ -30,6 +31,11 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import UpdateProfile from './UpdateProfile';
+import CommentDialog from './CommentDialog';
+import PostEdit from './PostEdit';
+import PostMenuPopup from './PostMenuPopup';
+import ProfileViewDialog from './ProfileViewDialog';
 
 
 const iconList = [
@@ -42,25 +48,35 @@ const UserProfile = () => {
     const dispatch = useAppDispatch()
     const [openCommetDialog, setOpenCommentDialog] = useState<boolean>(false)
     const [openComfirmDialog, setOpenComfirmDialog] = useState<boolean>(false)
+    const [comfirmDialogType, setComfirmDialogType] = useState<string>('unfriend')
+    const [comfirmDialogFunc, setComfirmDialogFunc] = useState<any>()
     const [openPostPhotoDialog, setOpenPostPhotoDialog] = useState<any>({})
+    const [postPhotoIndex, setPostPhotoIndex] = useState<number>(0)
     const [postCommentId, setPostCommentId] = useState<number>(0)
+    const [postCommentOwnerId, setPostCommentOwnerId] = useState<number>(0)
     const [loading, setLoading] = useState<boolean>(true)
     const [postMenuId, setPostMenuId] = useState<number>(0)
     const [openMenu, setOpenMenu] = useState(false)
+    const [postEditId, setPostEditId] = useState<number>(0)
+    const [openPostEdit, setOpenPostEdit] = useState(false)
     const [showMore, setShowMore] = useState<any>({})
     const { authUser } = useAppSelector((state) => state.auth)
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
     const [openCreateAboutUsDialog, setOpenCreateAboutUsDialog] = useState<boolean>(false)
+    const [openUpdateProfileDialog, setOpenUpdateProfileDialog] = useState<boolean>(false)
     const [addBio, setAddBio] = useState(false)
     const [bioContent, setBioContent] = useState('')
     const { profileId }: any = useParams();
+    const [profilePhotoView, setProfilePhotoView] = useState(false)
     const navigate = useNavigate()
 
     const maxPhotos = 4;
 
-    const handleLike = (postId: number) => {
-        dispatch(postLike(postId))
+    const handleLike = (postId: number, postOwnerId: number) => {
+        let filterPost = 'ProfilePost'
+        let postData = { filterPost, postId }
+        dispatch(postLike(postData))
     }
     const handleCommentDialog = (postId: number) => {
         setOpenCommentDialog(!openCommetDialog)
@@ -68,7 +84,8 @@ const UserProfile = () => {
         dispatch(fetchComment(postId))
     }
 
-    const handlePostPhotoDialog = (postId: number) => {
+    const handlePostPhotoDialog = (postId: number, index: number) => {
+        setPostPhotoIndex(index)
         setOpenPostPhotoDialog((prevState: any) => ({
             ...prevState,
             [postId]: !prevState[postId]
@@ -82,6 +99,11 @@ const UserProfile = () => {
     const handlePostMenu = (postId: number) => {
         setOpenMenu(!openMenu)
         setPostMenuId(postId)
+        localStorage.setItem('deletePostId', postId.toString())
+    }
+    const handlePostEdit = (postId: number) => {
+        setOpenPostEdit(!openPostEdit)
+        setPostEditId(postId)
     }
 
     const handlePostToggle = (postId: number) => {
@@ -91,17 +113,32 @@ const UserProfile = () => {
         }))
     };
 
-    const handleComfirmDialog = () => {
-        setOpenComfirmDialog(true)
-    }
-
-    const handleAddFriend = () => {
-        dispatch(addfriend(profileId))
+    const handleDeletePost = () => {
+        let storePostId = localStorage.getItem('deletePostId')
+        let id = parseInt(storePostId ? storePostId : '0')
+        dispatch(deletePost(id))
+        localStorage.removeItem('deletePostId')
+        setOpenComfirmDialog(false)
     }
 
     const handleConfirmUnfriend = () => {
         dispatch(unfriend(profileId))
         setOpenComfirmDialog(false)
+        dispatch(profileDataFetch(profileId))
+    }
+
+    const handleComfirmDialog = (deleteType: string) => {
+        if (deleteType == 'deletePost') {
+            setComfirmDialogType('delete this post')
+            setComfirmDialogFunc(() => handleDeletePost)
+            return setOpenComfirmDialog(true)
+        }
+        setComfirmDialogFunc(() => handleConfirmUnfriend)
+        setOpenComfirmDialog(true)
+    }
+
+    const handleAddFriend = () => {
+        dispatch(addfriend(profileId))
         dispatch(profileDataFetch(profileId))
     }
 
@@ -133,10 +170,18 @@ const UserProfile = () => {
         }
     };
 
-    const matchedFriend = waitingfriendLists.find(friendlist => friendlist.adding_user == profileId);
+    let matchedFriend = waitingfriendLists.find(friendlist => friendlist.adding_user?.id == profileId);
+    useEffect(() => {
+        matchedFriend = waitingfriendLists.find(friendlist => friendlist.adding_user?.id == profileId);
+
+    }, [waitingfriendLists])
 
     const handleCreateAboutUs = () => {
         setOpenCreateAboutUsDialog(!openCreateAboutUsDialog)
+    }
+
+    const handleUpdateProfile = () => {
+        setOpenUpdateProfileDialog(!openUpdateProfileDialog)
     }
 
     const handleLinkToFriend = (friendId: number) => {
@@ -151,6 +196,10 @@ const UserProfile = () => {
         setBioContent(event.target.value)
     }
 
+    const handleProfilePhotoView = () => {
+        setProfilePhotoView(true)
+    }
+
     return (
         <Box>
             {/* <Navbar /> */}
@@ -161,17 +210,23 @@ const UserProfile = () => {
                     <Box className="profile-details">
                         <Box className="pd-left">
                             <Box className="pd-row">
-                                <img src={profileDetail?.profile ? profileDetail.profile : defaultUser} className="pd-image" />
+                                <img alt={profileDetail?.name} src={profileDetail?.profile ? profileDetail.profile : defaultUser} className="pd-image"
+                                    onClick={handleProfilePhotoView} />
                                 <Box>
                                     <Typography variant='h3'>{profileDetail?.name}</Typography>
                                     <Typography>{friendLists.length} Friend</Typography>
                                     <AvatarGroup max={4}>
                                         {friendLists.map((friendlist) => (
-                                            <Avatar alt={friendlist.name} src={friendlist.profile} />
+                                            <Avatar key={friendlist.id} className='img' alt={friendlist.name} src={friendlist.profile} />
                                         ))}
                                     </AvatarGroup>
-
                                 </Box>
+                                {authUser?.id == profileId &&
+                                    <Box onClick={handleUpdateProfile}>
+                                        <MoreVertRoundedIcon sx={{ cursor: 'pointer' }} />
+                                    </Box>
+                                }
+
                             </Box>
                         </Box>
                         {authUser?.id != profileId &&
@@ -179,23 +234,23 @@ const UserProfile = () => {
                                 {matchedFriend ? (
                                     <FriendButton
                                         status={matchedFriend.status}
-                                        adding_user={matchedFriend.adding_user}
+                                        adding_user={matchedFriend.adding_user.id}
                                         profileId={profileId}
-                                        friendBtnAction={matchedFriend.status === 'Accepted' ? handleComfirmDialog : ''}
+                                        friendBtnAction={matchedFriend.status === 'Accepted' ? () => handleComfirmDialog('unfriend') : ''}
                                     />
                                 ) : (
                                     <FriendButton status="" adding_user={0} profileId={profileId} friendBtnAction={handleAddFriend} />
                                 )
                                 }
 
-                                <button type="button">
+                                {/* <button type="button">
                                     <SendRoundedIcon />
                                     Message
                                 </button>
                                 <br />
                                 <a href="#">
                                     <MoreHorizIcon />
-                                </a>
+                                </a> */}
                             </Box>
                         }
                     </Box>
@@ -246,7 +301,7 @@ const UserProfile = () => {
 
                                 <ul>
                                     {aboutUs.map((aboutUsList) => (
-                                        <li>
+                                        <li key={aboutUsList.id}>
                                             {iconList.map((list) => list.id == aboutUsList.icon && list.icon)}
                                             <i style={{ marginLeft: 10 }}>{aboutUsList.content}</i>
 
@@ -262,7 +317,7 @@ const UserProfile = () => {
                                 </ul>
                             </Box>
 
-                            <Box className="profile-intro">
+                            {/* <Box className="profile-intro">
                                 <Box className="title-box">
                                     <h3>Photos</h3>
                                     <a href="">All Photos</a>
@@ -287,7 +342,7 @@ const UserProfile = () => {
                                         <img src="https://firebasestorage.googleapis.com/v0/b/react-ef343.appspot.com/o/files%2Fsn_5db837ee-f7c2-4195-a2e6-3df61d725449?alt=media&token=9e43ec2a-3432-40cc-b3d6-628b041aa342" />
                                     </Box>
                                 </Box>
-                            </Box>
+                            </Box> */}
 
                             <Box className="profile-intro">
                                 <Box className="title-box">
@@ -326,7 +381,7 @@ const UserProfile = () => {
                                                     {post.image.slice(0, maxPhotos).map((photo, index) => (
                                                         <div className={post.image?.length == 1 ? 'photo-container-one' : 'photo-container'
                                                             && post.image?.length == 2 ? 'photo-container-two' : 'photo-container'}
-                                                            key={index} onClick={() => handlePostPhotoDialog(post.id)}>
+                                                            key={index} onClick={() => handlePostPhotoDialog(post.id, index)}>
 
                                                             {loading && postLoading}
                                                             <img
@@ -348,6 +403,7 @@ const UserProfile = () => {
                                                         open={true}
                                                         setOpen={setOpenPostPhotoDialog}
                                                         photo={post.image}
+                                                        photoIndex={postPhotoIndex}
                                                     />}
                                                 </div>
 
@@ -367,11 +423,18 @@ const UserProfile = () => {
                                                             <p>{post.user.name}</p>
                                                             <p className='postDate'>{post.date}</p>
                                                             {postMenuId == post.id &&
-                                                                < MenuPopup
-                                                                    editId={post.id}
-                                                                    deleteId={post.id}
+                                                                <PostMenuPopup
+                                                                    editPost={() => handlePostEdit(post.id)}
+                                                                    deletePost={() => handleComfirmDialog('deletePost')}
                                                                     open={openMenu}
                                                                     setOpen={setOpenMenu}
+                                                                />
+                                                            }
+                                                            {postEditId == post.id &&
+                                                                <PostEdit
+                                                                    open={openPostEdit}
+                                                                    setOpen={setOpenPostEdit}
+                                                                    post={post}
                                                                 />
                                                             }
                                                         </div>
@@ -380,7 +443,7 @@ const UserProfile = () => {
                                                     <div className='postAction'>
                                                         <div className='postLike'>
 
-                                                            <FavoriteRoundedIcon onClick={() => handleLike(post.id)}
+                                                            <FavoriteRoundedIcon onClick={() => handleLike(post.id, post.user.id)}
                                                                 className={post.liked.find((like: any) => (like.user_id == authUser?.id)) ? 'active' : ''} />
                                                             <p className='postActionText'>{post.like_count}</p>
                                                         </div>
@@ -413,11 +476,32 @@ const UserProfile = () => {
             <ConfirmDialog
                 open={openComfirmDialog}
                 setOpen={setOpenComfirmDialog}
-                handleConfirmUnfriend={handleConfirmUnfriend}
+                handleConfirm={comfirmDialogFunc}
+                title={comfirmDialogType}
             />
             <CreateAboutUsDialog
-                open={openCreateAboutUsDialog} setOpen={setOpenCreateAboutUsDialog}
+                open={openCreateAboutUsDialog}
+                setOpen={setOpenCreateAboutUsDialog}
             />
+            <UpdateProfile
+                open={openUpdateProfileDialog}
+                setOpen={setOpenUpdateProfileDialog}
+                profileData={profileDetail}
+            />
+            <CommentDialog
+                open={openCommetDialog}
+                setOpen={setOpenCommentDialog}
+                postId={postCommentId}
+                postOwnerId={postCommentOwnerId}
+            />
+            {profileDetail?.profile &&
+                <ProfileViewDialog
+                    open={profilePhotoView}
+                    setOpen={setProfilePhotoView}
+                    photo={profileDetail.profile}
+                />
+            }
+
         </Box>
     )
 }

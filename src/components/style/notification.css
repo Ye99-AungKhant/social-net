@@ -6,9 +6,18 @@
 }
 
 .notiBox::-webkit-scrollbar {
-    width: 0;
+    width: 3px;
     background-color: #F5F5F5;
 
+}
+
+.markAsRead {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 5px;
+    font-size: small;
+    color: #512da8;
+    cursor: pointer;
 }
 
 .unread {

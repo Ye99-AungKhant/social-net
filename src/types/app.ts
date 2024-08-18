@@ -17,6 +17,7 @@ export interface UserDetail {
     id: number
     name: string
     profile?: string
+    lastOnline?: string
 }
 export interface postImage {
     id: number
@@ -49,6 +50,9 @@ export interface AppSlice {
     notifications: Noti[],
     chatNoti: Chat[] | null,
     friendList: UserDetail[] | null,
+    chatUserList: UserDetail[] | null,
     friendRequestNoti: string | null,
     onlineUser: number[],
+    searchUser: UserDetail[],
+    searchPost: Post[]
 }
