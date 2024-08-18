@@ -50,6 +50,7 @@ export interface AppSlice {
     notifications: Noti[],
     chatNoti: Chat[] | null,
     friendList: UserDetail[] | null,
+    chatUserList: UserDetail[] | null,
     friendRequestNoti: string | null,
     onlineUser: number[],
     searchUser: UserDetail[],

@@ -86,6 +86,26 @@ export const getlastMessage = createAsyncThunk(
     }
 )
 
+export const chatSearch = createAsyncThunk(
+    'chatSearch',
+    async (payload: any, thunkApi) => {
+        const response = await fetch(`http://localhost:8000/api/search/chat?search=${payload}`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Accept": "application/json",
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
+        const dataFromServer = await response.json()
+        const { users } = dataFromServer
+        console.log(dataFromServer);
+        return users
+    }
+)
+
 const initialState: ChatSlice = {
     chats: [],
     lastMessage: [],

@@ -19,12 +19,13 @@ export const fetchData = createAsyncThunk(
             }
         })
         const dataFromServer = await response.json()
-        const { auth, friendRequestNoti, friendList, chatNoti, notification } = dataFromServer
+        const { auth, friendRequestNoti, friendList, chatNoti, notification, chatUserList } = dataFromServer
         thunkApi.dispatch(authUser(auth))
         thunkApi.dispatch(setNotification(notification))
         thunkApi.dispatch(setChatNoti(chatNoti))
         thunkApi.dispatch(setfriendRequestNoti(friendRequestNoti))
         thunkApi.dispatch(setFriendList(friendList))
+        thunkApi.dispatch(setChatUserList(chatUserList))
         console.log(dataFromServer);
     }
 )
@@ -152,6 +153,7 @@ const initialState: AppSlice = {
     notifications: [],
     chatNoti: null,
     friendList: null,
+    chatUserList: null,
     friendRequestNoti: null,
     onlineUser: [],
     searchUser: [],
@@ -195,6 +197,9 @@ export const appDataSlice = createSlice({
         setFriendList: (state, action: PayloadAction<UserDetail[]>) => {
             state.friendList = [...action.payload]
         },
+        setChatUserList: (state, action: PayloadAction<UserDetail[]>) => {
+            state.chatUserList = [...action.payload]
+        },
         setOnlineUser: (state, action: PayloadAction<[]>) => {
             state.onlineUser = action.payload
         },
@@ -227,5 +232,5 @@ export const appDataSlice = createSlice({
 })
 
 export const { setNotification, updateNotification, updateAllNotiAsRead, setChatNoti, removeChatNoti, setfriendRequestNoti,
-    setFriendList, setOnlineUser, setSearchData, setSearchPostLike, setSearchPostUnLike } = appDataSlice.actions
+    setFriendList, setChatUserList, setOnlineUser, setSearchData, setSearchPostLike, setSearchPostUnLike } = appDataSlice.actions
 export default appDataSlice.reducer

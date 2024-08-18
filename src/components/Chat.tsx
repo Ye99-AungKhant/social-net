@@ -14,14 +14,14 @@ import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
-import { Box } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import './style/chat.css'
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { chatfetch, chatNotiRemove, getlastMessage, sendChatMessage } from '../store/slices/chatSlice';
+import { chatfetch, chatNotiRemove, chatSearch, getlastMessage, sendChatMessage } from '../store/slices/chatSlice';
 import { Chat as chatlist, ChatMedia, ChatSlice } from '../types/chat';
 import Badge from '@mui/material/Badge';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
@@ -33,6 +33,7 @@ import ImageListItem from '@mui/material/ImageListItem';
 import { v4 as uuid } from 'uuid';
 import { StyledBadge } from './RightSidebar';
 import { useWebSocket } from './WebSocketProvider';
+import { ChatSearchLoading } from './SkeletonComponent';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -55,7 +56,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
     const messagesEndRef = useRef<null | HTMLElement>(null);
     const chatRef = useRef<null | HTMLInputElement>(null)
     const [selectUser, setSelectUser] = useState<any>()
-    const { friendList } = useAppSelector((state) => state.app)
+    const { friendList, chatUserList } = useAppSelector((state) => state.app)
     const { chats, lastMessage } = useAppSelector((state) => state.chat)
     const { authUser } = useAppSelector((state) => state.auth)
     const [unreadMessage, setUnReadMessage] = useState<any>({})
@@ -65,6 +66,9 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
     const [onlineUser, setOnlineUser] = useState<any>()
     const [sortedFriendList, setSortedFriendList] = useState<any[]>([]);
     const dispatch = useAppDispatch()
+    const [searchTerm, setSearchTerm] = useState('');
+    const [typingTimeout, setTypingTimeout] = useState<any>(null);
+    const [loading, setLoading] = useState<boolean>(false)
 
     const handleClose = () => {
         setOpen(false);
@@ -165,7 +169,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
     useEffect(() => {
         const unreadCounts: { [key: number]: number } = {};
         chatNoti?.forEach((noti) => {
-            friendList?.forEach((friend) => {
+            chatUserList?.forEach((friend) => {
                 if (friend.id === noti.sender_id) {
                     if (!unreadCounts[noti.sender_id]) {
                         unreadCounts[noti.sender_id] = 0;
@@ -176,7 +180,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
         });
         setUnReadMessage(unreadCounts);
 
-    }, [chatNoti, friendList])
+    }, [chatNoti, chatUserList])
 
     const scrollToBottom = () => {
         if (messagesEndRef.current)
@@ -269,9 +273,41 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
 
     };
 
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const query = e.target.value;
+
+        if (query) {
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+
+            setTypingTimeout(
+                setTimeout(() => {
+                    setLoading(true)
+                    dispatch(chatSearch(query)).then((res) => res.payload).then((data) => {
+                        if (data.length > 0) {
+                            setSearchTerm("")
+                            setLoading(false)
+                            return setSortedFriendList([...data])
+                        } else {
+                            setSortedFriendList([])
+                            setLoading(false)
+                            return setSearchTerm("No Results")
+                        }
+                    }
+                    )
+                }, 1000)
+            );
+        } else {
+            chatUserList && setSortedFriendList([...chatUserList])
+            setSearchTerm("")
+            setLoading(false)
+        }
+    };
+
     useEffect(() => {
-        if (friendList) {
-            const sortedList = [...friendList].sort((a, b) => {
+        if (chatUserList) {
+            const sortedList = [...chatUserList].sort((a, b) => {
                 const lastMessageA = lastMessage.find(
                     (message) => message.sender_id === a.id || message.receiver_id === a.id
                 );
@@ -291,7 +327,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
             setSortedFriendList(sortedList);
         }
 
-    }, [friendList, lastMessage, authUser]);
+    }, [chatUserList, lastMessage, authUser]);
 
 
 
@@ -307,7 +343,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                 <Box sx={{ display: 'flex', height: '100%' }}>
                     <Box sx={{ width: '30%' }}>
                         <Box className="search-container">
-                            <input type="text" placeholder="Search..." className="search-input" />
+                            <input type="text" placeholder="Search..." className="search-input" onChange={handleSearch} />
                             <button className="search-button">
                                 <SearchIcon className="search-icon" />
                             </button>
@@ -347,6 +383,9 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                                     <Divider />
                                 </Box>
                             ))}
+                            {loading && <ChatSearchLoading />}
+
+                            {searchTerm && <Typography variant='subtitle2' align="center" mt={1}>No Results <br></br> Try a new search</Typography>}
                         </Box>
                     </Box>
                     {selectUser &&
