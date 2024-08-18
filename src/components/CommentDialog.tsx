@@ -131,7 +131,8 @@ const CommentDialog = ({ open, setOpen, postId, postOwnerId }: Props) => {
                                 <div className='profileText'>
                                     <div className='commentTextHeader'>
                                         <p>{comment?.user?.name}</p>
-                                        <p style={{ marginLeft: '5px' }} className='commentMenu' onClick={() => handleMenu(comment.id, comment.user_id)}>▼</p>
+                                        {authUser?.id == comment.user_id && <p style={{ marginLeft: '5px' }} className='commentMenu' onClick={() => handleMenu(comment.id, comment.user_id)}>▼</p>}
+
                                     </div>
                                     <div className='commentText'>
                                         {showMore[comment.id] ? comment.content : `${comment.content.substring(0, 120)}`}

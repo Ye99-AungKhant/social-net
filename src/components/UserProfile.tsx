@@ -438,7 +438,8 @@ const UserProfile = () => {
                                                                 />
                                                             }
                                                         </div>
-                                                        <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>
+                                                        {authUser?.id == profileId && <p style={{ marginLeft: '5px' }} className='menuBtn' onClick={() => handlePostMenu(post.id)}>▼</p>}
+
                                                     </div>
                                                     <div className='postAction'>
                                                         <div className='postLike'>
