@@ -22,7 +22,7 @@ export const WebSocketProvider = ({ children }: any) => {
     const { authUser } = useAppSelector((state) => state.auth)
 
     useEffect(() => {
-        const websocket = new WebSocket('ws://https://social-net-nine.vercel.app:8080');
+        const websocket = new WebSocket('wss://social-net-nine.vercel.app');
 
         websocket.onopen = () => {
             websocket.send(JSON.stringify({ type: 'login', userId: authUser?.id }));
