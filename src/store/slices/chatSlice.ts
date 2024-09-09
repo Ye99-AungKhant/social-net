@@ -1,11 +1,12 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { ChatSlice, Chat } from "../../types/chat";
 import { removeChatNoti, setChatNoti } from "./appSlice";
+import { config } from './../../config/index';
 
 export const chatfetch = createAsyncThunk(
     'chatfetch',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/chat/${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/chat/${payload}`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -25,7 +26,7 @@ export const chatfetch = createAsyncThunk(
 export const sendChatMessage = createAsyncThunk(
     'sendChatMessage',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/chat`, {
+        const response = await fetch(`${config.ApiBaseUrl}/chat`, {
             method: "POST",
             credentials: 'include',
             headers: {
@@ -46,7 +47,7 @@ export const sendChatMessage = createAsyncThunk(
 export const chatNotiRemove = createAsyncThunk(
     'chatNotiRemove',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/chat/read`, {
+        const response = await fetch(`${config.ApiBaseUrl}/chat/read`, {
             method: "PATCH",
             credentials: 'include',
             headers: {
@@ -67,7 +68,7 @@ export const chatNotiRemove = createAsyncThunk(
 export const getlastMessage = createAsyncThunk(
     'lastMessage',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/last/chat`, {
+        const response = await fetch(`${config.ApiBaseUrl}/last/chat`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -89,7 +90,7 @@ export const getlastMessage = createAsyncThunk(
 export const chatSearch = createAsyncThunk(
     'chatSearch',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/search/chat?search=${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/search/chat?search=${payload}`, {
             method: "GET",
             credentials: 'include',
             headers: {

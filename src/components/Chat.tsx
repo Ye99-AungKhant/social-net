@@ -34,6 +34,7 @@ import { v4 as uuid } from 'uuid';
 import { StyledBadge } from './RightSidebar';
 import { useWebSocket } from './WebSocketProvider';
 import { ChatSearchLoading } from './SkeletonComponent';
+import { config } from './../config/index';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -254,7 +255,7 @@ const Chat = ({ open, setOpen, newChatBadge }: Props) => {
                 receiverId: authUser?.id,
             }));
             // Send read status to the Laravel backend to update in the database
-            await fetch('http://localhost:8000/api/chat/read', {
+            await fetch(`${config.ApiBaseUrl}/chat/read`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

@@ -4,12 +4,13 @@ import { ProfileAboutUs, ProfileDataDetail, ProfileDataSlice } from "../../types
 import { setPost } from "./postSlice";
 import { Post } from "../../types/app";
 import { PostEditData } from "../../types/post";
+import { config } from './../../config/index';
 
 
 export const profilePostFetch = createAsyncThunk(
     'profilePostFetch',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/profile/post/${payload.profileId}?&page=${payload.page}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/profile/post/${payload.profileId}?&page=${payload.page}`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -29,7 +30,7 @@ export const profilePostFetch = createAsyncThunk(
 export const profileDataFetch = createAsyncThunk(
     'profileDataFetch',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/profile/data/${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/profile/data/${payload}`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -51,7 +52,7 @@ export const profileDataFetch = createAsyncThunk(
 export const unfriend = createAsyncThunk(
     'unfriend',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/unfriend/${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/unfriend/${payload}`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -73,7 +74,7 @@ export const unfriend = createAsyncThunk(
 export const addfriend = createAsyncThunk(
     'addfriend',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/friend/request/${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/friend/request/${payload}`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -92,7 +93,7 @@ export const addfriend = createAsyncThunk(
 export const updateBio = createAsyncThunk(
     'profile/updateBio',
     async (payload: string, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/profile/bio`, {
+        const response = await fetch(`${config.ApiBaseUrl}/profile/bio`, {
             method: "PATCH",
             credentials: 'include',
             headers: {
@@ -111,7 +112,7 @@ export const updateBio = createAsyncThunk(
 export const updatePost = createAsyncThunk(
     'updatePost',
     async (payload: PostEditData, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/post`, {
+        const response = await fetch(`${config.ApiBaseUrl}/post`, {
             method: "PATCH",
             credentials: 'include',
             headers: {
@@ -133,7 +134,7 @@ export const updatePost = createAsyncThunk(
 export const deletePostImage = createAsyncThunk(
     'deletePostImage',
     async (payload: string, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/post/media/delete`, {
+        const response = await fetch(`${config.ApiBaseUrl}/post/media/delete`, {
             method: "PATCH",
             credentials: 'include',
             headers: {
@@ -150,7 +151,7 @@ export const deletePostImage = createAsyncThunk(
 export const deletePost = createAsyncThunk(
     'deletePost',
     async (payload: number, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/post/delete/${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/post/delete/${payload}`, {
             method: "DELETE",
             credentials: 'include',
             headers: {
@@ -171,7 +172,7 @@ export const deletePost = createAsyncThunk(
 export const updateProfile = createAsyncThunk(
     'profile/update',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/profile/update`, {
+        const response = await fetch(`${config.ApiBaseUrl}/profile/update`, {
             method: "PATCH",
             credentials: 'include',
             headers: {
@@ -192,7 +193,7 @@ export const updateProfile = createAsyncThunk(
 export const createAboutus = createAsyncThunk(
     'aboutus/create',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/profile/aboutus`, {
+        const response = await fetch(`${config.ApiBaseUrl}/profile/aboutus`, {
             method: "POST",
             credentials: 'include',
             headers: {
@@ -213,7 +214,7 @@ export const createAboutus = createAsyncThunk(
 export const deleteAboutUs = createAsyncThunk(
     'aboutUs/delete',
     async (payload: number, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/profile/aboutus/${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/profile/aboutus/${payload}`, {
             method: "DELETE",
             credentials: 'include',
             headers: {

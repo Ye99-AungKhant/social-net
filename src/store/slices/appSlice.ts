@@ -4,11 +4,12 @@ import { setPost } from './postSlice'
 import { authUser } from './userSlice'
 import { PayloadAction } from '@reduxjs/toolkit';
 import { stat } from 'fs';
+import { config } from './../../config/index';
 
 export const fetchData = createAsyncThunk(
     'app/fetchData',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/app`, {
+        const response = await fetch(`${config.ApiBaseUrl}/app`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -33,7 +34,7 @@ export const fetchData = createAsyncThunk(
 export const fetchNotification = createAsyncThunk(
     'app/fetchNoti',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/notification`, {
+        const response = await fetch(`${config.ApiBaseUrl}/notification`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -52,7 +53,7 @@ export const fetchNotification = createAsyncThunk(
 export const notiRead = createAsyncThunk(
     'app/notiread',
     async (payload: number, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/notification`, {
+        const response = await fetch(`${config.ApiBaseUrl}/notification`, {
             method: "PATCH",
             credentials: 'include',
             headers: {
@@ -73,7 +74,7 @@ export const notiRead = createAsyncThunk(
 export const markAsReadAllNoti = createAsyncThunk(
     'app/markAsReadAllNoti',
     async (payload: number[], thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/notification/markAsReadAll`, {
+        const response = await fetch(`${config.ApiBaseUrl}/notification/markAsReadAll`, {
             method: "PATCH",
             credentials: 'include',
             headers: {
@@ -94,7 +95,7 @@ export const markAsReadAllNoti = createAsyncThunk(
 export const search = createAsyncThunk(
     'search',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/search?search=${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/search?search=${payload}`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -115,7 +116,7 @@ export const search = createAsyncThunk(
 export const fetchPhotos = createAsyncThunk(
     'fetchPhotos',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/photos?page=${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/photos?page=${payload}`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -135,7 +136,7 @@ export const fetchPhotos = createAsyncThunk(
 export const updateLastOnline = createAsyncThunk(
     'updateLastOnline',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/user/updateLastOnline`, {
+        const response = await fetch(`${config.ApiBaseUrl}/user/updateLastOnline`, {
             method: "PATCH",
             credentials: 'include',
             headers: {

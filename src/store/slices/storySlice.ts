@@ -1,12 +1,13 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Story, StorySlice } from "../../types/story";
 import { PostCreate } from "../../types/post";
+import { config } from './../../config/index';
 
 export const storyFetch = createAsyncThunk(
     'storyFetch',
     async (payload: number, thunkApi) => {
 
-        const response = await fetch(`http://localhost:8000/api/story?page=${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/story?page=${payload}`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",
@@ -27,7 +28,7 @@ export const createStory = createAsyncThunk(
     'createstory',
     async (payload: PostCreate, thunkApi) => {
 
-        const response = await fetch(`http://localhost:8000/api/story`, {
+        const response = await fetch(`${config.ApiBaseUrl}/story`, {
             method: "Post",
             headers: {
                 "Accept": "application/json",

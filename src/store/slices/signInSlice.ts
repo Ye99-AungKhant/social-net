@@ -1,12 +1,13 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { SignInSlice, UserSignIn, signInUserPayload } from "../../types/user";
 import { authUser } from "./userSlice";
+import { config } from './../../config/index';
 
 export const signInUser = createAsyncThunk(
     'signin',
     async (payload: UserSignIn, thunkApi) => {
         const { onSuccess, onError } = payload
-        const response = await fetch(`http://localhost:8000/api/signin`, {
+        const response = await fetch(`${config.ApiBaseUrl}/signin`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -30,7 +31,7 @@ export const signInGoogle = createAsyncThunk(
     'signInGoogle',
     async (payload: any, thunkApi) => {
         const { onSuccess, onError, email, name } = payload
-        const response = await fetch(`http://localhost:8000/api/signin/google`, {
+        const response = await fetch(`${config.ApiBaseUrl}/signin/google`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
