@@ -9,7 +9,7 @@ import { setSearchPostLike, setSearchPostUnLike } from './appSlice';
 export const postFetch = createAsyncThunk(
     'postFetch',
     async (payload: any, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/post?page=${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/post?page=${payload}`, {
             method: "GET",
             credentials: 'include',
             headers: {
@@ -73,7 +73,7 @@ export const userPostFetch = createAsyncThunk(
 export const createPost = createAsyncThunk(
     'createpost',
     async (payload: PostCreate, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/post`, {
+        const response = await fetch(`${config.ApiBaseUrl}/post`, {
             method: "POST",
             credentials: 'include',
             headers: {
@@ -97,7 +97,7 @@ export const postLike = createAsyncThunk(
     async (payload: any, thunkApi) => {
         console.log('post with filter', payload);
 
-        const response = await fetch(`http://localhost:8000/api/post/like`, {
+        const response = await fetch(`${config.ApiBaseUrl}/post/like`, {
             method: "POST",
             credentials: 'include',
             headers: {

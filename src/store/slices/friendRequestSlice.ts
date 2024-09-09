@@ -1,11 +1,12 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { waitingfriendLists } from "./profileDataSlice";
+import { config } from './../../config/index';
 
 export const friendRequestFetch = createAsyncThunk(
     "friendRequestFetch",
     async (payload: any, thunkApi) => {
         const token = localStorage.getItem('token')
-        const response = await fetch(`http://localhost:8000/api/friend/requested`, {
+        const response = await fetch(`${config.ApiBaseUrl}/friend/requested`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",
@@ -23,7 +24,7 @@ export const waitingFriend = createAsyncThunk(
     "waitingFriend",
     async (payload: any, thunkApi) => {
         const token = localStorage.getItem('token')
-        const response = await fetch(`http://localhost:8000/api/friend/waiting`, {
+        const response = await fetch(`${config.ApiBaseUrl}/friend/waiting`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",
@@ -41,7 +42,7 @@ export const friendRequestAccept = createAsyncThunk(
     "friendRequestAccept",
     async (payload: number, thunkApi) => {
         const token = localStorage.getItem('token')
-        const response = await fetch(`http://localhost:8000/api/friend/accept`, {
+        const response = await fetch(`${config.ApiBaseUrl}/friend/accept`, {
             method: "PATCH",
             headers: {
                 "Accept": "application/json",
@@ -60,7 +61,7 @@ export const friendRequestDecline = createAsyncThunk(
     "friendRequestDecline",
     async (payload: number, thunkApi) => {
         const token = localStorage.getItem('token')
-        const response = await fetch(`http://localhost:8000/api/friend/decline`, {
+        const response = await fetch(`${config.ApiBaseUrl}/friend/decline`, {
             method: "PATCH",
             headers: {
                 "Accept": "application/json",
@@ -79,7 +80,7 @@ export const waitingFriendCancel = createAsyncThunk(
     "waitingFriendCancel",
     async (payload: number, thunkApi) => {
         const token = localStorage.getItem('token')
-        const response = await fetch(`http://localhost:8000/api/unfriend/${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/unfriend/${payload}`, {
             method: "GET",
             headers: {
                 "Accept": "application/json",

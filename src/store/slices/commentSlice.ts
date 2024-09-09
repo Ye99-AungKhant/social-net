@@ -1,11 +1,12 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Comments, CommentSlice, CreateComment, EditComment } from '../../types/comment';
 import { setCommentCountDecrease, setCommentCountIncrease, setFriendPostCommentCountDecrease, setFriendPostCommentCountIncrease } from './postSlice';
+import { config } from './../../config/index';
 
 export const fetchComment = createAsyncThunk(
     'fetchComment',
     async (payload: number, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/comment`, {
+        const response = await fetch(`${config.ApiBaseUrl}/comment`, {
             method: "POST",
             credentials: 'include',
             headers: {
@@ -25,7 +26,7 @@ export const fetchComment = createAsyncThunk(
 export const createComment = createAsyncThunk(
     'createComment',
     async (payload: CreateComment, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/comment/create`, {
+        const response = await fetch(`${config.ApiBaseUrl}/comment/create`, {
             method: "POST",
             credentials: 'include',
             headers: {
@@ -50,7 +51,7 @@ export const createComment = createAsyncThunk(
 export const deleteComment = createAsyncThunk(
     'deleteComment',
     async (payload: number, thunkApi) => {
-        const response = await fetch(`http://localhost:8000/api/comment/delete/${payload}`, {
+        const response = await fetch(`${config.ApiBaseUrl}/comment/delete/${payload}`, {
             method: "DELETE",
             credentials: 'include',
             headers: {
@@ -74,7 +75,7 @@ export const updateComment = createAsyncThunk(
     'updateComment',
     async (payload: EditComment, thunkApi) => {
 
-        const response = await fetch(`http://localhost:8000/api/comment/edit`, {
+        const response = await fetch(`${config.ApiBaseUrl}/comment/edit`, {
             method: "PATCH",
             credentials: 'include',
             headers: {

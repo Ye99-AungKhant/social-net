@@ -1,13 +1,14 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { AuthUser, User, UserSlice } from "../../types/user";
 import { googleLogout } from '@react-oauth/google';
+import { config } from './../../config/index';
 
 export const logOut = createAsyncThunk(
     'userLogout',
     async (payload: any, thunkApi) => {
         const token = localStorage.getItem('token')
         const { onSuccess } = payload
-        const response = await fetch(`http://localhost:8000/api/logout`, {
+        const response = await fetch(`${config.ApiBaseUrl}/logout`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -26,7 +27,7 @@ export const signUpUser = createAsyncThunk(
         console.log(payload);
 
         const { onSuccess } = payload
-        const response = await fetch(`http://localhost:8000/api/signup`, {
+        const response = await fetch(`${config.ApiBaseUrl}/signup`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
